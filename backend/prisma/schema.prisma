@@ -13,6 +13,7 @@ model User {
   passwordHash  String
   name          String?
   role          UserRole       @default(USER)
+  subscription  Subscription?
   agents        Agent[]
   refreshTokens RefreshToken[]
   usage         Usage[]
@@ -25,17 +26,43 @@ enum UserRole {
   ADMIN
 }
 
+model Subscription {
+  id                   String           @id @default(uuid())
+  user                 User             @relation(fields: [userId], references: [id])
+  userId               String           @unique
+  tier                 SubscriptionTier @default(FREE)
+  maxAgents            Int              @default(1)
+  maxTokensPerDay      Int              @default(10000)
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+}
+
+enum SubscriptionTier {
+  FREE
+  LAUNCH
+  PRO
+  ENTERPRISE
+}
+
 model Agent {
-  id          String      @id @default(uuid())
-  name        String
-  modelPreset String
-  status      AgentStatus @default(STOPPED)
-  user        User        @relation(fields: [userId], references: [id])
-  userId      String
-  usage       Usage[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  deletedAt   DateTime?
+  id               String      @id @default(uuid())
+  name             String
+  modelPreset      String
+  status           AgentStatus @default(STOPPED)
+  user             User        @relation(fields: [userId], references: [id])
+  userId           String
+  port             Int?
+  profilePath      String?
+  telegramBotToken String?
+  gatewayPid       Int?
+  customPrompt     String?     @db.Text
+  config           Json?
+  usage            Usage[]
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  deletedAt        DateTime?
 }
 
 enum AgentStatus {
