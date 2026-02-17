@@ -19,5 +19,8 @@ router.post('/', validate(createAgentSchema), agentController.create);
 router.get('/', agentController.list);
 router.get('/:id', agentController.getOne);
 router.delete('/:id', agentController.delete);
+router.post('/:id/start', agentController.start);
+router.post('/:id/stop', agentController.stop);
+router.post('/:id/chat', agentController.chat);
 
 export default router;
