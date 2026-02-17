@@ -1,0 +1,24 @@
+{
+  "taskId": "task-w2-sight-001",
+  "timestamp": "2026-02-17T16:15:00+08:00",
+  "from": "kai_ten_bot",
+  "to": "kaiten_sight_bot",
+  "priority": "high",
+  "task": {
+    "title": "Fix Coordination Checker + Full System Audit",
+    "description": "Verify the fixed coordination-checker.sh works correctly (no duplicate output, proper timestamp math). Then run a full system health audit — check all gateways, ports, database, and identify the stale 6th gateway process.",
+    "track": "fast",
+    "deliverables": [
+      "Confirm checker script fix works",
+      "System health audit report",
+      "Identify and kill stale 6th gateway process",
+      "Clean up stale log files >50MB"
+    ],
+    "references": [
+      "~/.openclaw/scripts/coordination-checker.sh",
+      "~/ocaas-project/coordination/SYSTEM-REVIEW-2026-02-17.md",
+      "~/.openclaw/workspace-sight/skills/ocaas-qa/scripts/health-audit.sh"
+    ]
+  },
+  "status": "pending"
+}

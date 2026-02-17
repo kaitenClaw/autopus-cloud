@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  sight:
+    image: kaiten-agent:latest
+    container_name: kaiten-sight
+    volumes:
+      - ./data:/workspace/.openclaw
+    environment:
+      - OPENCLAW_PROFILE=sight
+    ports:
+      - "18795:18795"
+    restart: always
+    networks:
+      - coolify
+
+networks:
+  coolify:
+    external: true

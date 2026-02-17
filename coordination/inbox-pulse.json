@@ -1,0 +1,10 @@
+{
+  "taskId": null,
+  "timestamp": null,
+  "from": null,
+  "to": "kaiten_pulse_bot",
+  "priority": null,
+  "task": null,
+  "status": "empty",
+  "message": "No tasks assigned yet. Waiting for instructions."
+}

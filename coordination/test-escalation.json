@@ -1,0 +1,7 @@
+{
+  "test": "complex_code_generation",
+  "description": "Generate a complete Express.js authentication system with JWT, bcrypt, and refresh tokens. Include middleware for validation, error handling, and rate limiting. Must be production-ready with proper TypeScript types.",
+  "expected_lines": 150,
+  "should_escalate": true,
+  "reason": "Code generation >50 lines triggers Pro"
+}
