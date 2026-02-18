@@ -52,7 +52,7 @@ const ChatWindow = () => {
       
       setMessages((prev) => [...prev, { 
         sender: 'agent', 
-        text: data.data?.response || data.message || 'No response from agent.' 
+        text: data.response || data.data?.response || data.message || 'No response from agent.' 
       }]);
     } catch (error) {
       console.error('Error sending message:', error);
