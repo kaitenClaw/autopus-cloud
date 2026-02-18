@@ -190,18 +190,30 @@ export function useChatState() {
     setMessages([]);
   };
 
+  const tryAutoPromoteToAdmin = async () => {
+    try {
+      await promoteSelfToAdmin();
+    } catch {
+      // Ignore if user is not eligible yet.
+    }
+  };
+
   const handleLoginSuccess = async (token: string) => {
     localStorage.setItem('ocaas_token', token);
     setIsAuthenticated(true);
     setShowAuthModal(false);
+    await tryAutoPromoteToAdmin();
     fetchAgents();
+    window.dispatchEvent(new Event('ocaas-auth-changed'));
   };
 
   const handleSignUpSuccess = async (token: string) => {
     localStorage.setItem('ocaas_token', token);
     setIsAuthenticated(true);
     setShowAuthModal(false);
+    await tryAutoPromoteToAdmin();
     fetchAgents();
+    window.dispatchEvent(new Event('ocaas-auth-changed'));
   };
 
   const handleLaunchSuccess = async () => {

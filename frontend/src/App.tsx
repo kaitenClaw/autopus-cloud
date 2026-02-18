@@ -1,4 +1,3 @@
-import React from 'react';
 import { Sidebar } from './components/chat/Sidebar';
 import { MessageList } from './components/chat/MessageList';
 import { PromptInput } from './components/chat/PromptInput';
@@ -16,8 +15,8 @@ export default function App() {
     sessions, selectedSession, setSelectedSession,
     messages, input, setInput,
     config, setConfig, isConfigSaving, lastSaved,
-    isLoading, isSidebarOpen, setIsSidebarOpen,
-    isRightPanelOpen, setIsRightPanelOpen,
+    isLoading, isSidebarOpen,
+    isRightPanelOpen,
     activeRightPanelTab, setActiveRightPanelTab,
     error, setError, isAuthenticated,
     showAuthModal, setShowAuthModal,
@@ -49,7 +48,7 @@ export default function App() {
           isAuthenticated={isAuthenticated}
           onLogout={handleLogout}
           onAuthOpen={() => setShowAuthModal(true)}
-          user={{ name: 'Alton Cheng', plan: 'Free Plan' }}
+          user={{ name: 'Alton Cheng', plan: 'Starter Tier' }}
         />
 
         <main className="flex-1 flex flex-col relative bg-[#0b0b0b] min-w-0">

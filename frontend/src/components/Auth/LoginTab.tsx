@@ -70,7 +70,7 @@ export default function LoginTab({ onLoginSuccess }: LoginTabProps) {
         disabled={isLoading}
       >
         {isLoading && <Loader2 size={16} className="animate-spin" />}
-        Login
+        Sign In to OCaaS
       </button>
     </form>
   );

@@ -82,7 +82,7 @@ export default function SignUpTab({ onSignUpSuccess }: SignUpTabProps) {
         disabled={isLoading}
       >
         {isLoading && <Loader2 size={16} className="animate-spin" />}
-        Sign Up
+        Create OCaaS Workspace
       </button>
     </form>
   );

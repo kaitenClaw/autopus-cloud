@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { RefreshCw } from 'lucide-react';
-import { api, getAgents, getConfig, type Agent } from '../api';
+import { RefreshCw, AlertTriangle } from 'lucide-react';
+import { getKaitenAgentsStatus, type KAITENAgentRuntime } from '../api';
 
-type MatrixStatus = 'RUNNING' | 'STOPPED' | 'ERROR' | 'unknown' | 'unregistered';
+type MatrixStatus = 'RUNNING' | 'STOPPED' | 'ERROR' | 'UNKNOWN' | 'unregistered';
 type RuntimeLocation = 'Local' | 'Cloud' | 'Unknown';
 
 interface MatrixAgent {
@@ -11,7 +11,9 @@ interface MatrixAgent {
   status: MatrixStatus;
   location: RuntimeLocation;
   model: string;
+  heartbeatAge: string;
   lastUpdated: string;
+  lastError: string | null;
   source: 'live' | 'placeholder';
 }
 
@@ -22,7 +24,7 @@ const statusStyles: Record<MatrixStatus, string> = {
   RUNNING: 'text-emerald-400 bg-emerald-500/15 border-emerald-500/25',
   STOPPED: 'text-zinc-300 bg-zinc-500/15 border-zinc-500/25',
   ERROR: 'text-red-400 bg-red-500/15 border-red-500/25',
-  unknown: 'text-amber-300 bg-amber-500/15 border-amber-500/25',
+  UNKNOWN: 'text-amber-300 bg-amber-500/15 border-amber-500/25',
   unregistered: 'text-zinc-400 bg-zinc-600/15 border-zinc-600/25',
 };
 
@@ -32,18 +34,16 @@ const locationStyles: Record<RuntimeLocation, string> = {
   Unknown: 'text-zinc-400 bg-zinc-600/15 border-zinc-600/25',
 };
 
-const inferStatus = (agent: Agent & Record<string, any>): MatrixStatus => {
-  const raw = String(agent.status ?? 'unknown').toLowerCase();
-  if (raw.includes('run')) return 'RUNNING';
-  if (raw.includes('stop')) return 'STOPPED';
-  if (raw.includes('error') || raw.includes('fail')) return 'ERROR';
-  return 'unknown';
-};
-
-const inferLocation = (runtimeMode?: string): RuntimeLocation => {
-  if (runtimeMode === 'local') return 'Local';
-  if (runtimeMode === 'cloud') return 'Cloud';
-  return 'Unknown';
+const formatHeartbeatAge = (checkedAt?: string) => {
+  if (!checkedAt) return 'n/a';
+  const ms = Date.now() - new Date(checkedAt).getTime();
+  if (!Number.isFinite(ms) || ms < 0) return 'n/a';
+  const seconds = Math.floor(ms / 1000);
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  return `${hours}h ago`;
 };
 
 interface AgentsMatrixProps {
@@ -66,7 +66,9 @@ export default function AgentsMatrix({ refreshKey = 0 }: AgentsMatrixProps) {
         status: 'unregistered',
         location: 'Unknown',
         model: 'n/a',
+        heartbeatAge: 'n/a',
         lastUpdated: now,
+        lastError: null,
         source: 'placeholder',
       })));
       setLastUpdated(now);
@@ -75,48 +77,37 @@ export default function AgentsMatrix({ refreshKey = 0 }: AgentsMatrixProps) {
 
     setIsLoading(true);
     try {
-      const [agents, runtimeRes] = await Promise.all([
-        getAgents().catch(() => [] as Agent[]),
-        api.get('/system/runtime').catch(() => null),
-      ]);
+      const runtimes = await getKaitenAgentsStatus().catch(() => [] as KAITENAgentRuntime[]);
+      const indexed = new Map(runtimes.map((a) => [normalize(a.name), a]));
 
-      const runtimeMode = runtimeRes?.data?.data?.runtimeMode as string | undefined;
-      const indexed = new Map(agents.map((a: any) => [normalize(a.name), a]));
-
-      const built = await Promise.all(
-        TARGET_AGENTS.map(async (targetName) => {
-          const live = indexed.get(normalize(targetName));
-          if (!live) {
-            return {
-              id: `placeholder-${targetName}`,
-              name: targetName,
-              status: 'unregistered' as const,
-              location: inferLocation(runtimeMode),
-              model: 'n/a',
-              lastUpdated: now,
-              source: 'placeholder' as const,
-            };
-          }
-
-          let model = 'n/a';
-          try {
-            const cfg = await getConfig(live.id);
-            if (cfg?.model) model = cfg.model;
-          } catch {
-            model = 'n/a';
-          }
-
+      const built = TARGET_AGENTS.map((targetName) => {
+        const live = indexed.get(normalize(targetName));
+        if (!live) {
           return {
-            id: live.id,
+            id: `placeholder-${targetName}`,
             name: targetName,
-            status: inferStatus(live),
-            location: inferLocation(runtimeMode),
-            model,
+            status: 'unregistered' as const,
+            location: 'Unknown' as const,
+            model: 'n/a',
+            heartbeatAge: 'n/a',
             lastUpdated: now,
-            source: 'live' as const,
+            lastError: null,
+            source: 'placeholder' as const,
           };
-        })
-      );
+        }
+
+        return {
+          id: live.id,
+          name: targetName,
+          status: live.status,
+          location: live.location,
+          model: live.model || 'unknown',
+          heartbeatAge: formatHeartbeatAge(live.checkedAt),
+          lastUpdated: now,
+          lastError: live.error,
+          source: 'live' as const,
+        };
+      });
 
       setItems(built);
       setLastUpdated(now);
@@ -171,9 +162,19 @@ export default function AgentsMatrix({ refreshKey = 0 }: AgentsMatrixProps) {
                   <span className="truncate text-zinc-200">{item.model}</span>
                 </div>
                 <div className="flex items-center justify-between gap-2">
+                  <span>Heartbeat</span>
+                  <span className="text-zinc-300">{item.heartbeatAge}</span>
+                </div>
+                <div className="flex items-center justify-between gap-2">
                   <span>Backend</span>
                   <span className="text-zinc-300">{item.source === 'live' ? 'live' : 'unregistered'}</span>
                 </div>
+                {item.lastError ? (
+                  <div className="flex items-start gap-1.5 rounded-md border border-red-500/20 bg-red-500/10 p-1.5 text-[10px] text-red-300">
+                    <AlertTriangle size={11} className="mt-0.5 shrink-0" />
+                    <span className="line-clamp-2">{item.lastError}</span>
+                  </div>
+                ) : null}
                 <div className="flex items-center justify-between gap-2">
                   <span>Updated</span>
                   <span className="text-zinc-500">{item.lastUpdated}</span>

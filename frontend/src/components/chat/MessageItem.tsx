@@ -1,6 +1,6 @@
 import React from 'react';
 import { cn } from '../../utils';
-import { Bot, User, Loader2 } from 'lucide-react';
+import { Bot, User } from 'lucide-react';
 import { type Message } from '../../api';
 
 interface MessageItemProps {

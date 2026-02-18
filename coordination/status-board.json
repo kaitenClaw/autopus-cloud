@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-02-17T16:24:00+08:00",
+  "lastUpdated": "2026-02-18T09:00:00+08:00",
   "buildPhase": "Week 2: Core Product (Accelerated)",
   "weekNumber": 2,
   "overallStatus": "in-progress",
@@ -7,90 +7,49 @@
     "prime": {
       "status": "active",
       "role": "orchestrator",
-      "currentTask": "System review + agent skill upgrades",
-      "model": "google-antigravity/gemini-3-flash",
-      "skills": [
-        "task-coordination"
-      ]
+      "currentTask": "System coordination",
+      "model": "google-antigravity/gemini-3-flash"
     },
     "forge": {
-      "status": "ready",
+      "status": "active",
       "role": "builder",
-      "currentTask": "Awaiting Week 2 task assignment",
-      "lastCompleted": "task-w1-forge-001 (Backend Infrastructure)",
-      "model": "google-antigravity/gemini-3-pro",
-      "skills": [
-        "ocaas-builder",
-        "task-coordination",
-        "crawl4ai-scraper",
-        "docker",
-        "duckduckgo-search",
-        "google-sheets",
-        "playwright-web"
-      ]
+      "currentTask": "Dashboard 2.0 frontend execution (WebSocket/runtime UX)",
+      "lastCompleted": "P0 dashboard hardening (live matrix, trust indicators, admin bootstrap, guided/pro split, brand shell)",
+      "model": "google-antigravity/gemini-3-flash"
     },
     "sight": {
-      "status": "ready",
+      "status": "active",
       "role": "qa-diagnostician",
-      "currentTask": "Awaiting Week 2 task assignment",
-      "lastCompleted": "task-w1-sight-001 (Security Audit)",
-      "model": "google-antigravity/gemini-3-pro",
-      "skills": [
-        "ocaas-qa",
-        "task-coordination",
-        "duckduckgo-search",
-        "system-resource-monitor"
-      ]
+      "currentTask": "Monitoring system health + security audits",
+      "lastCompleted": "task-w2-sight-001 (Coordination Checker Fix & Audit)",
+      "model": "google-antigravity/gemini-3-flash"
     },
     "pulse": {
       "status": "active",
       "role": "devops-coordinator",
-      "currentTask": "P1/P2/P3 execution: health checks, status board refresh, marketing research, 30-min sprint monitoring",
-      "model": "google-antigravity/gemini-3-flash",
-      "skills": [
-        "ocaas-devops",
-        "task-coordination",
-        "crawl4ai-scraper",
-        "duckduckgo-search",
-        "playwright-web"
-      ]
+      "currentTask": "Routine sprint monitoring + backend health monitoring (currently stable)",
+      "model": "google-antigravity/gemini-3-flash"
     }
-  },
-  "nextMilestone": "Week 2: OpenClaw Spawner + Message Proxy (Target: Feb 23)",
-  "vpsStatus": {
-    "ip": "108.160.137.70",
-    "provider": "Vultr",
-    "coolify": "https://coolify.autopus.cloud",
-    "api": "https://api.autopus.cloud",
-    "ssh": "Key-based Access Active"
   },
   "systemHealth": {
-    "gateways": "6 processes detected for 5 expected services (investigate stale main service)",
-    "ports": "5/5 listening (18789,18791,18793,18795,18797)",
-    "backend": "localhost:3000 not responding",
-    "vpsApi": "api.autopus.cloud reachable",
-    "modelConfig": "Google-first + smartEscalation patched on main/forge/sight/pulse"
+    "gateways": "5/5 running",
+    "ports": "5/5 listening",
+    "backend": "localhost:3000 healthy",
+    "vpsApi": "api.autopus.cloud reachable"
   },
-  "recentUpgrades": {
-    "2026-02-17": [
-      "Fixed coordination-checker.sh (double output bug + timestamp math)",
-      "Created Forge ocaas-builder skill (npm/prisma/git/docker/deploy)",
-      "Created Sight ocaas-qa skill (tests/audit/bug reports)",
-      "Created Pulse ocaas-devops skill (health check/gateway restart)",
-      "Created shared task-coordination skill (TASK:: protocol)",
-      "Updated all agent IDENTITY.md + TOOLS.md with project-specific info"
-    ]
-  },
-  "alerts": [
-    {
-      "time": "2026-02-17T16:23:40+08:00",
-      "severity": "warning",
-      "issue": "Gateway process count mismatch (6/5)"
-    },
-    {
-      "time": "2026-02-17T16:23:40+08:00",
-      "severity": "critical",
-      "issue": "Local backend health check failed on localhost:3000"
+  "nextMilestone": "Implement WebSocket runtime metadata + end-to-end smoke validation",
+  "marketValidation": {
+    "lastDigestAt": "2026-02-17T21:55:52+08:00",
+    "windowDays": 7,
+    "leadsCaptured7d": 0,
+    "demos7d": 0,
+    "paid7d": 0,
+    "netNewMrr7dUsd": 0.0,
+    "allTimeMrrUsd": 0.0,
+    "goalProgressPct": {
+      "signupsPct": 0.0,
+      "payingCustomersPct": 0.0,
+      "mrrPct": 0.0
     }
-  ]
+  }
 }
