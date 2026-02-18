@@ -1,0 +1,34 @@
+services:
+  hub:
+    build: .
+    restart: always
+    ports:
+      - "3001:3000"
+    environment:
+      - BACKEND_URL=http://ocaas-backend-backend-1:3000
+    networks:
+      - default
+      - coolify
+      - ocaas-backend_default
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=coolify"
+      - "traefik.http.middlewares.kaiten-gzip.compress=true"
+      - "traefik.http.middlewares.kaiten-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.http-kaiten-hub.entrypoints=http"
+      - "traefik.http.routers.http-kaiten-hub.rule=Host(`hub.autopus.cloud`) && PathPrefix(`/`)"
+      - "traefik.http.routers.http-kaiten-hub.middlewares=kaiten-redirect"
+      - "traefik.http.routers.http-kaiten-hub.service=kaiten-hub"
+      - "traefik.http.routers.https-kaiten-hub.entrypoints=https"
+      - "traefik.http.routers.https-kaiten-hub.rule=Host(`hub.autopus.cloud`) && PathPrefix(`/`)"
+      - "traefik.http.routers.https-kaiten-hub.tls=true"
+      - "traefik.http.routers.https-kaiten-hub.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.https-kaiten-hub.middlewares=kaiten-gzip"
+      - "traefik.http.routers.https-kaiten-hub.service=kaiten-hub"
+      - "traefik.http.services.kaiten-hub.loadbalancer.server.port=3000"
+
+networks:
+  coolify:
+    external: true
+  ocaas-backend_default:
+    external: true

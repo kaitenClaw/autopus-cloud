@@ -20,5 +20,6 @@
       "~/.openclaw/workspace-sight/skills/ocaas-qa/scripts/health-audit.sh"
     ]
   },
-  "status": "completed"
+  "status": "completed",
+  "result": "Fixed coordination-checker.sh and health-audit.sh (gateway count logic improved to use lsof and filter IPv4 listening ports). Verified 5/5 gateways active. Identified that '6th gateway' reports were likely transient cron processes. Cleaned up logs (none found >50MB)."
 }

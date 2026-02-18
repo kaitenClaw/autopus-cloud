@@ -15,7 +15,7 @@ const authenticate = (req, res, next) => {
     const token = authHeader.split(' ')[1];
     try {
         const decoded = jsonwebtoken_1.default.verify(token, env_1.env.JWT_ACCESS_SECRET);
-        req.user = { userId: decoded.userId };
+        req.user = { userId: decoded.userId, role: decoded.role };
         next();
     }
     catch (err) {

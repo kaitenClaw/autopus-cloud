@@ -1,33 +1,27 @@
 import { prisma } from '../config/prisma';
 
 export class PortManager {
-  private static readonly START_PORT = 19000;
-  private static readonly END_PORT = 19999;
+  private readonly minPort = 19000;
+  private readonly maxPort = 19999;
 
-  async allocatePort(): Promise<number> {
-    const agentsWithPorts = await prisma.agent.findMany({
+  async getAvailablePort(): Promise<number> {
+    const agents = await prisma.agent.findMany({
       where: {
-        port: {
-          not: null,
-        },
-        status: {
-          in: ['STARTING', 'RUNNING'],
-        },
+        port: { not: null },
+        status: 'RUNNING'
       },
-      select: {
-        port: true,
-      },
+      select: { port: true }
     });
 
-    const usedPorts = new Set(agentsWithPorts.map((a) => a.port as number));
+    const usedPorts = new Set(agents.map(a => a.port as number));
 
-    for (let port = PortManager.START_PORT; port <= PortManager.END_PORT; port++) {
+    for (let port = this.minPort; port <= this.maxPort; port++) {
       if (!usedPorts.has(port)) {
         return port;
       }
     }
 
-    throw new Error('No available ports');
+    throw new Error('No available ports for new agents');
   }
 }
 

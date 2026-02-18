@@ -10,7 +10,17 @@ class AgentService {
                 name,
                 modelPreset,
                 userId,
+                agentConfig: {
+                    create: {
+                        model: modelPreset || 'gpt-3.5-turbo',
+                        temperature: 0.7,
+                        systemPrompt: 'You are a helpful assistant.'
+                    }
+                }
             },
+            include: {
+                agentConfig: true
+            }
         });
         return agent;
     }

@@ -1,0 +1,67 @@
+{
+  "generatedAt": "2026-02-17T21:55:52+08:00",
+  "windowDays": 7,
+  "eventCount": {
+    "window": 0,
+    "allTime": 0
+  },
+  "goals": {
+    "signupTarget": 50,
+    "payingCustomersTarget": 10,
+    "mrrTargetUsd": 290.0
+  },
+  "window": {
+    "funnel": {
+      "captured": 0,
+      "qualified": 0,
+      "demos": 0,
+      "proposals": 0,
+      "trials": 0,
+      "paid": 0,
+      "qualificationRatePct": 0.0,
+      "demoRatePct": 0.0,
+      "trialRatePct": 0.0,
+      "closeRatePct": 0.0,
+      "captureToPaidPct": 0.0
+    },
+    "revenue": {
+      "newMrrUsd": 0.0,
+      "churnedMrrUsd": 0.0,
+      "netNewMrrUsd": 0.0,
+      "payingCustomers": 0
+    }
+  },
+  "allTime": {
+    "funnel": {
+      "captured": 0,
+      "qualified": 0,
+      "demos": 0,
+      "proposals": 0,
+      "trials": 0,
+      "paid": 0,
+      "qualificationRatePct": 0.0,
+      "demoRatePct": 0.0,
+      "trialRatePct": 0.0,
+      "closeRatePct": 0.0,
+      "captureToPaidPct": 0.0
+    },
+    "revenue": {
+      "newMrrUsd": 0.0,
+      "churnedMrrUsd": 0.0,
+      "netNewMrrUsd": 0.0,
+      "payingCustomers": 0
+    }
+  },
+  "progress": {
+    "signupsPct": 0.0,
+    "payingCustomersPct": 0.0,
+    "mrrPct": 0.0
+  },
+  "blockers": [
+    "No leads captured in current window."
+  ],
+  "recommendedActions": [
+    "Launch 2 outbound campaigns today (X thread + Telegram founder outreach)."
+  ],
+  "recentEvents": []
+}

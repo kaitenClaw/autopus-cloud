@@ -9,8 +9,12 @@ const app_1 = __importDefault(require("../app"));
 const prisma_1 = require("../config/prisma");
 (0, vitest_1.describe)('Auth API', () => {
     (0, vitest_1.beforeEach)(async () => {
-        await prisma_1.prisma.refreshToken.deleteMany();
+        await prisma_1.prisma.message.deleteMany();
+        await prisma_1.prisma.agentConfig.deleteMany();
+        await prisma_1.prisma.usage.deleteMany();
         await prisma_1.prisma.agent.deleteMany();
+        await prisma_1.prisma.refreshToken.deleteMany();
+        await prisma_1.prisma.subscription.deleteMany();
         await prisma_1.prisma.user.deleteMany();
     });
     (0, vitest_1.afterAll)(async () => {

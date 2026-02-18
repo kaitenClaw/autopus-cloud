@@ -162,3 +162,32 @@ System Health:
 === Check complete ===
 
 
+=== Coordination Check: Tue Feb 17 18:00:01 HKT 2026 ===
+
+Checking agent inboxes...
+  🏁 forge: Last task task-w1-forge-001 completed
+  🏁 sight: Last task task-w2-sight-001 completed
+  ✅ pulse: No tasks (idle)
+
+System Health:
+  ⚠️  Gateways running: 6/5 (MISMATCH)
+  ✅ Ports listening: 5/5
+  ✅ Status board: Updated 0h ago
+  📊 Overall status: in-progress
+
+=== Check complete ===
+
+2026-02-18 06:10:44 === Coordination Check Started ===
+2026-02-18 06:10:44 ℹ️  forge: Status = pending (Pending for 571 min)
+2026-02-18 06:10:44 ⚠️  ALERT: forge task pending for > 1 hour!
+2026-02-18 06:10:44 ✅ sight: Status = completed
+2026-02-18 06:10:44 ✅ pulse: Status = empty
+2026-02-18 06:10:44 System Health: Gateways running: 10 / 5 (Target)
+2026-02-18 06:10:44 === Check Complete ===
+2026-02-18 06:10:53 === Coordination Check Started ===
+2026-02-18 06:10:53 ℹ️  forge: Status = pending (Pending for 571 min)
+2026-02-18 06:10:53 ⚠️  ALERT: forge task pending for > 1 hour!
+2026-02-18 06:10:53 ✅ sight: Status = completed
+2026-02-18 06:10:53 ✅ pulse: Status = empty
+2026-02-18 06:10:53 System Health: Gateways running: 5 / 5 (Target)
+2026-02-18 06:10:53 === Check Complete ===

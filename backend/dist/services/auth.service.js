@@ -12,18 +12,27 @@ const errors_1 = require("../utils/errors");
 const BCRYPT_ROUNDS = 12;
 const ACCESS_TOKEN_EXPIRY = '15m';
 const REFRESH_TOKEN_EXPIRY = '7d';
+const PLACEHOLDER_EMAIL_DOMAINS = ['example.com', 'example.org', 'example.net'];
 class AuthService {
+    constructor() {
+        this.adminEmails = new Set(env_1.env.ADMIN_EMAILS.split(',')
+            .map((email) => email.trim().toLowerCase())
+            .filter(Boolean));
+    }
     async signup(email, password, name) {
-        const existingUser = await prisma_1.prisma.user.findUnique({ where: { email } });
+        const normalizedEmail = email.trim().toLowerCase();
+        const existingUser = await prisma_1.prisma.user.findUnique({ where: { email: normalizedEmail } });
         if (existingUser) {
             throw new errors_1.ConflictError('User with this email already exists');
         }
         const passwordHash = await bcrypt_1.default.hash(password, BCRYPT_ROUNDS);
+        const role = this.adminEmails.has(normalizedEmail) ? 'ADMIN' : 'USER';
         const user = await prisma_1.prisma.user.create({
             data: {
-                email,
+                email: normalizedEmail,
                 passwordHash,
                 name,
+                role,
             },
             select: {
                 id: true,
@@ -35,7 +44,8 @@ class AuthService {
         return user;
     }
     async login(email, password) {
-        const user = await prisma_1.prisma.user.findUnique({ where: { email } });
+        const normalizedEmail = email.trim().toLowerCase();
+        const user = await prisma_1.prisma.user.findUnique({ where: { email: normalizedEmail } });
         if (!user) {
             throw new errors_1.UnauthorizedError('Invalid credentials');
         }
@@ -43,21 +53,22 @@ class AuthService {
         if (!isPasswordValid) {
             throw new errors_1.UnauthorizedError('Invalid credentials');
         }
-        const tokens = this.generateTokens(user.id);
+        const effectiveUser = await this.maybePromoteUserToAdmin(user.id, user.email, user.role);
+        const tokens = this.generateTokens(effectiveUser.id, effectiveUser.role);
         // Store refresh token in DB
         await prisma_1.prisma.refreshToken.create({
             data: {
                 token: tokens.refreshToken,
-                userId: user.id,
+                userId: effectiveUser.id,
                 expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
             },
         });
         return {
             user: {
-                id: user.id,
-                email: user.email,
-                name: user.name,
-                role: user.role,
+                id: effectiveUser.id,
+                email: effectiveUser.email,
+                name: effectiveUser.name,
+                role: effectiveUser.role,
             },
             ...tokens,
         };
@@ -73,7 +84,7 @@ class AuthService {
             }
             throw new errors_1.UnauthorizedError('Invalid or expired refresh token');
         }
-        const tokens = this.generateTokens(refreshTokenRecord.userId);
+        const tokens = this.generateTokens(refreshTokenRecord.userId, refreshTokenRecord.user.role);
         // Rotate refresh token: delete old, create new
         await prisma_1.prisma.$transaction([
             prisma_1.prisma.refreshToken.delete({ where: { id: refreshTokenRecord.id } }),
@@ -90,9 +101,36 @@ class AuthService {
     async logout(token) {
         await prisma_1.prisma.refreshToken.deleteMany({ where: { token } });
     }
-    generateTokens(userId) {
-        const accessToken = jsonwebtoken_1.default.sign({ userId }, env_1.env.JWT_ACCESS_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
-        const refreshToken = jsonwebtoken_1.default.sign({ userId }, env_1.env.JWT_REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
+    isPlaceholderEmail(email) {
+        const domain = email.split('@')[1]?.toLowerCase();
+        return domain ? PLACEHOLDER_EMAIL_DOMAINS.includes(domain) : false;
+    }
+    async maybePromoteUserToAdmin(userId, email, role) {
+        if (role === 'ADMIN') {
+            return prisma_1.prisma.user.findUniqueOrThrow({
+                where: { id: userId },
+                select: { id: true, email: true, name: true, role: true }
+            });
+        }
+        const normalizedEmail = email.toLowerCase();
+        const emailIsConfiguredAdmin = this.adminEmails.has(normalizedEmail);
+        const existingAdminCount = await prisma_1.prisma.user.count({ where: { role: 'ADMIN' } });
+        const shouldBootstrapAdmin = existingAdminCount === 0 && !this.isPlaceholderEmail(normalizedEmail);
+        if (!emailIsConfiguredAdmin && !shouldBootstrapAdmin) {
+            return prisma_1.prisma.user.findUniqueOrThrow({
+                where: { id: userId },
+                select: { id: true, email: true, name: true, role: true }
+            });
+        }
+        return prisma_1.prisma.user.update({
+            where: { id: userId },
+            data: { role: 'ADMIN' },
+            select: { id: true, email: true, name: true, role: true }
+        });
+    }
+    generateTokens(userId, role) {
+        const accessToken = jsonwebtoken_1.default.sign({ userId, role }, env_1.env.JWT_ACCESS_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
+        const refreshToken = jsonwebtoken_1.default.sign({ userId, role }, env_1.env.JWT_REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
         return { accessToken, refreshToken };
     }
 }

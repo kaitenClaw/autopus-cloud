@@ -10,6 +10,8 @@ import { NotFoundError } from './utils/errors';
 
 import authRoutes from './routes/auth.routes';
 import agentRoutes from './routes/agent.routes';
+import agentLifecycleRoutes from './routes/agent-lifecycle.routes';
+import systemRoutes from './routes/system.routes';
 
 const app = express();
 
@@ -37,7 +39,7 @@ app.use(globalLimiter);
 // Auth Rate Limiter (Brute-force protection)
 const authLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 10, // Limit each IP to 10 login/signup attempts per hour
+  max: env.NODE_ENV === 'development' ? 1000 : 10, // Relaxed in dev, strict in prod
   standardHeaders: true,
   legacyHeaders: false,
   message: { message: 'Too many login attempts from this IP, please try again after an hour' }
@@ -51,6 +53,8 @@ app.get('/health', (req, res) => {
 // Routes
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/agents', agentRoutes);
+app.use('/api/agents', agentLifecycleRoutes);
+app.use('/api/system', systemRoutes);
 
 // 404 Handler
 app.use((req, res, next) => {

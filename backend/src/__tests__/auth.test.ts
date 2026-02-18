@@ -4,9 +4,13 @@ import app from '../app';
 import { prisma } from '../config/prisma';
 
 describe('Auth API', () => {
-  beforeEach(async () => {
-    await prisma.refreshToken.deleteMany();
+    beforeEach(async () => {
+    await prisma.message.deleteMany();
+    await prisma.agentConfig.deleteMany();
+    await prisma.usage.deleteMany();
     await prisma.agent.deleteMany();
+    await prisma.refreshToken.deleteMany();
+    await prisma.subscription.deleteMany();
     await prisma.user.deleteMany();
   });
 

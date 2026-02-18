@@ -5,6 +5,13 @@ import { messageProxyService } from '../services/message-proxy.service';
 import { asyncHandler } from '../middleware/errorHandler';
 import { AuthRequest } from '../middleware/authenticate';
 
+const DEFAULT_KAITEN_PRESETS = [
+  { name: 'Prime', suggestedModel: 'gpt-5' },
+  { name: 'Forge', suggestedModel: 'claude-sonnet-4-20250514' },
+  { name: 'Sight', suggestedModel: 'gpt-4.1' },
+  { name: 'Pulse', suggestedModel: 'gemini-2.5-flash' },
+] as const;
+
 export class AgentController {
   create = asyncHandler(async (req: AuthRequest, res: Response) => {
     const { name, modelPreset } = req.body;
@@ -13,6 +20,54 @@ export class AgentController {
     const agent = await agentService.createAgent(userId, name, modelPreset);
     
     res.status(201).json({ status: 'success', data: { agent } });
+  });
+
+  bulkCreate = asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { agents, autoStart = false } = req.body as {
+      agents: Array<{ name: string; modelPreset: string }>;
+      autoStart?: boolean;
+    };
+    const userId = req.user!.userId;
+
+    const results: Array<{
+      name: string;
+      modelPreset: string;
+      status: 'created' | 'failed';
+      message: string;
+      agent?: unknown;
+    }> = [];
+
+    for (const item of agents) {
+      try {
+        const createdAgent = await agentService.createAgent(userId, item.name, item.modelPreset);
+
+        if (autoStart) {
+          await spawnerService.startAgent(createdAgent.id);
+        }
+
+        results.push({
+          name: item.name,
+          modelPreset: item.modelPreset,
+          status: 'created',
+          message: autoStart ? 'Agent created and started' : 'Agent created',
+          agent: createdAgent,
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        results.push({
+          name: item.name,
+          modelPreset: item.modelPreset,
+          status: 'failed',
+          message,
+        });
+      }
+    }
+
+    res.status(201).json({ status: 'success', data: { agents: results } });
+  });
+
+  getPresets = asyncHandler(async (_req: AuthRequest, res: Response) => {
+    res.json({ status: 'success', data: { presets: DEFAULT_KAITEN_PRESETS } });
   });
 
   list = asyncHandler(async (req: AuthRequest, res: Response) => {

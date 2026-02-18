@@ -60,6 +60,11 @@ model Agent {
   customPrompt     String?     @db.Text
   config           Json?
   usage            Usage[]
+  
+  // New Relations
+  messages         Message[]
+  agentConfig      AgentConfig?
+
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
   deletedAt        DateTime?
@@ -70,6 +75,29 @@ enum AgentStatus {
   RUNNING
   STOPPED
   ERROR
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  agent     Agent    @relation(fields: [agentId], references: [id])
+  agentId   String
+  role      String   // 'user', 'assistant', 'system'
+  content   String   @db.Text
+  metadata  Json?
+  createdAt DateTime @default(now())
+}
+
+model AgentConfig {
+  id             String   @id @default(uuid())
+  agent          Agent    @relation(fields: [agentId], references: [id])
+  agentId        String   @unique
+  systemPrompt   String?  @db.Text
+  model          String
+  temperature    Float    @default(0.7)
+  topP           Float    @default(1.0)
+  maxTokens      Int      @default(2048)
+  stopSequences  String[]
+  updatedAt      DateTime @updatedAt
 }
 
 model RefreshToken {

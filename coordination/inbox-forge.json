@@ -1,22 +1,23 @@
 {
-  "taskId": "task-w1-forge-001",
-  "timestamp": "2026-02-14T23:51:00+08:00",
-  "from": "kai_ten_bot",
-  "to": "kaiten_forge_bot",
-  "priority": "high",
+  "taskId": "task-w2-forge-f2f3",
+  "timestamp": "2026-02-17T20:39:00+08:00",
+  "from": "kaiten-pulse",
+  "to": "kaiten-forge",
+  "priority": "critical",
+  "track": "standard",
   "task": {
-    "title": "Initialize Backend Infrastructure (Week 1)",
-    "description": "Set up the core backend foundation for OCaaS including server, database, authentication, and agent management APIs.",
+    "title": "Build OpenClaw Spawner + Message Proxy",
+    "description": "Execute F2/F3: implement agent lifecycle spawner service and /api/agents/:id/chat proxy endpoint.",
     "deliverables": [
-      "Node.js + Express server scaffolding",
-      "Prisma + PostgreSQL schema and connection setup",
-      "JWT-based Authentication system",
-      "Initial Agent management API endpoints"
+      "Spawner service (start/stop/status)",
+      "Port allocation + profile generation",
+      "Message proxy endpoint",
+      "Basic tests for lifecycle + chat"
     ],
-    "deadline": "2026-02-21",
+    "deadline": "2026-02-17T23:30:00+08:00",
     "references": [
-      "~/.openclaw/workspace-forge/OCAAS-BUILD-PLAN.md",
-      "~/ocaas-project/coordination/COORDINATION-PROTOCOL.md"
+      "~/ocaas-project/coordination/SYSTEM-REVIEW-2026-02-17.md",
+      "~/ocaas-project/coordination/SHARED-CONTEXT.md"
     ]
   },
   "status": "completed"

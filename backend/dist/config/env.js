@@ -13,6 +13,7 @@ const envSchema = zod_1.z.object({
     JWT_REFRESH_SECRET: zod_1.z.string().min(32),
     PORT: zod_1.z.string().default('3000').transform(Number),
     ALLOWED_ORIGINS: zod_1.z.string().default('http://localhost:3000'),
+    ADMIN_EMAILS: zod_1.z.string().optional().default(''),
     NODE_ENV: zod_1.z.enum(['development', 'production', 'test']).default('development'),
 });
 const _env = envSchema.safeParse(process.env);

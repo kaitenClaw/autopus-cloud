@@ -1,77 +1,64 @@
-import * as fs from 'fs/promises';
-import * as path from 'path';
-import * as os from 'os';
+import fs from 'fs/promises';
+import path from 'path';
+import os from 'os';
 
-export interface AgentConfig {
-  name: string;
-  modelPreset: string;
-  telegramBotToken?: string;
-  customPrompt?: string;
-  allowedUserIds?: number[];
-  port: number;
+export interface AgentProfileConfig {
+  agentId: string;
+  modelPrimary: string;
+  telegramToken?: string;
+  allowedUserIds: string[];
+  systemPrompt?: string;
 }
 
 export class ProfileGenerator {
-  private static readonly BASE_DIR = path.join(os.homedir(), '.openclaw-ocaas');
+  private readonly baseDir = path.join(os.homedir(), '.ocaas-agents');
 
-  async generate(agentId: string, config: AgentConfig): Promise<string> {
-    const profileDir = path.join(ProfileGenerator.BASE_DIR, `agent-${agentId}`);
-    const agentDir = path.join(profileDir, 'agents', 'main', 'agent');
+  async generate(config: AgentProfileConfig): Promise<string> {
+    const profileDir = path.join(this.baseDir, `customer-${config.agentId}`);
+    const agentDataDir = path.join(profileDir, 'agents', 'main', 'agent');
 
-    await fs.mkdir(agentDir, { recursive: true });
+    // Create directories
+    await fs.mkdir(agentDataDir, { recursive: true });
+    await fs.mkdir(path.join(profileDir, 'logs'), { recursive: true });
 
-    const openclawJson = {
+    // 1. Generate openclaw.json
+    const openClawConfig = {
       agents: {
         defaults: {
           model: {
-            primary: config.modelPreset,
-            fallbacks: [
-              'google-antigravity/gemini-3-flash',
-              'google/gemini-2.5-flash'
-            ]
-          }
-        }
-      },
-      auth: {
-        profiles: {
-          'google-antigravity:altoncheng.research@gmail.com': {
-            provider: 'google-antigravity',
-            mode: 'oauth'
+            primary: config.modelPrimary,
+            fallbacks: ["google/gemini-2.0-flash"]
           }
         }
       },
       channels: {
-        telegram: config.telegramBotToken ? {
-          enabled: true,
-          botToken: config.telegramBotToken,
-          allowFrom: config.allowedUserIds || []
-        } : {
-          enabled: false
-        }
-      },
-      gateway: {
-        port: config.port,
-        mode: 'local',
-        bind: 'loopback',
-        auth: {
-          mode: 'none'
+        telegram: {
+          enabled: !!config.telegramToken,
+          token: config.telegramToken,
+          allowFrom: config.allowedUserIds
         }
       }
     };
 
     await fs.writeFile(
       path.join(profileDir, 'openclaw.json'),
-      JSON.stringify(openclawJson, null, 2)
+      JSON.stringify(openClawConfig, null, 2)
     );
 
-    if (config.customPrompt) {
+    // 2. Generate system-prompt.md
+    if (config.systemPrompt) {
       await fs.writeFile(
-        path.join(agentDir, 'system-prompt.md'),
-        config.customPrompt
+        path.join(agentDataDir, 'system-prompt.md'),
+        config.systemPrompt
       );
     }
 
     return profileDir;
+  }
+
+  async delete(agentId: string): Promise<void> {
+    const profileDir = path.join(this.baseDir, `customer-${agentId}`);
+    await fs.rm(profileDir, { recursive: true, force: true });
   }
 }
 

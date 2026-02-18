@@ -230,7 +230,7 @@ Add this to each agent's OpenClaw system prompt or CLAUDE.md equivalent.
                     ┌──────▼───────┐
                     │    PRIME     │
                     │ Orchestrator │
-                    │ (Claude Code)│
+                    │
                     └──┬───┬───┬──┘
                        │   │   │
           ┌────────────┘   │   └────────────┐

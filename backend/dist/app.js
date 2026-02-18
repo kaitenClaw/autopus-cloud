@@ -14,6 +14,8 @@ const errorHandler_1 = require("./middleware/errorHandler");
 const errors_1 = require("./utils/errors");
 const auth_routes_1 = __importDefault(require("./routes/auth.routes"));
 const agent_routes_1 = __importDefault(require("./routes/agent.routes"));
+const agent_lifecycle_routes_1 = __importDefault(require("./routes/agent-lifecycle.routes"));
+const system_routes_1 = __importDefault(require("./routes/system.routes"));
 const app = (0, express_1.default)();
 // Security & Optimization Middleware
 app.use((0, helmet_1.default)());
@@ -37,7 +39,7 @@ app.use(globalLimiter);
 // Auth Rate Limiter (Brute-force protection)
 const authLimiter = (0, express_rate_limit_1.default)({
     windowMs: 60 * 60 * 1000, // 1 hour
-    max: 10, // Limit each IP to 10 login/signup attempts per hour
+    max: env_1.env.NODE_ENV === 'development' ? 1000 : 10, // Relaxed in dev, strict in prod
     standardHeaders: true,
     legacyHeaders: false,
     message: { message: 'Too many login attempts from this IP, please try again after an hour' }
@@ -49,6 +51,8 @@ app.get('/health', (req, res) => {
 // Routes
 app.use('/api/auth', authLimiter, auth_routes_1.default);
 app.use('/api/agents', agent_routes_1.default);
+app.use('/api/agents', agent_lifecycle_routes_1.default);
+app.use('/api/system', system_routes_1.default);
 // 404 Handler
 app.use((req, res, next) => {
     next(new errors_1.NotFoundError(`Route ${req.originalUrl} not found`));

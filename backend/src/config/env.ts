@@ -9,6 +9,7 @@ const envSchema = z.object({
   JWT_REFRESH_SECRET: z.string().min(32),
   PORT: z.string().default('3000').transform(Number),
   ALLOWED_ORIGINS: z.string().default('http://localhost:3000'),
+  ADMIN_EMAILS: z.string().optional().default(''),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 });
 
