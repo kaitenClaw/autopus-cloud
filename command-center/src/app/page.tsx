@@ -40,8 +40,7 @@ const ChatWindow = () => {
 
     try {
       // For MVP, we point to KAITEN Forge specifically or use a dynamic agent selector
-      const agentId = '6786d15a-7ffe-4571-b4c4-fba55da769a8'; 
-      const response = await fetch(`https://api.autopus.cloud/api/agents/${agentId}/chat`, {
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
