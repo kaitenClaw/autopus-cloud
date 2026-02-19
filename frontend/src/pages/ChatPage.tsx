@@ -13,8 +13,6 @@ export default function ChatPage() {
     messages,
     input,
     setInput,
-    config,
-    setConfig,
     isConfigSaving,
     lastSaved,
     isLoading,
@@ -28,16 +26,10 @@ export default function ChatPage() {
     setIsAutoRefreshEnabled,
     playgroundMode,
     setPlaygroundMode,
-    modelOptions,
     handleSend,
-    applyGuidedPreset,
     toggleRightPanel,
     coordinationOverview,
   } = chat;
-
-  const effectiveModelOptions = modelOptions.length > 0
-    ? modelOptions
-    : ['google-antigravity/gemini-3-flash', 'google/gemini-2.5-flash', 'google/gemini-2.0-flash'];
 
   return (
     <div className="flex h-full overflow-hidden">
@@ -53,6 +45,7 @@ export default function ChatPage() {
               {selectedSession && (
                 <span className="text-[10px] text-[var(--text-muted)] truncate max-w-[200px]">
                   {selectedSession.title}
+                  {selectedSession.memoryScope === 'TELEGRAM' ? ' · Mirrored from Telegram/OpenClaw' : ''}
                 </span>
               )}
             </div>
@@ -101,6 +94,12 @@ export default function ChatPage() {
             <button onClick={() => setError(null)} className="rounded p-1 transition hover:bg-red-500/10">
               <X size={14} />
             </button>
+          </div>
+        )}
+
+        {selectedSession?.memoryScope === 'TELEGRAM' && (
+          <div className="border-b border-amber-500/20 bg-amber-500/10 px-4 py-2 text-xs text-amber-200">
+            This thread is mirrored from Telegram/OpenClaw. Send from source channel.
           </div>
         )}
 
@@ -154,94 +153,23 @@ export default function ChatPage() {
 
         {/* Panel content */}
         <div className="flex-1 overflow-y-auto scrollbar-thin">
-          {activeRightPanelTab === 'settings' && config && (
-            <div className="p-4 space-y-6">
-              {playgroundMode === 'guided' ? (
-                <>
-                  <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Guided Mode</p>
-                    <p className="mt-1 text-xs text-[var(--text-muted)]">
-                      Optimized for builder workflows. Focus on outcomes.
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-label text-[var(--text-muted)]">Model</label>
-                    <select
-                      value={config.model}
-                      onChange={(e) => setConfig({ ...config, model: e.target.value })}
-                      className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-2)] p-2.5 text-sm text-[var(--text-primary)] focus:outline-none hover:bg-[var(--surface-3)] transition"
-                    >
-                      {effectiveModelOptions.map((m) => (
-                        <option key={m} value={m}>{m}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-label text-[var(--text-muted)]">Response Style</label>
-                    <div className="grid gap-2">
-                      {(['balanced', 'creative', 'precise'] as const).map((preset) => (
-                        <button
-                          key={preset}
-                          onClick={() => applyGuidedPreset(preset)}
-                          className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-2)] px-4 py-2.5 text-left text-xs font-semibold text-[var(--text-secondary)] capitalize transition hover:bg-[var(--surface-3)] hover:text-white active:scale-[0.98]"
-                        >
-                          {preset}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="space-y-2">
-                    <label className="text-label text-[var(--text-muted)]">Model</label>
-                    <select
-                      value={config.model}
-                      onChange={(e) => setConfig({ ...config, model: e.target.value })}
-                      className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-2)] p-2.5 text-sm text-[var(--text-primary)] focus:outline-none"
-                    >
-                      {effectiveModelOptions.map((m) => (
-                        <option key={m} value={m}>{m}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <label className="text-label text-[var(--text-muted)]">Temperature</label>
-                      <span className="rounded-md bg-[var(--accent-muted)] px-2 py-0.5 text-[10px] font-bold text-[var(--accent-hover)]">
-                        {config.temperature}
-                      </span>
-                    </div>
-                    <input
-                      type="range"
-                      min="0"
-                      max="2"
-                      step="0.1"
-                      value={config.temperature}
-                      onChange={(e) => setConfig({ ...config, temperature: parseFloat(e.target.value) })}
-                      className="w-full accent-[var(--accent)]"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-label text-[var(--text-muted)]">Max Tokens</label>
-                    <input
-                      type="number"
-                      value={config.maxTokens}
-                      onChange={(e) => setConfig({ ...config, maxTokens: parseInt(e.target.value) })}
-                      className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-2)] p-2.5 text-sm text-[var(--text-primary)] focus:outline-none"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-label text-[var(--text-muted)]">System Prompt</label>
-                    <textarea
-                      value={config.systemPrompt}
-                      onChange={(e) => setConfig({ ...config, systemPrompt: e.target.value })}
-                      className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-2)] p-3 text-sm text-[var(--text-secondary)] focus:outline-none h-48 resize-none scrollbar-thin"
-                      placeholder="Define agent behavior..."
-                    />
-                  </div>
-                </>
-              )}
+          {activeRightPanelTab === 'settings' && (
+            <div className="p-4 space-y-4">
+              <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-2)] p-3">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Settings Moved</p>
+                <p className="mt-1 text-xs text-[var(--text-secondary)]">
+                  Model chain, app preferences, and advanced controls now live in the dedicated Settings page.
+                </p>
+                <button
+                  onClick={() => (window.location.href = '/settings')}
+                  className="mt-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-3)] px-3 py-1.5 text-xs font-semibold text-[var(--text-primary)]"
+                >
+                  Open Settings
+                </button>
+              </div>
+              <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-2)] p-3 text-xs text-[var(--text-muted)]">
+                Quick controls remain in chat. Full routing and model profile edits are managed centrally in Settings.
+              </div>
             </div>
           )}
 

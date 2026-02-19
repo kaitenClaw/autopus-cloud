@@ -14,10 +14,12 @@ router.get('/coordination/overview', systemController.getCoordinationOverview);
 router.get('/business/value', systemController.getBusinessValue);
 router.post('/admin/promote-self', systemController.promoteSelfToAdmin);
 
-// Hub & Dashboard
+// Deprecated hub compatibility routes (canonical routes live under /api/hub/*)
 router.get('/hub/feed', systemController.getHubFeed);
 router.get('/hub/openclaw/threads', systemController.getOpenClawThreads);
 router.get('/hub/thread/:id', systemController.getHubThread);
+
+// Dashboard (legacy compatibility)
 router.get('/dashboard/overview', systemController.getDashboardOverview);
 
 // Onboarding

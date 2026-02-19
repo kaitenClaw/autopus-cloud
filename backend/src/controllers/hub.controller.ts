@@ -18,6 +18,7 @@ type OpenClawThreadMeta = {
 
 const HOME_DIR = process.env.OPENCLAW_HOME || os.homedir();
 const OPENCLAW_PROFILE_FALLBACKS: Record<string, string[]> = {
+  kaiten: [path.join(HOME_DIR, '.openclaw-kaiten'), path.join(HOME_DIR, '.openclaw'), '/data/openclaw/kaiten', '/data/openclaw/prime'],
   forge: [path.join(HOME_DIR, '.openclaw-forge'), '/data/openclaw/forge'],
   sight: [path.join(HOME_DIR, '.openclaw-sight'), '/data/openclaw/sight'],
   pulse: [path.join(HOME_DIR, '.openclaw-pulse'), '/data/openclaw/pulse'],
@@ -26,8 +27,9 @@ const OPENCLAW_PROFILE_FALLBACKS: Record<string, string[]> = {
 };
 
 const PROFILE_ALIASES: Record<string, string> = {
-  main: 'prime',
-  prime: 'prime',
+  main: 'kaiten',
+  prime: 'kaiten',
+  kaiten: 'kaiten',
   forge: 'forge',
   sight: 'sight',
   pulse: 'pulse',
@@ -56,7 +58,8 @@ const resolveProfileCandidates = (agentName: string, profilePath?: string | null
   const mapped = parseProfileMapFromEnv();
   const key = agentName.trim().toLowerCase();
   if (mapped[key]) return [mapped[key]];
-  return OPENCLAW_PROFILE_FALLBACKS[key] || [];
+  const normalized = PROFILE_ALIASES[key] || key;
+  return OPENCLAW_PROFILE_FALLBACKS[normalized] || [];
 };
 
 const resolveCandidatesByProfileId = (profileId: string): string[] => {

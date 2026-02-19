@@ -13,6 +13,11 @@ export default function LoginTab({ onLoginSuccess }: LoginTabProps) {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  const withRetryHint = (baseMessage: string) => {
+    const retryAt = new Date(Date.now() + 30_000).toLocaleTimeString();
+    return `${baseMessage} Please retry around ${retryAt}.`;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -24,8 +29,10 @@ export default function LoginTab({ onLoginSuccess }: LoginTabProps) {
       const status = e?.response?.status;
       if (status === 401 || status === 403) {
         setError('Invalid email or password. Please try again.');
+      } else if (status === 502 || status === 503 || status === 504) {
+        setError(withRetryHint('Service is temporarily unavailable.'));
       } else if (e?.message?.includes('Network Error')) {
-        setError('Network error. Please check your connection and try again.');
+        setError(withRetryHint('Network error. Please check your connection.'));
       } else {
         setError(e?.response?.data?.message || 'Login failed. Please try again.');
       }

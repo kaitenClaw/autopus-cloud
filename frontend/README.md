@@ -14,6 +14,10 @@ npm run dev
 - `VITE_API_BASE_URL`: Backend base URL (example: `http://localhost:3000`)
 - `VITE_CLOUD_HEALTH_URL` (optional): Cloud health endpoint for status bar
 
+Production requirement:
+- `VITE_API_BASE_URL` must be set explicitly in deploy pipelines.
+- For Autopus production, set `VITE_API_BASE_URL=https://api.autopus.cloud/api`.
+
 > Note: API calls are made to `/api/...` paths (for example `/api/auth/login`).
 
 ## Auth UI Flow (No Browser Console Needed)

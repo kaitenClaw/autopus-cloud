@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { runPolledTask } from '../utils/polling';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 const CLOUD_HEALTH_URL = import.meta.env.VITE_CLOUD_HEALTH_URL;
@@ -26,13 +27,17 @@ export function useSystemStatus(): SystemStatus {
     const fetchLocalStatus = useCallback(async () => {
         const start = Date.now();
         try {
-            const token = localStorage.getItem('ocaas_token');
-            const headers: HeadersInit = token ? { 'Authorization': `Bearer ${token}` } : {};
-
-            const response = await fetch(`${API_BASE_URL}/system/runtime`, { headers });
+            const response = await runPolledTask('system.runtime', async () => {
+              const token = localStorage.getItem('ocaas_token');
+              const headers: HeadersInit = token ? { 'Authorization': `Bearer ${token}` } : {};
+              return fetch(`${API_BASE_URL}/system/runtime`, { headers });
+            });
+            if (!response) return;
             if (!response.ok) {
                 if (response.status === 401 || response.status === 403) {
                     setIsAuthenticated(false);
+                    localStorage.removeItem('ocaas_token');
+                    window.dispatchEvent(new Event('ocaas-auth-changed'));
                 }
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -41,7 +46,7 @@ export function useSystemStatus(): SystemStatus {
             setLocalStatus({ online: true, latency, host: data.data.runtimeHost, mode: data.data.runtimeMode });
             setIsAuthenticated(true);
         } catch (error) {
-            console.error('Failed to fetch local runtime status:', error);
+            if ((error as Error)?.message?.includes('429')) return;
             setLocalStatus({ online: false, latency: null, host: null, mode: null });
         }
     }, []);
@@ -53,14 +58,17 @@ export function useSystemStatus(): SystemStatus {
         }
         const start = Date.now();
         try {
-            const response = await fetch(CLOUD_HEALTH_URL);
+            const response = await runPolledTask('system.cloud-health', async () => {
+              return fetch(CLOUD_HEALTH_URL);
+            });
+            if (!response) return;
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const latency = Date.now() - start;
             setCloudStatus({ online: true, latency });
         } catch (error) {
-            console.error('Failed to fetch cloud health status:', error);
+            if ((error as Error)?.message?.includes('429')) return;
             setCloudStatus({ online: false, latency: null });
         }
     }, []);
@@ -83,7 +91,7 @@ export function useSystemStatus(): SystemStatus {
         const handleAuthChanged = () => refreshStatus();
 
         refreshStatus();
-        const interval = setInterval(refreshStatus, 30000);
+        const interval = setInterval(refreshStatus, 45000);
         window.addEventListener('ocaas-auth-changed', handleAuthChanged);
 
         return () => {

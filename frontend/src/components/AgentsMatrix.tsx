@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
 import { getKaitenAgentsStatus, type KAITENAgentRuntime } from '../api';
+import { runPolledTask } from '../utils/polling';
 
 type MatrixStatus = 'RUNNING' | 'STOPPED' | 'ERROR' | 'UNKNOWN' | 'unregistered';
 type RuntimeLocation = 'Local' | 'Cloud' | 'Unknown';
@@ -13,6 +14,7 @@ interface MatrixAgent {
   model: string;
   configuredModel?: string | null;
   heartbeatAge: string;
+  stale: boolean;
   lastUpdated: string;
   lastError: string | null;
   source: 'live' | 'placeholder';
@@ -44,6 +46,12 @@ const formatHeartbeatAge = (checkedAt?: string) => {
   return `${hours}h ago`;
 };
 
+const heartbeatIsStale = (checkedAt?: string) => {
+  if (!checkedAt) return true;
+  const ms = Date.now() - new Date(checkedAt).getTime();
+  return !Number.isFinite(ms) || ms > 120000;
+};
+
 interface AgentsMatrixProps {
   refreshKey?: number;
 }
@@ -52,35 +60,48 @@ export default function AgentsMatrix({ refreshKey = 0 }: AgentsMatrixProps) {
   const [items, setItems] = useState<MatrixAgent[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+  const [authRequired, setAuthRequired] = useState(false);
 
   const refresh = useCallback(async () => {
+    if (localStorage.getItem('autopus_polling_enabled') === 'false') return;
+    if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
     const token = localStorage.getItem('ocaas_token');
     const now = new Date().toLocaleTimeString();
 
     if (!token) {
       setItems([]);
+      setAuthRequired(true);
       setLastUpdated(now);
       return;
     }
 
     setIsLoading(true);
     try {
-      const runtimes = await getKaitenAgentsStatus().catch(() => [] as KAITENAgentRuntime[]);
+      let runtimes: KAITENAgentRuntime[] = [];
+      await runPolledTask('system.kaiten-agents', async () => {
+        runtimes = await getKaitenAgentsStatus();
+      });
+      setAuthRequired(false);
       const built = runtimes.map((live) => ({
         id: live.id,
-        name: live.name || live.id,
+        name: String(live.name || live.id).trim().toLowerCase() === 'prime' ? 'KAITEN' : (live.name || live.id),
         status: live.status,
         location: live.location,
-        model: live.model || 'unknown',
+        model: live.activeModel || live.model || 'unknown',
         configuredModel: live.configuredPrimaryModel || null,
         heartbeatAge: formatHeartbeatAge(live.checkedAt),
+        stale: heartbeatIsStale(live.checkedAt),
         lastUpdated: now,
         lastError: live.error,
         source: 'live' as const,
-      }));
+      })).filter((item) => item.id !== 'prime');
 
       setItems(built);
       setLastUpdated(now);
+    } catch (error: any) {
+      if (error?.response?.status === 401) {
+        setAuthRequired(true);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -88,7 +109,7 @@ export default function AgentsMatrix({ refreshKey = 0 }: AgentsMatrixProps) {
 
   useEffect(() => {
     refresh();
-    const interval = setInterval(refresh, 30000);
+    const interval = setInterval(refresh, 45000);
     return () => clearInterval(interval);
   }, [refresh, refreshKey]);
 
@@ -115,7 +136,7 @@ export default function AgentsMatrix({ refreshKey = 0 }: AgentsMatrixProps) {
         <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-4">
           {items.length === 0 ? (
             <div className="rounded-xl border border-white/10 bg-[#171717] p-3 text-xs text-zinc-500">
-              No runtime agents discovered yet.
+              {authRequired ? 'Sign in to view runtime agents.' : 'No runtime agents configured yet.'}
             </div>
           ) : items.map((item) => (
             <article key={item.id} className="rounded-xl border border-white/10 bg-[#171717] p-2.5">
@@ -132,19 +153,23 @@ export default function AgentsMatrix({ refreshKey = 0 }: AgentsMatrixProps) {
                   <span className={`rounded-full border px-2 py-0.5 text-[10px] ${statusStyles[item.status]}`}>{item.status}</span>
                 </div>
                 <div className="flex items-center justify-between gap-2">
-                  <span>Model</span>
+                  <span>Configured</span>
                   <span className="truncate text-zinc-200">{item.configuredModel || item.model}</span>
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <span>Active</span>
+                  <span className="truncate text-zinc-400">{item.model}</span>
                 </div>
                 {item.configuredModel && item.model && item.configuredModel !== item.model ? (
                   <div className="flex items-center justify-between gap-2">
-                    <span>Active Runtime</span>
-                    <span className="truncate text-zinc-400">{item.model}</span>
+                    <span>Diff</span>
+                    <span className="truncate text-amber-300">Fallback/Escalated</span>
                   </div>
                 ) : null}
                 <div className="flex items-center justify-between gap-2">
                   <span>Heartbeat</span>
                   <div className="flex items-center gap-1.5">
-                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <div className={`h-1.5 w-1.5 rounded-full ${item.stale ? 'bg-amber-500' : 'bg-emerald-500 animate-pulse'}`} />
                     <span className="text-zinc-300">{item.heartbeatAge}</span>
                   </div>
                 </div>

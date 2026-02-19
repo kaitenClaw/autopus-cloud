@@ -3,15 +3,12 @@ import {
   ArrowRightLeft,
   ChevronDown,
   CloudOff,
-  Menu,
+  MessageSquare,
   RefreshCw,
   Rocket,
   Search,
   Split,
 } from 'lucide-react';
-import { Sidebar } from '../chat/Sidebar';
-import { MessageList } from '../chat/MessageList';
-import { PromptInput } from '../chat/PromptInput';
 import AgentsMatrix from '../AgentsMatrix';
 import {
   getHubFeed,
@@ -20,6 +17,7 @@ import {
   type HubFeedQuery,
 } from '../../api';
 import { cn } from '../../utils';
+import { runPolledTask, shouldPoll } from '../../utils/polling';
 import type { UseChatState } from '../../hooks/useChatState';
 
 interface HubSurfaceProps {
@@ -93,19 +91,9 @@ export default function HubSurface({
     selectedSession,
     setSelectedSession,
     messages,
-    input,
-    setInput,
-    isLoading,
-    isSidebarOpen,
-    error,
-    setError,
     isAuthenticated,
     matrixRefreshKey,
     currentUser,
-    handleCreateSession,
-    handleSend,
-    handleLogout,
-    toggleSidebar,
     highlightMessageId,
     setHighlightMessageId,
   } = chat;
@@ -141,7 +129,7 @@ export default function HubSurface({
       }
 
       const query: HubFeedQuery = {
-        limit: 80,
+        limit: Number(localStorage.getItem('autopus_feed_limit') || 80),
         scope,
         timeWindow,
       };
@@ -151,11 +139,15 @@ export default function HubSurface({
       if (sessionFilter !== 'all') query.sessionId = sessionFilter;
       if (loadMore && nextCursor) query.cursor = nextCursor;
 
+      if (!loadMore && !shouldPoll()) return;
       setFeedLoading(true);
       if (!loadMore) setFeedError(null);
 
       try {
-        const response = await getHubFeed(query);
+        let response: { events: HubFeedEvent[]; nextCursor: string | null } = { events: [], nextCursor: null };
+        await runPolledTask('hub.feed', async () => {
+          response = await getHubFeed(query);
+        });
         setFeedEvents((prev) => {
           if (!loadMore) return response.events;
           const merged = [...prev];
@@ -182,7 +174,9 @@ export default function HubSurface({
 
   useEffect(() => {
     if (!isAuthenticated) return;
-    const interval = window.setInterval(() => refreshFeed(false), 15000);
+    const interval = window.setInterval(() => {
+      refreshFeed(false);
+    }, 30000);
     return () => window.clearInterval(interval);
   }, [isAuthenticated, refreshFeed]);
 
@@ -283,7 +277,7 @@ export default function HubSurface({
       if (event.eventType === 'message' || event.eventType === 'handoff' || event.eventType === 'system') {
         setHighlightMessageId(event.id);
       }
-      setMobilePane('chat');
+      window.location.href = '/chat';
     },
     [agents, selectedAgent?.id, sessions, setHighlightMessageId, setSelectedAgent, setSelectedSession]
   );
@@ -341,7 +335,7 @@ export default function HubSurface({
                   : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
               )}
             >
-              {pane === 'chat' ? 'Chat' : 'Live Feed'}
+              {pane === 'chat' ? 'Overview' : 'Live Feed'}
             </button>
           ))}
         </div>
@@ -350,38 +344,12 @@ export default function HubSurface({
       <div className="flex-1 overflow-hidden px-3 pb-3">
         <div className="mx-auto h-full w-full max-w-[1500px] overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-1)] shadow-[var(--elev-2)]">
           <div className="flex h-full overflow-hidden">
-            <Sidebar
-              isOpen={isSidebarOpen}
-              toggle={toggleSidebar}
-              page="chat"
-              setPage={() => {}}
-              agents={agents}
-              selectedAgent={selectedAgent}
-              setSelectedAgent={setSelectedAgent}
-              sessions={sessions}
-              selectedSession={selectedSession}
-              setSelectedSession={setSelectedSession}
-              onCreateSession={handleCreateSession}
-              isAuthenticated={isAuthenticated}
-              onLogout={handleLogout}
-              onAuthOpen={onOpenAuthModal}
-              user={currentUser}
-            />
-
             <main className={cn('flex min-w-0 flex-1 flex-col bg-[var(--surface-0)]', mobilePane !== 'chat' && 'max-lg:hidden')}>
               <header className="flex h-14 items-center justify-between border-b border-[var(--border-subtle)] px-4">
                 <div className="flex min-w-0 items-center gap-2">
-                  {!isSidebarOpen ? (
-                    <button
-                      onClick={toggleSidebar}
-                      className="rounded-lg p-1.5 text-[var(--text-muted)] transition hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)]"
-                    >
-                      <Menu size={18} />
-                    </button>
-                  ) : null}
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-[var(--text-primary)]">{selectedAgent?.name || 'Select an agent'}</p>
-                    <p className="truncate text-[11px] text-[var(--text-muted)]">{selectedSession?.title || 'No session selected'}</p>
+                    <p className="truncate text-sm font-semibold text-[var(--text-primary)]">Hub Monitoring</p>
+                    <p className="truncate text-[11px] text-[var(--text-muted)]">Runtime and timeline only. Chat lives in /chat.</p>
                   </div>
                 </div>
                 <div className="hidden items-center gap-2 text-[11px] text-[var(--text-muted)] sm:flex">
@@ -396,24 +364,34 @@ export default function HubSurface({
                 </div>
               </header>
 
-              {error ? (
-                <div className="flex items-center justify-between border-b border-red-500/20 bg-red-500/10 px-4 py-2 text-xs text-red-300">
-                  <span>{error}</span>
-                  <button onClick={() => setError(null)} className="rounded px-1 py-0.5 hover:bg-red-500/20">Dismiss</button>
+              <div className="flex flex-1 items-center justify-center p-8">
+                <div className="w-full max-w-xl rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-1)] p-5">
+                  <p className="mb-2 text-xs uppercase tracking-[0.14em] text-[var(--text-muted)]">Conversation Surface</p>
+                  <h2 className="text-lg font-semibold text-[var(--text-primary)]">Use Chat For Messaging</h2>
+                  <p className="mt-2 text-sm text-[var(--text-muted)]">
+                    Hub now focuses on runtime and live event monitoring. Open Chat to start or continue conversations.
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <button
+                      onClick={() => (window.location.href = '/chat')}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-2)] px-3 py-2 text-xs font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--surface-3)]"
+                    >
+                      <MessageSquare size={14} />
+                      Open Chat
+                    </button>
+                    {messages.length > 0 ? (
+                      <span className="inline-flex items-center rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-2)] px-3 py-2 text-xs text-[var(--text-muted)]">
+                        Recent messages: {messages.length}
+                      </span>
+                    ) : null}
+                    {highlightMessageId ? (
+                      <span className="inline-flex items-center rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-2)] px-3 py-2 text-xs text-[var(--text-muted)]">
+                        Highlighted event: {highlightMessageId.slice(0, 8)}...
+                      </span>
+                    ) : null}
+                  </div>
                 </div>
-              ) : null}
-
-              <MessageList
-                messages={messages}
-                isLoading={isLoading}
-                playgroundMode="guided"
-                onPromptSelect={setInput}
-                isAuthenticated={isAuthenticated}
-                onAuthOpen={onOpenAuthModal}
-                highlightMessageId={highlightMessageId}
-              />
-
-              <PromptInput input={input} setInput={setInput} onSend={handleSend} isLoading={isLoading} />
+              </div>
             </main>
 
             <aside className={cn('w-full border-l border-[var(--border-subtle)] bg-[var(--surface-1)] lg:flex lg:max-w-[430px] lg:flex-col', mobilePane !== 'feed' ? 'hidden' : 'flex')}>

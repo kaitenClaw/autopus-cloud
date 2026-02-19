@@ -96,19 +96,17 @@ export default function LandingPage() {
 
           <h1 className="mx-auto max-w-4xl text-5xl font-extrabold tracking-tighter md:text-7xl">
             <span className="bg-gradient-to-b from-white via-white to-zinc-500 bg-clip-text text-transparent">
-              Your AI Agents.
+              Your Personal AI Team.
             </span>
             <br />
             <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
-              Running. Learning. Always On.
+              One Click Away.
             </span>
           </h1>
 
           <p className="mx-auto mt-6 max-w-2xl text-lg text-[var(--text-secondary)] md:text-xl">
-            Deploy autonomous AI agents in one click. Manage your swarm from{' '}
-            <span className="font-semibold text-[var(--accent-hover)]">Telegram</span>.
-            Monitor everything from the dashboard. Built on{' '}
-            <span className="font-semibold text-white">OpenClaw</span>.
+            Skip the infrastructure complexity. Launch and manage your AI team from one
+            dashboard, orchestrate tasks from chat, and track everything in real time.
           </p>
 
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">

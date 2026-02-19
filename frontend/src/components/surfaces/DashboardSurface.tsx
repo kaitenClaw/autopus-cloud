@@ -25,6 +25,7 @@ import {
   type OnboardingState,
 } from '../../api';
 import { cn } from '../../utils';
+import { runPolledTask } from '../../utils/polling';
 import type { UseChatState } from '../../hooks/useChatState';
 
 interface DashboardSurfaceProps {
@@ -36,6 +37,7 @@ interface DashboardSurfaceProps {
 
 const HUB_URL = import.meta.env.VITE_HUB_URL || 'https://hub.autopus.cloud';
 const ENABLE_ONBOARDING_V2 = import.meta.env.VITE_FEATURE_DASHBOARD_ONBOARDING_V2 !== 'false';
+const ONBOARDING_STATE_KEY = 'autopus_onboarding_state_v1';
 
 const alertTone: Record<'info' | 'warning' | 'critical', string> = {
   info: 'border-cyan-500/30 bg-cyan-500/10 text-cyan-100',
@@ -79,7 +81,15 @@ export default function DashboardSurface({
   const { isAuthenticated, matrixRefreshKey, currentUser } = chat;
   const isAdmin = currentUser.role === 'ADMIN';
   const [overview, setOverview] = useState<DashboardOverview | null>(null);
-  const [onboarding, setOnboarding] = useState<OnboardingState | null>(null);
+  const [onboarding, setOnboarding] = useState<OnboardingState | null>(() => {
+    try {
+      const raw = localStorage.getItem(ONBOARDING_STATE_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw) as OnboardingState;
+    } catch {
+      return null;
+    }
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [actionBusy, setActionBusy] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -97,12 +107,18 @@ export default function DashboardSurface({
     setIsLoading(true);
     setLoadError(null);
     try {
-      const [snapshot, onboardingState] = await Promise.all([
-        getDashboardOverview(),
-        getOnboardingState(),
-      ]);
+      let snapshot: DashboardOverview | null = null;
+      let onboardingState: OnboardingState | null = null;
+      await runPolledTask('dashboard.overview', async () => {
+        [snapshot, onboardingState] = await Promise.all([
+          getDashboardOverview(),
+          getOnboardingState(),
+        ]);
+      });
+      if (!snapshot || !onboardingState) return;
       setOverview(snapshot);
       setOnboarding(onboardingState);
+      localStorage.setItem(ONBOARDING_STATE_KEY, JSON.stringify(onboardingState));
       setLastRefresh(new Date().toLocaleTimeString());
     } catch (error) {
       setLoadError(parseErrorMessage(error));
@@ -114,7 +130,11 @@ export default function DashboardSurface({
   useEffect(() => {
     refreshOverview();
     if (!isAuthenticated) return;
-    const interval = window.setInterval(refreshOverview, 20000);
+    const interval = window.setInterval(() => {
+      if (localStorage.getItem('autopus_polling_enabled') === 'false') return;
+      if (document.visibilityState !== 'visible') return;
+      refreshOverview();
+    }, 45000);
     const onAuthSuccess = () => refreshOverview();
     window.addEventListener('ocaas-onboarding-auth-success', onAuthSuccess);
     return () => {
@@ -136,6 +156,7 @@ export default function DashboardSurface({
         autoStart: true,
       });
       setOnboarding(result.state);
+      localStorage.setItem(ONBOARDING_STATE_KEY, JSON.stringify(result.state));
       await refreshOverview();
     } catch (error) {
       setLoadError(parseErrorMessage(error));
@@ -154,6 +175,7 @@ export default function DashboardSurface({
     try {
       const result = await verifyOnboardingFirstMessage();
       setOnboarding(result.state);
+      localStorage.setItem(ONBOARDING_STATE_KEY, JSON.stringify(result.state));
       await refreshOverview();
     } catch (error) {
       setLoadError(parseErrorMessage(error));
@@ -208,8 +230,8 @@ export default function DashboardSurface({
         <div className="mx-auto flex w-full max-w-[1500px] flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-1)] px-4 py-3 shadow-[var(--elev-2)]">
           <div>
             <p className="text-[10px] uppercase tracking-[0.18em] text-[var(--text-muted)]">Dashboard.autopus.cloud</p>
-            <h1 className="text-lg font-semibold">Guided Onboarding + Multi-Agent Control Plane</h1>
-            <p className="text-xs text-[var(--text-muted)]">Start with one agent, then expand to KAITEN core when ready.</p>
+            <h1 className="text-lg font-semibold">Your Personal AI Team, One Click Away</h1>
+            <p className="text-xs text-[var(--text-muted)]">Start with one agent, then expand to the KAITEN core when ready.</p>
           </div>
           <div className="flex items-center gap-2">
             {onSwitchToHub ? (

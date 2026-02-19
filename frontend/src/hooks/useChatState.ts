@@ -2,9 +2,10 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   getAgents, getMessages, sendMessage, getConfig, updateConfig, streamMessage, getSessions, createSession,
   getOpenClawThreads, getOpenClawThreadMessages, getKaitenAgentsStatus,
-  promoteSelfToAdmin, getModelCatalog, getCoordinationOverview, getBusinessValue,
+  getModelCatalog, getCoordinationOverview, getBusinessValue,
   type Agent, type Message, type AgentConfig, type Session, type ModelCatalog
 } from '../api';
+import { runPolledTask } from '../utils/polling';
 
 const getAuthToken = () => localStorage.getItem('ocaas_token');
 
@@ -15,8 +16,14 @@ export interface CurrentUser {
 }
 
 export function useChatState() {
+  const normalizeKaitenProfile = (value?: string | null) => {
+    const profile = String(value || '').trim().toLowerCase();
+    if (!profile || profile === 'prime' || profile === 'main') return 'kaiten';
+    return profile;
+  };
   const isVirtualKaitenAgent = (agentId?: string | null) => String(agentId || '').startsWith('kaiten:');
-  const getKaitenProfileFromAgentId = (agentId?: string | null) => String(agentId || '').replace(/^kaiten:/, '');
+  const getKaitenProfileFromAgentId = (agentId?: string | null) =>
+    normalizeKaitenProfile(String(agentId || '').replace(/^kaiten:/, ''));
 
   const isMobileViewport = () => {
     if (typeof window === 'undefined') return false;
@@ -62,27 +69,42 @@ export function useChatState() {
       return;
     }
     try {
-      const [dbAgents, kaitenStatus] = await Promise.all([
-        getAgents(),
-        getKaitenAgentsStatus().catch(() => []),
-      ]);
+      let dbAgents: Agent[] = [];
+      let kaitenStatus: any[] = [];
+      await runPolledTask('chat.agents', async () => {
+        [dbAgents, kaitenStatus] = await Promise.all([
+          getAgents(),
+          getKaitenAgentsStatus().catch(() => []),
+        ]);
+      });
       const virtualAgents: Agent[] = kaitenStatus.map((agent) => ({
-        id: `kaiten:${agent.id}`,
-        name: agent.name,
+        id: `kaiten:${normalizeKaitenProfile(agent.id)}`,
+        name: normalizeKaitenProfile(agent.name) === 'kaiten' ? 'KAITEN' : agent.name,
       }));
       const virtualNames = new Set(virtualAgents.map((agent) => agent.name.trim().toLowerCase()));
-      const filteredDbAgents = dbAgents.filter((agent) => !virtualNames.has(agent.name.trim().toLowerCase()));
+      const filteredDbAgents = dbAgents.filter((agent) => {
+        const name = agent.name.trim().toLowerCase();
+        if (name === 'prime') return false;
+        return !virtualNames.has(name);
+      });
       const mergedById = new Map<string, Agent>();
       [...virtualAgents, ...filteredDbAgents].forEach((agent) => mergedById.set(agent.id, agent));
       const merged = Array.from(mergedById.values());
       setAgents(merged);
-      if (merged.length > 0 && !selectedAgent) {
-        setSelectedAgent(merged[0]);
-      }
+      setSelectedAgent((prev) => {
+        if (!merged.length) return null;
+        if (!prev) return merged[0];
+        if (String(prev.name).trim().toLowerCase() === 'prime') {
+          return merged.find((agent) => agent.id === 'kaiten:kaiten') || merged[0];
+        }
+        const existing = merged.find((agent) => agent.id === prev.id);
+        return existing || merged[0];
+      });
     } catch (e: any) {
       if (e?.response?.status === 401) {
         setIsAuthenticated(false);
         localStorage.removeItem('ocaas_token');
+        window.dispatchEvent(new Event('ocaas-auth-changed'));
       }
     }
   }, [selectedAgent]);
@@ -104,6 +126,11 @@ export function useChatState() {
         });
       }
     } catch (e: any) {
+      if (e?.response?.status === 401) {
+        setIsAuthenticated(false);
+        localStorage.removeItem('ocaas_token');
+        window.dispatchEvent(new Event('ocaas-auth-changed'));
+      }
       console.error('Sessions fetch failed', e);
     }
   }, []);
@@ -117,6 +144,11 @@ export function useChatState() {
         : await getMessages(agentId, sessionId).catch(() => [] as Message[]);
       setMessages(data);
     } catch (e: any) {
+      if (e?.response?.status === 401) {
+        setIsAuthenticated(false);
+        localStorage.removeItem('ocaas_token');
+        window.dispatchEvent(new Event('ocaas-auth-changed'));
+      }
       console.error('Messages fetch failed', e);
     }
   }, [sessions]);
@@ -140,6 +172,11 @@ export function useChatState() {
       setConfig(data);
       initialConfigRef.current = data;
     } catch (e: any) {
+      if (e?.response?.status === 401) {
+        setIsAuthenticated(false);
+        localStorage.removeItem('ocaas_token');
+        window.dispatchEvent(new Event('ocaas-auth-changed'));
+      }
       console.error('Config fetch failed', e);
     }
   }, [modelCatalog]);
@@ -195,9 +232,11 @@ export function useChatState() {
         // Non-blocking.
       }
     };
-    loadCoordination();
-    loadBusinessValue();
-    const interval = window.setInterval(loadCoordination, 15000);
+    runPolledTask('system.coordination', loadCoordination).catch(() => undefined);
+    runPolledTask('system.business', loadBusinessValue).catch(() => undefined);
+    const interval = window.setInterval(() => {
+      runPolledTask('system.coordination', loadCoordination).catch(() => undefined);
+    }, 30000);
     return () => window.clearInterval(interval);
   }, [isAuthenticated, matrixRefreshKey]);
 
@@ -219,8 +258,9 @@ export function useChatState() {
     if (selectedSession.memoryScope !== 'TELEGRAM') return;
 
     const poll = window.setInterval(() => {
+      if (document.visibilityState !== 'visible') return;
       fetchMessages(selectedAgent.id, selectedSession.id);
-    }, 8000);
+    }, 12000);
 
     return () => window.clearInterval(poll);
   }, [selectedAgent, selectedSession, fetchMessages]);
@@ -366,19 +406,10 @@ export function useChatState() {
     setMessages([]);
   };
 
-  const tryAutoPromoteToAdmin = async () => {
-    try {
-      await promoteSelfToAdmin();
-    } catch {
-      // Ignore if user is not eligible yet.
-    }
-  };
-
   const handleLoginSuccess = async (token: string) => {
     localStorage.setItem('ocaas_token', token);
     setIsAuthenticated(true);
     setShowAuthModal(false);
-    await tryAutoPromoteToAdmin();
     fetchAgents();
     window.dispatchEvent(new Event('ocaas-auth-changed'));
   };
@@ -387,7 +418,6 @@ export function useChatState() {
     localStorage.setItem('ocaas_token', token);
     setIsAuthenticated(true);
     setShowAuthModal(false);
-    await tryAutoPromoteToAdmin();
     fetchAgents();
     window.dispatchEvent(new Event('ocaas-auth-changed'));
   };

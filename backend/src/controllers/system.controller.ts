@@ -243,11 +243,23 @@ const getConfiguredAdminEmails = (): Set<string> => {
   );
 };
 
-const fetchAgentStatus = async (agent: { id: string; name: string; profilePath?: string | null; port?: number | null; userId?: string }) => {
+const fetchAgentStatus = async (agent: {
+  id: string;
+  name: string;
+  status?: string | null;
+  profilePath?: string | null;
+  port?: number | null;
+  userId?: string;
+  agentConfig?: { model?: string | null } | null;
+}) => {
   const checkedAt = new Date().toISOString();
-  // For now, we don't load individual model configs per agent in this summary view,
-  // but we could via prisma.agentConfig if needed.
-  // const modelsConfig = await readKaitenModelsConfig(); 
+  const configuredModel = agent.agentConfig?.model || null;
+  const recentUsage = await prisma.usage.findFirst({
+    where: { agentId: agent.id },
+    orderBy: { timestamp: 'desc' },
+    select: { model: true },
+  }).catch(() => null);
+  const recentModel = recentUsage?.model || null;
 
   // Use profilePath for openclaw CLI check if available
   // If not, use port check if available
@@ -300,7 +312,8 @@ const fetchAgentStatus = async (agent: { id: string; name: string; profilePath?:
           runtimeIp: parsed.gateway?.self?.ip || null,
           serviceState: parsed.gatewayService?.runtimeShort || null,
           model: getModel(parsed),
-          configuredPrimaryModel: null,
+          activeModel: getModel(parsed) || recentModel || configuredModel || 'unknown',
+          configuredPrimaryModel: configuredModel,
           configuredFallbacks: [],
           error: parsed.gateway?.error || null,
           checkedAt,
@@ -312,20 +325,29 @@ const fetchAgentStatus = async (agent: { id: string; name: string; profilePath?:
     // If we can't check via CLI, we mark as STOPPED or UNKNOWN unless we implement a ping.
     // Since this is "One-Click", everything is likely local or docker-compose.
 
+    const mappedStatus = String(agent.status || '').toUpperCase();
+    const status: AgentStatus =
+      mappedStatus === 'RUNNING' || mappedStatus === 'STOPPED' || mappedStatus === 'ERROR'
+        ? (mappedStatus as AgentStatus)
+        : 'UNKNOWN';
+    const activeModel = recentModel || configuredModel || 'unknown';
     return {
       id: agent.id,
       name: agent.name,
       profile: agent.profilePath || 'db-agent',
-      status: 'UNKNOWN' as AgentStatus, // TODO: Implement Ping
-      reachable: false,
+      status,
+      reachable: status === 'RUNNING',
       location: 'Local' as AgentLocation,
       gatewayMode: 'unknown',
       gatewayUrl: null,
       runtimeHost: null,
       runtimeIp: null,
       serviceState: null,
-      model: 'unknown',
-      error: 'Status check not implemented for non-CLI agents',
+      model: activeModel,
+      activeModel,
+      configuredPrimaryModel: configuredModel,
+      configuredFallbacks: [],
+      error: status === 'ERROR' ? 'Runtime reported error state' : null,
       checkedAt
     };
 
@@ -343,6 +365,9 @@ const fetchAgentStatus = async (agent: { id: string; name: string; profilePath?:
       runtimeIp: null,
       serviceState: null,
       model: 'unknown',
+      activeModel: recentModel || configuredModel || 'unknown',
+      configuredPrimaryModel: configuredModel,
+      configuredFallbacks: [],
       error: `status check failed: ${getErrorMessage(err)}`,
       checkedAt,
     };
@@ -391,9 +416,9 @@ export const systemController = {
 
       let agentsList;
       if (userRole === 'ADMIN') {
-        agentsList = await prisma.agent.findMany();
+        agentsList = await prisma.agent.findMany({ include: { agentConfig: { select: { model: true } } } });
       } else if (userId) {
-        agentsList = await prisma.agent.findMany({ where: { userId } });
+        agentsList = await prisma.agent.findMany({ where: { userId }, include: { agentConfig: { select: { model: true } } } });
       } else {
         // Fallback/Legacy: fetch 'Kaiten' profiles if DB is empty or just return empty?
         // We'll return empty if no user.

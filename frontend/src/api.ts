@@ -11,14 +11,38 @@ const resolveApiBaseFromHostname = (hostname: string): string => {
   return '/api';
 };
 
-const defaultApiBase = (() => {
-  if (typeof window === 'undefined') return '/api';
-  return resolveApiBaseFromHostname(window.location.hostname);
-})();
+const resolveApiBase = (): string => {
+  if (typeof window === 'undefined') {
+    return import.meta.env.VITE_API_BASE_URL || '/api';
+  }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || defaultApiBase;
+  const hostBase = resolveApiBaseFromHostname(window.location.hostname);
+  const configuredBase = import.meta.env.VITE_API_BASE_URL;
+  const isAutopusDashboard =
+    window.location.hostname === 'dashboard.autopus.cloud' ||
+    window.location.hostname === 'www.dashboard.autopus.cloud' ||
+    (window.location.hostname.endsWith('.autopus.cloud') && window.location.hostname.includes('dashboard'));
+
+  // Production dashboard domains always use the API domain directly.
+  if (isAutopusDashboard) {
+    return hostBase;
+  }
+
+  return configuredBase || hostBase;
+};
+
+const API_BASE_URL = resolveApiBase();
+
+if (!import.meta.env.PROD) {
+  console.info(`[api] base URL resolved to: ${API_BASE_URL}`);
+}
 
 const getAuthToken = () => localStorage.getItem('ocaas_token');
+const normalizeProfile = (value?: string | null) => {
+  const profile = String(value || '').trim().toLowerCase();
+  if (!profile || profile === 'prime' || profile === 'main') return 'kaiten';
+  return profile;
+};
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
@@ -31,6 +55,31 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (!error?.config) return Promise.reject(error);
+    const status = error?.response?.status;
+    if (status === 401) {
+      if (typeof window !== 'undefined' && localStorage.getItem('ocaas_token')) {
+        localStorage.removeItem('ocaas_token');
+        window.dispatchEvent(new Event('ocaas-auth-changed'));
+      }
+      return Promise.reject(error);
+    }
+    const method = String(error?.config?.method || 'get').toLowerCase();
+    const retryCount = Number(error?.config?._retryCount || 0);
+    const shouldRetry = method === 'get' && (status === 429 || status === 502 || status === 503 || status === 504);
+    if (!shouldRetry || retryCount >= 2) {
+      return Promise.reject(error);
+    }
+    const delay = 250 * Math.pow(2, retryCount) + Math.floor(Math.random() * 100);
+    await new Promise((resolve) => setTimeout(resolve, delay));
+    error.config._retryCount = retryCount + 1;
+    return api.request(error.config);
+  }
+);
 
 export interface Agent {
   id: string;
@@ -78,6 +127,7 @@ export interface KAITENAgentRuntime {
   runtimeIp: string | null;
   serviceState: string | null;
   model: string;
+  activeModel?: string;
   configuredPrimaryModel?: string | null;
   configuredFallbacks?: string[];
   error: string | null;
@@ -131,12 +181,13 @@ export const getSessions = async (agentId: string): Promise<Session[]> => {
 };
 
 export const getOpenClawThreads = async (opts: { agentId?: string; profile?: string }): Promise<Session[]> => {
-  const response = await api.get('/hub/openclaw/threads', { params: opts });
+  const normalized = opts.profile ? { ...opts, profile: normalizeProfile(opts.profile) } : opts;
+  const response = await api.get('/hub/openclaw/threads', { params: normalized });
   const data = extractData(response);
   const threads = Array.isArray(data?.threads) ? data.threads : [];
   return threads.map((thread: any) => ({
     id: String(thread.id),
-    agentId: String(opts.agentId || `kaiten:${opts.profile || 'unknown'}`),
+    agentId: String(normalized.agentId || `kaiten:${normalizeProfile(normalized.profile)}`),
     title: String(thread.title || 'Telegram Thread'),
     memoryScope: 'TELEGRAM',
     channel: String(thread.channel || 'telegram'),
@@ -160,7 +211,7 @@ export const getMessages = async (agentId: string, sessionId: string): Promise<M
 
 export const getOpenClawThreadMessages = async (agentId: string, threadId: string): Promise<Message[]> => {
   const isVirtual = agentId.startsWith('kaiten:');
-  const profile = isVirtual ? agentId.replace('kaiten:', '') : undefined;
+  const profile = isVirtual ? normalizeProfile(agentId.replace('kaiten:', '')) : undefined;
   const response = await api.get(`/hub/openclaw/thread/${threadId}`, {
     params: isVirtual ? { profile } : { agentId },
   });
@@ -278,9 +329,25 @@ export interface BusinessValue {
 }
 
 export const getBusinessValue = async (): Promise<BusinessValue> => {
-  const response = await api.get('/system/business/value');
-  const data = extractData(response);
-  return data as BusinessValue;
+  try {
+    const response = await api.get('/system/business/value');
+    const data = extractData(response);
+    return data as BusinessValue;
+  } catch (error: any) {
+    if (error?.response?.status === 404) {
+      return {
+        proposition: '',
+        mvpDefinition: '',
+        priorities: [],
+        launchTargets: { signupTarget: 0, payingCustomersTarget: 0, mrrTargetUsd: 0 },
+        progress: { signupsPct: 0, payingCustomersPct: 0, mrrPct: 0 },
+        blockers: [],
+        recommendedActions: [],
+        sources: [],
+      };
+    }
+    throw error;
+  }
 };
 
 export const bulkCreateAgents = async (payload: {
@@ -348,34 +415,61 @@ export const bulkCreateAgents = async (payload: {
   return { created, failed };
 };
 export const getKaitenAgentsStatus = async (): Promise<KAITENAgentRuntime[]> => {
-  const response = await api.get('/system/kaiten/agents');
-  const data = extractData(response);
-  return data.agents ?? [];
+  try {
+    const response = await api.get('/system/kaiten/agents');
+    const data = extractData(response);
+    return data.agents ?? [];
+  } catch (error: any) {
+    if (error?.response?.status === 404) return [];
+    throw error;
+  }
 };
 
 export const getModelCatalog = async (): Promise<ModelCatalog> => {
-  const response = await api.get('/system/model-catalog');
-  const data = extractData(response);
-  return {
-    models: Array.isArray(data?.models) ? data.models : [],
-    defaults: data?.defaults ?? null,
-    profiles: data?.profiles ?? {},
-    generatedAt: data?.generatedAt ?? null,
-  };
+  try {
+    const response = await api.get('/system/model-catalog');
+    const data = extractData(response);
+    return {
+      models: Array.isArray(data?.models) ? data.models : [],
+      defaults: data?.defaults ?? null,
+      profiles: data?.profiles ?? {},
+      generatedAt: data?.generatedAt ?? null,
+    };
+  } catch (error: any) {
+    if (error?.response?.status === 404) {
+      return { models: [], defaults: null, profiles: {}, generatedAt: null };
+    }
+    throw error;
+  }
 };
 
 export const getCoordinationOverview = async (): Promise<CoordinationOverview> => {
-  const response = await api.get('/system/coordination/overview');
-  const data = extractData(response);
-  return {
-    agents: data?.agents || {},
-    activeTasks: Array.isArray(data?.activeTasks) ? data.activeTasks : [],
-    assigneeLoad: data?.assigneeLoad || {},
-    agentRoutines: Array.isArray(data?.agentRoutines) ? data.agentRoutines : [],
-    tasksByAssignee: data?.tasksByAssignee || {},
-    chains: Array.isArray(data?.chains) ? data.chains : [],
-    totalTasks: Number(data?.totalTasks || 0),
-  };
+  try {
+    const response = await api.get('/system/coordination/overview');
+    const data = extractData(response);
+    return {
+      agents: data?.agents || {},
+      activeTasks: Array.isArray(data?.activeTasks) ? data.activeTasks : [],
+      assigneeLoad: data?.assigneeLoad || {},
+      agentRoutines: Array.isArray(data?.agentRoutines) ? data.agentRoutines : [],
+      tasksByAssignee: data?.tasksByAssignee || {},
+      chains: Array.isArray(data?.chains) ? data.chains : [],
+      totalTasks: Number(data?.totalTasks || 0),
+    };
+  } catch (error: any) {
+    if (error?.response?.status === 404) {
+      return {
+        agents: {},
+        activeTasks: [],
+        assigneeLoad: {},
+        agentRoutines: [],
+        tasksByAssignee: {},
+        chains: [],
+        totalTasks: 0,
+      };
+    }
+    throw error;
+  }
 };
 
 export const updateModelChainForProfile = async (
@@ -659,11 +753,20 @@ export const streamMessage = async (
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}/agents/${agentId}/message`, {
+  let response = await fetch(`${API_BASE_URL}/agents/${agentId}/message`, {
     method: 'POST',
     headers,
     body: JSON.stringify({ message, stream: true, sessionId }),
   });
+
+  if (!response.ok && [429, 502, 503, 504].includes(response.status)) {
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    response = await fetch(`${API_BASE_URL}/agents/${agentId}/message`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ message, stream: true, sessionId }),
+    });
+  }
 
   if (!response.ok) {
     throw new Error('Streaming failed');

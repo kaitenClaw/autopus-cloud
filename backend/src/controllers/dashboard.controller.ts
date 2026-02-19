@@ -47,7 +47,7 @@ interface SpecialModelPackage {
 
 const OPENCLAW_HOME = process.env.OPENCLAW_HOME || `${os.homedir()}/.openclaw`;
 const PROFILE_INFO: Array<{ profile: ProfileId; label: string; root: string; skillDirs: string[] }> = [
-  { profile: 'default', label: 'Prime', root: `${os.homedir()}/.openclaw`, skillDirs: [`${OPENCLAW_HOME}/skills`, `${OPENCLAW_HOME}/workspace/skills`] },
+  { profile: 'default', label: 'KAITEN', root: `${os.homedir()}/.openclaw`, skillDirs: [`${OPENCLAW_HOME}/skills`, `${OPENCLAW_HOME}/workspace/skills`] },
   { profile: 'forge', label: 'Forge', root: `${os.homedir()}/.openclaw-forge`, skillDirs: [`${OPENCLAW_HOME}/workspace-forge/skills`] },
   { profile: 'sight', label: 'Sight', root: `${os.homedir()}/.openclaw-sight`, skillDirs: [`${OPENCLAW_HOME}/workspace-sight/skills`] },
   { profile: 'pulse', label: 'Pulse', root: `${os.homedir()}/.openclaw-pulse`, skillDirs: [`${OPENCLAW_HOME}/workspace-pulse/skills`] },

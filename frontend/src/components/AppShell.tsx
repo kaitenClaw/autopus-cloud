@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   MessageSquare,
   Activity,
+  Settings,
   Rocket,
   LogOut,
   LogIn,
@@ -23,6 +24,7 @@ const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/hub', label: 'Hub', icon: Activity },
   { to: '/chat', label: 'Chat', icon: MessageSquare },
+  { to: '/settings', label: 'Settings', icon: Settings },
 ] as const;
 
 export default function AppShell() {
@@ -52,6 +54,8 @@ export default function AppShell() {
   } = chat;
 
   const closeMobileSidebar = () => setMobileSidebarOpen(false);
+  const visibleAgents = agents.filter((agent) => agent.name.trim().toLowerCase() !== 'prime');
+  const mapAgentLabel = (name: string) => (name.trim().toLowerCase() === 'prime' ? 'KAITEN' : name);
 
   return (
     <div className="flex h-screen overflow-hidden bg-surface-0 text-[var(--text-primary)]">
@@ -151,7 +155,7 @@ export default function AppShell() {
              `sidebarCollapsed` tells you if the sidebar is narrow (icon-only).
           */}
           <div className="space-y-1">
-            {agents.map((agent) => (
+            {visibleAgents.map((agent) => (
               <button
                 key={agent.id}
                 onClick={() => setSelectedAgent(agent)}
@@ -170,7 +174,7 @@ export default function AppShell() {
                 >
                   <Bot size={14} className={selectedAgent?.id === agent.id ? 'text-[var(--accent-hover)]' : ''} />
                 </div>
-                {!sidebarCollapsed && <span className="truncate font-medium">{agent.name}</span>}
+                {!sidebarCollapsed && <span className="truncate font-medium">{mapAgentLabel(agent.name)}</span>}
               </button>
             ))}
           </div>
@@ -266,7 +270,7 @@ export default function AppShell() {
               {selectedAgent && (
                 <>
                   <ChevronRight size={14} className="text-[var(--text-muted)]" />
-                  <span className="text-[var(--text-secondary)]">{selectedAgent.name}</span>
+                  <span className="text-[var(--text-secondary)]">{mapAgentLabel(selectedAgent.name)}</span>
                 </>
               )}
               {selectedSession && (
@@ -279,6 +283,9 @@ export default function AppShell() {
           </div>
 
           <div className="flex items-center gap-2">
+            <span className="hidden text-[11px] text-[var(--text-muted)] md:inline">
+              Your Personal AI Team, One Click Away
+            </span>
             {isAuthenticated && (
               <button
                 onClick={() => setShowLaunchWizard(true)}

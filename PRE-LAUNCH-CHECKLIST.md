@@ -78,6 +78,57 @@
 
 ---
 
+## 3.1) UX Components and Required Functionalities (Dashboard v2)
+
+### `frontend/src/components/AppShell.tsx` (Navigation + Global Controls)
+- [ ] Sidebar navigation works for `/dashboard`, `/hub`, `/chat` with active-state highlight
+- [ ] Mobile drawer open/close behavior works without layout breakage
+- [ ] Auth state controls are correct (guest shows sign-in, user shows profile/logout)
+- [ ] Launch Agent button opens launch wizard for authenticated users
+- [ ] Agent list selection updates current workspace context
+- [ ] Session list supports create/select and preserves selected state
+
+### `frontend/src/pages/HubPage.tsx` (Route Wiring)
+- [ ] Hub route correctly receives shared `useChatState` outlet context
+- [ ] Launch/Auth callbacks are wired to shared modal state
+- [ ] No duplicate local state introduced that can drift from AppShell state
+
+### `frontend/src/components/surfaces/HubSurface.tsx` (Core Operator Surface)
+- [ ] Feed query controls work: scope, event type, direction, time window, agent, session
+- [ ] Live feed polling refreshes every 15s and handles auth/guest mode correctly
+- [ ] Pagination/load-more works via `nextCursor` with no duplicate events
+- [ ] Thread expansion fetches per-thread event context and handles failures gracefully
+- [ ] Selecting feed items can focus agent/session context in chat panel
+- [ ] Mobile pane switch (chat/feed) behaves correctly
+- [ ] Feed errors render clearly and recover on retry
+
+### `frontend/src/components/AgentsMatrix.tsx` (Runtime Trust Panel)
+- [ ] Runtime data is loaded from backend and refreshed every 30s
+- [ ] Status/location/model/heartbeat display correctly for each runtime
+- [ ] Last error snippet is shown when runtime reports an error
+- [ ] Empty state and loading state are clear and non-blocking
+- [ ] Manual refresh button triggers immediate refresh without breaking polling
+
+### Chat Components (`frontend/src/components/chat/*`)
+- [ ] Sidebar supports agent/session navigation with stable selection
+- [ ] Message list renders streamed assistant output and history reliably
+- [ ] Prompt input handles submit, disabled/loading states, and error feedback
+- [ ] Highlight/jump-to-message behavior works from hub feed context
+
+### API/Backend Requirements for UX to be complete
+- [ ] `GET /api/system/kaiten/agents` for live runtime matrix
+- [ ] `GET /api/hub/feed` with filters + cursor pagination
+- [ ] `GET /api/hub/thread/:threadId` for thread expansion
+- [ ] Auth/session endpoints for login/logout/current-user
+- [ ] Session/message endpoints backing chat history and send flow
+
+### QA Exit Criteria for UX
+- [ ] End-to-end operator flow passes: login -> hub filter -> open thread -> jump to chat -> send message
+- [ ] Responsive check passes on mobile and desktop for AppShell + HubSurface
+- [ ] No P0/P1 UX defects remain (navigation dead-ends, data not loading, broken state sync)
+
+---
+
 ## 4) Daily Operator Cadence (09:00 HKT)
 
 - [ ] Prime updates source-of-truth: `coordination/status-board.json`
@@ -110,4 +161,3 @@
 - **Forge:** implementation and fixes
 - **Sight:** QA sign-off and bug severity
 - **Pulse:** runtime health and incident coordination
-

@@ -81,7 +81,9 @@ Use Start/Spawner first to attach runtime, then chat will route live.`;
         res.end();
       } catch (error) {
         console.error('Streaming error:', error);
-        res.write(`data: ${JSON.stringify({ type: 'error', message: 'Streaming failed' })}\n\n`);
+        const text = error instanceof Error ? error.message : 'Streaming failed';
+        const isTransient = /429|timeout|temporar|unavailable|gateway|network/i.test(text);
+        res.write(`data: ${JSON.stringify({ type: 'error', transient: isTransient, message: isTransient ? 'Streaming temporarily unavailable' : 'Streaming failed' })}\n\n`);
         res.end();
       }
       return;

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-export type CoordinationAgentId = 'prime' | 'forge' | 'sight' | 'pulse';
+export type CoordinationAgentId = 'kaiten' | 'forge' | 'sight' | 'pulse';
 export type CoordinationTaskState =
   | 'pending'
   | 'acknowledged'
@@ -84,7 +84,7 @@ export interface TaskTransitionEvent {
   };
 }
 
-const AGENTS: CoordinationAgentId[] = ['prime', 'forge', 'sight', 'pulse'];
+const AGENTS: CoordinationAgentId[] = ['kaiten', 'forge', 'sight', 'pulse'];
 const STATES: CoordinationTaskState[] = [
   'pending',
   'acknowledged',
@@ -117,8 +117,11 @@ const safeReadJson = (filePath: string): unknown => {
   }
 };
 
-const isAgent = (value: unknown): value is CoordinationAgentId =>
-  value === 'prime' || value === 'forge' || value === 'sight' || value === 'pulse';
+const isAgent = (value: unknown): value is CoordinationAgentId | 'prime' =>
+  value === 'kaiten' || value === 'forge' || value === 'sight' || value === 'pulse' || value === 'prime';
+
+const normalizeAgent = (value: CoordinationAgentId | 'prime'): CoordinationAgentId =>
+  value === 'prime' ? 'kaiten' : value;
 
 const isState = (value: unknown): value is CoordinationTaskState =>
   value === 'pending' ||
@@ -156,7 +159,7 @@ const normalizeTask = (raw: unknown): CoordinationTask | null => {
     id: value.id,
     title: typeof value.title === 'string' ? value.title : value.id,
     description: typeof value.description === 'string' ? value.description : '',
-    assignee: value.assignee,
+    assignee: normalizeAgent(value.assignee),
     priority: value.priority === 'P0' || value.priority === 'P1' || value.priority === 'P2' ? value.priority : 'P1',
     track: value.track === 'fast' || value.track === 'deep' || value.track === 'standard' ? value.track : 'standard',
     state: value.state,

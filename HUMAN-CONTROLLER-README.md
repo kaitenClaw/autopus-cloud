@@ -35,6 +35,16 @@ cd /Users/altoncheng/ocaas-project/backend && npm run build
 cd /Users/altoncheng/ocaas-project/frontend && npm run build
 ```
 
+### Pre-deploy checks (required)
+```bash
+# 1) Env sanity
+cd /Users/altoncheng/ocaas-project/backend
+node -e 'const req=["DATABASE_URL","JWT_ACCESS_SECRET","JWT_REFRESH_SECRET","ALLOWED_ORIGINS"]; const miss=req.filter(k=>!process.env[k]); if(miss.length){console.error("Missing env:", miss.join(",")); process.exit(1)} console.log("Env OK")'
+
+# 2) Migration status (clean or deployable)
+npx prisma migrate status
+```
+
 ### Deploy (split backend + dashboard containers)
 ```bash
 cd /Users/altoncheng/ocaas-project/backend
@@ -45,6 +55,27 @@ cd /Users/altoncheng/ocaas-project/frontend
 docker compose -f docker-compose.dashboard.yml build
 docker compose -f docker-compose.dashboard.yml up -d
 ```
+
+### Post-deploy verification
+```bash
+# API readiness
+curl -sS https://api.autopus.cloud/health | jq
+
+# Auth endpoint should return 401 for invalid credentials (not 5xx)
+curl -sS -X POST https://api.autopus.cloud/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"invalid@example.com","password":"wrongpass"}' | jq
+
+# Optional check only if dashboard /api fallback is intentionally used
+curl -sS -X POST https://dashboard.autopus.cloud/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"invalid@example.com","password":"wrongpass"}' | jq
+```
+
+### Rollback trigger
+- Trigger rollback if auth endpoints show sustained `5xx` for more than 5 minutes.
+- Trigger rollback if login latency exceeds 2 seconds p95 in release window.
+- Roll back by redeploying the previous known-good backend and dashboard images.
 
 ### One-click local host mode
 ```bash
@@ -63,3 +94,4 @@ curl -s https://api.autopus.cloud/api/system/kaiten/agents -H "Authorization: Be
 - Starter MVP now targets one active agent per account.
 - Dashboard supports model fallback editing and mirrored OpenClaw thread visibility.
 - Payment is intentionally not included in this MVP.
+- Production dashboard should use direct API host (`https://api.autopus.cloud/api`), not `/api` proxy as primary path.

@@ -6,6 +6,7 @@ import LandingPage from './components/LandingPage';
 import DashboardPage from './pages/DashboardPage';
 import HubPage from './pages/HubPage';
 import ChatPage from './pages/ChatPage';
+import SettingsPage from './pages/SettingsPage';
 import './index.css';
 
 function AppRouter() {
@@ -31,6 +32,7 @@ function AppRouter() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/hub" element={<HubPage />} />
         <Route path="/chat" element={<ChatPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
       </Route>
 
       {/* Catch-all */}
