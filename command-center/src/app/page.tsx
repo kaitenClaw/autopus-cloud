@@ -39,20 +39,19 @@ const ChatWindow = () => {
     setIsLoading(true);
 
     try {
-      // For MVP, we point to KAITEN Forge specifically or use a dynamic agent selector
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ message: input }),
+        body: JSON.stringify({ message: input, agentId: 'forge' }),
       });
       const data = await response.json();
       
       setMessages((prev) => [...prev, { 
         sender: 'agent', 
-        text: data.response || data.data?.response || data.message || 'No response from agent.' 
+        text: data.response || data.data?.assistantMessage?.content || data.message || 'No response from agent.' 
       }]);
     } catch (error) {
       console.error('Error sending message:', error);
@@ -126,7 +125,7 @@ const ChatWindow = () => {
 const DashboardPage = () => {
   const { user, logout, token, isLoading: authLoading } = useAuth();
   const router = useRouter();
-  const [stats, setStats] = useState({ agents: [], system: {} });
+  const [stats, setStats] = useState({ agents: [], kaiten: [], system: {} });
 
   useEffect(() => {
     if (!authLoading && !token) {
@@ -135,12 +134,31 @@ const DashboardPage = () => {
   }, [token, authLoading, router]);
 
   useEffect(() => {
-    if (token) {
-      fetch('/api/status')
-        .then(res => res.json())
-        .then(data => setStats(data))
-        .catch(err => console.error(err));
-    }
+    const fetchData = async () => {
+      try {
+        if (token) {
+          const [runtimeRes, kaitenRes, agentsRes] = await Promise.all([
+            fetch('/api/system/runtime', { headers: { 'Authorization': `Bearer ${token}` } }),
+            fetch('/api/system/kaiten/agents', { headers: { 'Authorization': `Bearer ${token}` } }),
+            fetch('/api/agents', { headers: { 'Authorization': `Bearer ${token}` } }),
+          ]);
+
+          const runtime = await runtimeRes.json();
+          const kaiten = await kaitenRes.json();
+          const agents = await agentsRes.json();
+
+          setStats({
+            system: runtime.data || {},
+            kaiten: kaiten.data?.agents || [],
+            agents: agents.data?.agents || []
+          });
+        }
+      } catch (error) {
+        console.error('Dashboard Fetch Error:', error);
+      }
+    };
+
+    fetchData();
   }, [token]);
 
   if (authLoading || !token) return null;
@@ -225,30 +243,30 @@ const DashboardPage = () => {
                 </button>
               </div>
               <div className="divide-y divide-zinc-800/50">
-                {[
+                {(stats.kaiten.length > 0 ? stats.kaiten : [
                   { name: 'KAITEN Prime', role: 'Orchestrator', status: 'Standby', model: 'Gemini 3 Flash', color: 'zinc' },
                   { name: 'KAITEN Forge', role: 'Builder', status: 'Working', model: 'Gemini 3 Pro', color: 'blue' },
                   { name: 'KAITEN Sight', role: 'Diagnostics', status: 'Auditing', model: 'Gemini 3 Pro', color: 'purple' },
                   { name: 'KAITEN Pulse', role: 'Coordinator', status: 'Monitoring', model: 'Gemini 3 Flash', color: 'green' },
-                ].map((agent, i) => (
+                ]).map((agent: any, i: number) => (
                   <div key={i} className="px-6 py-5 flex items-center justify-between hover:bg-zinc-800/30 transition-all cursor-pointer group">
                     <div className="flex items-center gap-4">
                       <div className={`w-12 h-12 rounded-2xl bg-zinc-950 border border-zinc-800 flex items-center justify-center font-black text-lg text-zinc-500 group-hover:text-blue-500 group-hover:border-blue-500/50 transition-all`}>
-                        {agent.name.charAt(7)}
+                        {agent.name.includes(' ') ? agent.name.split(' ')[1].charAt(0) : agent.name.charAt(0)}
                       </div>
                       <div>
                         <h3 className="font-bold text-zinc-100 group-hover:text-white transition-colors">{agent.name}</h3>
-                        <p className="text-xs text-zinc-500 font-medium">{agent.role} • {agent.model}</p>
+                        <p className="text-xs text-zinc-500 font-medium">{agent.role || 'Personnel'} • {agent.model}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
                       <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
-                        agent.status === 'Working' ? 'bg-blue-500/10 text-blue-500' : 
+                        agent.status === 'RUNNING' || agent.status === 'Working' ? 'bg-blue-500/10 text-blue-500' : 
                         agent.status === 'Auditing' ? 'bg-purple-500/10 text-purple-500' :
                         'bg-zinc-800 text-zinc-500'
                       }`}>
                         <div className={`w-1 h-1 rounded-full ${
-                          agent.status === 'Working' ? 'bg-blue-500 animate-pulse' : 
+                          agent.status === 'RUNNING' || agent.status === 'Working' ? 'bg-blue-500 animate-pulse' : 
                           agent.status === 'Auditing' ? 'bg-purple-500' :
                           'bg-zinc-500'
                         }`} />
