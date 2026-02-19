@@ -52,7 +52,7 @@ export class ConfigController {
       create: {
         agentId,
         systemPrompt,
-        model: model || 'gpt-3.5-turbo', // Default if not provided
+        model: model || 'gemini-3-flash',
         temperature: temperature ?? 0.7,
         topP: topP ?? 1.0,
         maxTokens: maxTokens ?? 2048,

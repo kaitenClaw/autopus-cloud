@@ -1,8 +1,23 @@
 import { prisma } from '../config/prisma';
-import { NotFoundError } from '../utils/errors';
+import { ConflictError, NotFoundError } from '../utils/errors';
 
 export class AgentService {
   async createAgent(userId: string, name: string, modelPreset: string) {
+    const [subscription, existingAgents] = await Promise.all([
+      prisma.subscription.findUnique({
+        where: { userId },
+        select: { maxAgents: true },
+      }),
+      prisma.agent.count({
+        where: { userId, deletedAt: null },
+      }),
+    ]);
+
+    const maxAgents = subscription?.maxAgents ?? 1;
+    if (existingAgents >= maxAgents) {
+      throw new ConflictError(`Agent limit reached: your current plan allows ${maxAgents} active agent(s).`);
+    }
+
     const agent = await prisma.agent.create({
       data: {
         name,
@@ -10,7 +25,7 @@ export class AgentService {
         userId,
         agentConfig: {
           create: {
-            model: modelPreset || 'gpt-3.5-turbo',
+            model: modelPreset || 'gemini-3-flash',
             temperature: 0.7,
             systemPrompt: 'You are a helpful assistant.'
           }

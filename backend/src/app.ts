@@ -7,15 +7,22 @@ import rateLimit from 'express-rate-limit';
 import { env } from './config/env';
 import { errorHandler } from './middleware/errorHandler';
 import { NotFoundError } from './utils/errors';
+import { prisma } from './config/prisma';
 
 import authRoutes from './routes/auth.routes';
 import agentRoutes from './routes/agent.routes';
 import agentLifecycleRoutes from './routes/agent-lifecycle.routes';
 import systemRoutes from './routes/system.routes';
+import adminRoutes from './routes/admin.routes';
+import dashboardRoutes from './routes/dashboard.routes';
+import hubRoutes from './routes/hub.routes';
+import { authenticate } from './middleware/authenticate';
+import { requireAdmin } from './middleware/requireAdmin';
 
 const app = express();
 
 // Security & Optimization Middleware
+app.set('trust proxy', 1); // Trust first proxy (Nginx/Docker)
 app.use(helmet());
 app.use(cors({
   origin: env.ALLOWED_ORIGINS.split(','),
@@ -46,8 +53,39 @@ const authLimiter = rateLimit({
 });
 
 // Health Check
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+const appStartTime = Date.now();
+app.get('/health', async (_req, res) => {
+  const uptimeMs = Date.now() - appStartTime;
+  const hours = Math.floor(uptimeMs / 3600000);
+  const minutes = Math.floor((uptimeMs % 3600000) / 60000);
+
+  let database: 'connected' | 'disconnected' = 'disconnected';
+  let agentStats = { total: 0, running: 0, stopped: 0 };
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    database = 'connected';
+    const counts = await prisma.agent.groupBy({
+      by: ['status'],
+      where: { deletedAt: null },
+      _count: true,
+    });
+    for (const row of counts) {
+      agentStats.total += row._count;
+      if (row.status === 'RUNNING') agentStats.running = row._count;
+      if (row.status === 'STOPPED') agentStats.stopped = row._count;
+    }
+  } catch {
+    // DB unreachable — return degraded status
+  }
+
+  res.json({
+    status: database === 'connected' ? 'ok' : 'degraded',
+    version: '0.2.0',
+    database,
+    uptime: `${hours}h ${minutes}m`,
+    agents: agentStats,
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // Routes
@@ -55,6 +93,9 @@ app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/agents', agentRoutes);
 app.use('/api/agents', agentLifecycleRoutes);
 app.use('/api/system', systemRoutes);
+app.use('/api/admin', authenticate, requireAdmin, adminRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/hub', hubRoutes);
 
 // 404 Handler
 app.use((req, res, next) => {

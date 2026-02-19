@@ -11,14 +11,12 @@ interface MatrixAgent {
   status: MatrixStatus;
   location: RuntimeLocation;
   model: string;
+  configuredModel?: string | null;
   heartbeatAge: string;
   lastUpdated: string;
   lastError: string | null;
   source: 'live' | 'placeholder';
 }
-
-const TARGET_AGENTS = ['Prime', 'Forge', 'Sight', 'Pulse'];
-const normalize = (value: string) => value.trim().toLowerCase();
 
 const statusStyles: Record<MatrixStatus, string> = {
   RUNNING: 'text-emerald-400 bg-emerald-500/15 border-emerald-500/25',
@@ -60,17 +58,7 @@ export default function AgentsMatrix({ refreshKey = 0 }: AgentsMatrixProps) {
     const now = new Date().toLocaleTimeString();
 
     if (!token) {
-      setItems(TARGET_AGENTS.map((name) => ({
-        id: `placeholder-${name}`,
-        name,
-        status: 'unregistered',
-        location: 'Unknown',
-        model: 'n/a',
-        heartbeatAge: 'n/a',
-        lastUpdated: now,
-        lastError: null,
-        source: 'placeholder',
-      })));
+      setItems([]);
       setLastUpdated(now);
       return;
     }
@@ -78,36 +66,18 @@ export default function AgentsMatrix({ refreshKey = 0 }: AgentsMatrixProps) {
     setIsLoading(true);
     try {
       const runtimes = await getKaitenAgentsStatus().catch(() => [] as KAITENAgentRuntime[]);
-      const indexed = new Map(runtimes.map((a) => [normalize(a.name), a]));
-
-      const built = TARGET_AGENTS.map((targetName) => {
-        const live = indexed.get(normalize(targetName));
-        if (!live) {
-          return {
-            id: `placeholder-${targetName}`,
-            name: targetName,
-            status: 'unregistered' as const,
-            location: 'Unknown' as const,
-            model: 'n/a',
-            heartbeatAge: 'n/a',
-            lastUpdated: now,
-            lastError: null,
-            source: 'placeholder' as const,
-          };
-        }
-
-        return {
-          id: live.id,
-          name: targetName,
-          status: live.status,
-          location: live.location,
-          model: live.model || 'unknown',
-          heartbeatAge: formatHeartbeatAge(live.checkedAt),
-          lastUpdated: now,
-          lastError: live.error,
-          source: 'live' as const,
-        };
-      });
+      const built = runtimes.map((live) => ({
+        id: live.id,
+        name: live.name || live.id,
+        status: live.status,
+        location: live.location,
+        model: live.model || 'unknown',
+        configuredModel: live.configuredPrimaryModel || null,
+        heartbeatAge: formatHeartbeatAge(live.checkedAt),
+        lastUpdated: now,
+        lastError: live.error,
+        source: 'live' as const,
+      }));
 
       setItems(built);
       setLastUpdated(now);
@@ -129,7 +99,7 @@ export default function AgentsMatrix({ refreshKey = 0 }: AgentsMatrixProps) {
       <div className="mx-auto w-full max-w-7xl">
         <div className="mb-3 flex items-center justify-between">
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-zinc-400">KAITEN Agents Live Matrix</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-zinc-400">Agent Runtime Matrix</p>
             <p className="text-[11px] text-zinc-500">Last refresh: {headerText}</p>
           </div>
           <button
@@ -142,8 +112,12 @@ export default function AgentsMatrix({ refreshKey = 0 }: AgentsMatrixProps) {
           </button>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
-          {items.map((item) => (
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-4">
+          {items.length === 0 ? (
+            <div className="rounded-xl border border-white/10 bg-[#171717] p-3 text-xs text-zinc-500">
+              No runtime agents discovered yet.
+            </div>
+          ) : items.map((item) => (
             <article key={item.id} className="rounded-xl border border-white/10 bg-[#171717] p-2.5">
               <div className="mb-2 flex items-start justify-between gap-2">
                 <h3 className="text-sm font-semibold text-zinc-100">{item.name}</h3>
@@ -159,11 +133,20 @@ export default function AgentsMatrix({ refreshKey = 0 }: AgentsMatrixProps) {
                 </div>
                 <div className="flex items-center justify-between gap-2">
                   <span>Model</span>
-                  <span className="truncate text-zinc-200">{item.model}</span>
+                  <span className="truncate text-zinc-200">{item.configuredModel || item.model}</span>
                 </div>
+                {item.configuredModel && item.model && item.configuredModel !== item.model ? (
+                  <div className="flex items-center justify-between gap-2">
+                    <span>Active Runtime</span>
+                    <span className="truncate text-zinc-400">{item.model}</span>
+                  </div>
+                ) : null}
                 <div className="flex items-center justify-between gap-2">
                   <span>Heartbeat</span>
-                  <span className="text-zinc-300">{item.heartbeatAge}</span>
+                  <div className="flex items-center gap-1.5">
+                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-zinc-300">{item.heartbeatAge}</span>
+                  </div>
                 </div>
                 <div className="flex items-center justify-between gap-2">
                   <span>Backend</span>

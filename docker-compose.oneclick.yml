@@ -1,0 +1,57 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ocaas}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ocaas_password}
+      POSTGRES_DB: ${POSTGRES_DB:-ocaas}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-ocaas}:${POSTGRES_PASSWORD:-ocaas_password}@postgres:5432/${POSTGRES_DB:-ocaas}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:8080}
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-}
+      NODE_ENV: production
+      OPENCLAW_PROFILE_MAP: ${OPENCLAW_PROFILE_MAP:-{"forge":"/data/openclaw/forge","sight":"/data/openclaw/sight","pulse":"/data/openclaw/pulse","prime":"/data/openclaw/prime","fion":"/data/openclaw/fion"}}
+      KAITEN_MODELS_PATH: /app/coordination/kaiten-models.json
+      COORDINATION_STATUS_PATH: /app/coordination/status-board.json
+      COORDINATION_TASKS_DIR: /app/coordination/tasks
+      MARKET_VALIDATION_SCOREBOARD_PATH: /app/coordination/market-validation-scoreboard.json
+    command: sh -c "npx prisma migrate deploy && npm start"
+    volumes:
+      - ${COORDINATION_PATH:-./coordination}:/app/coordination
+      - ${OPENCLAW_FORGE_PATH:-/tmp/openclaw/forge}:/data/openclaw/forge:ro
+      - ${OPENCLAW_SIGHT_PATH:-/tmp/openclaw/sight}:/data/openclaw/sight:ro
+      - ${OPENCLAW_PULSE_PATH:-/tmp/openclaw/pulse}:/data/openclaw/pulse:ro
+      - ${OPENCLAW_PRIME_PATH:-/tmp/openclaw/prime}:/data/openclaw/prime:ro
+      - ${OPENCLAW_FION_PATH:-/tmp/openclaw/fion}:/data/openclaw/fion:ro
+    ports:
+      - "3000:3000"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.oneclick
+      args:
+        VITE_API_BASE_URL: /api
+        VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID}
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+
+volumes:
+  postgres_data:

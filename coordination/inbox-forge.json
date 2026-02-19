@@ -1,24 +1,32 @@
 {
-  "taskId": "task-w2-forge-f2f3",
-  "timestamp": "2026-02-17T20:39:00+08:00",
-  "from": "kaiten-pulse",
-  "to": "kaiten-forge",
-  "priority": "critical",
-  "track": "standard",
+  "taskId": "task-w2-forge-next-features",
+  "timestamp": "2026-02-20T00:35:00+08:00",
+  "from": "prime",
+  "to": "kaiten_forge_bot",
+  "priority": "high",
   "task": {
-    "title": "Build OpenClaw Spawner + Message Proxy",
-    "description": "Execute F2/F3: implement agent lifecycle spawner service and /api/agents/:id/chat proxy endpoint.",
+    "title": "Post-Deploy Feature Build — Telegram Wizard + Stripe + Agent Templates",
+    "description": "Dashboard v2 foundation is deployed. Now build the missing product features. Pick up after Sight completes QA.",
+    "track": "standard",
     "deliverables": [
-      "Spawner service (start/stop/status)",
-      "Port allocation + profile generation",
-      "Message proxy endpoint",
-      "Basic tests for lifecycle + chat"
+      "Telegram Connection Wizard — step-by-step UI: Create bot via BotFather > Paste token > Verify connection > Live status indicator",
+      "Memory Management Panel — view/edit/search across SESSION/WORKSPACE/GLOBAL scopes with timeline view",
+      "Agent Log Viewer — real-time stdout/stderr stream with search, connected via WebSocket",
+      "Stripe Billing Integration — checkout flow, subscription management, usage metering dashboard",
+      "Agent Templates Marketplace — curated presets (Customer Support, Research Assistant, Code Reviewer)"
     ],
-    "deadline": "2026-02-17T23:30:00+08:00",
+    "context": {
+      "architecture": "React 19 + Vite + Tailwind + react-router-dom",
+      "designTokens": "All new components MUST use CSS custom properties (--surface-*, --text-*, --accent, etc.) from index.css. NO hardcoded hex colors.",
+      "routing": "Add new routes in main.tsx, wrap in AppShell Outlet pattern. See DashboardPage.tsx for reference.",
+      "priority": "Telegram Wizard first (signature feature), then Memory Panel, then Stripe"
+    },
     "references": [
-      "~/ocaas-project/coordination/SYSTEM-REVIEW-2026-02-17.md",
-      "~/ocaas-project/coordination/SHARED-CONTEXT.md"
+      "~/ocaas-project/frontend/src/index.css — Design tokens",
+      "~/ocaas-project/frontend/src/main.tsx — Router structure",
+      "~/ocaas-project/frontend/src/components/AppShell.tsx — Layout shell",
+      "~/ocaas-project/coordination/status-board.json — Current state"
     ]
   },
-  "status": "completed"
+  "status": "pending"
 }

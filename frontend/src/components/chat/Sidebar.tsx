@@ -6,6 +6,8 @@ import { type Agent, type Session } from '../../api';
 interface SidebarProps {
   isOpen: boolean;
   toggle: () => void;
+  page: 'status' | 'chat';
+  setPage: (page: 'status' | 'chat') => void;
   agents: Agent[];
   selectedAgent: Agent | null;
   setSelectedAgent: (a: Agent) => void;
@@ -19,8 +21,10 @@ interface SidebarProps {
   user: { name: string; plan: string };
 }
 
+import { SidebarSystemStatus } from './SidebarSystemStatus';
+
 export const Sidebar: React.FC<SidebarProps> = ({
-  isOpen, toggle, agents, selectedAgent, setSelectedAgent,
+  isOpen, toggle, page, setPage, agents, selectedAgent, setSelectedAgent,
   sessions, selectedSession, setSelectedSession, onCreateSession,
   isAuthenticated, onLogout, onAuthOpen, user
 }) => {
@@ -34,19 +38,39 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div className="w-7 h-7 bg-white rounded-lg flex items-center justify-center shadow-sm">
             <div className="w-3.5 h-3.5 bg-black rounded-full" />
           </div>
-          <h1 className="font-bold text-lg tracking-tight text-white">Forge</h1>
+          <h1 className="font-bold text-lg tracking-tight text-white">OCaaS</h1>
         </div>
         <button onClick={toggle} className="text-zinc-500 hover:text-zinc-300 transition-colors p-1.5 hover:bg-white/5 rounded-lg">
-          <Menu size={18}/>
+          <Menu size={18} />
         </button>
       </div>
 
       <div className="p-3">
-        <button 
+        <div className="mb-2 grid grid-cols-2 gap-1 rounded-xl border border-white/5 bg-[#141414] p-1">
+          <button
+            onClick={() => setPage('status')}
+            className={cn(
+              'rounded-lg px-2 py-1.5 text-[11px] font-semibold transition-all',
+              page === 'status' ? 'bg-white text-black' : 'text-zinc-400 hover:bg-white/5 hover:text-zinc-200'
+            )}
+          >
+            Status
+          </button>
+          <button
+            onClick={() => setPage('chat')}
+            className={cn(
+              'rounded-lg px-2 py-1.5 text-[11px] font-semibold transition-all',
+              page === 'chat' ? 'bg-white text-black' : 'text-zinc-400 hover:bg-white/5 hover:text-zinc-200'
+            )}
+          >
+            Chatroom
+          </button>
+        </div>
+        <button
           onClick={onCreateSession}
           className="w-full flex items-center justify-center gap-2 p-2.5 bg-[#212121] hover:bg-[#2f2f2f] border border-white/5 rounded-xl transition-all text-sm font-semibold text-zinc-100 shadow-sm active:scale-[0.98]"
         >
-          <Plus size={16}/> New Chat
+          <Plus size={16} /> New Chat
         </button>
       </div>
 
@@ -96,6 +120,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         )}
       </div>
+
+      <SidebarSystemStatus />
 
       <div className="p-4 border-t border-white/5 bg-[#1a1a1a]/50">
         <div className="flex items-center gap-3 px-1">

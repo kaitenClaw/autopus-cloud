@@ -1,45 +1,72 @@
 {
-  "lastUpdated": "2026-02-18T09:24:41+08:00",
-  "buildPhase": "Week 2: Core Product (Accelerated)",
+  "lastUpdated": "2026-02-20T00:54:00+08:00",
+  "buildPhase": "Week 2: Dashboard Elevation (Replit/Cursor-Level UI)",
   "weekNumber": 2,
   "overallStatus": "in-progress",
   "agents": {
     "prime": {
       "status": "active",
       "role": "orchestrator",
-      "currentTask": "System coordination",
-      "model": "google-antigravity/gemini-3-flash"
+      "currentTask": "Dashboard v2 deployment — UI foundation complete, deploying to production",
+      "model": "claude-opus-4-6"
     },
     "forge": {
-      "status": "active",
+      "status": "standby",
       "role": "builder",
-      "currentTask": "Dashboard 2.0 frontend execution (WebSocket/runtime UX)",
-      "lastCompleted": "P0 dashboard hardening (live matrix, trust indicators, admin bootstrap, guided/pro split, brand shell)",
+      "currentTask": "Awaiting post-deploy tasks (Stripe billing, Telegram wizard, agent templates)",
+      "lastCompleted": "Dashboard 2.0 frontend execution",
       "model": "google-antigravity/gemini-3-flash"
     },
     "sight": {
-      "status": "active",
+      "status": "pending",
       "role": "qa-diagnostician",
-      "currentTask": "Monitoring system health + security audits",
-      "lastCompleted": "task-w2-sight-001 (Coordination Checker Fix & Audit)",
+      "currentTask": "QA on new router-based dashboard (post-deploy)",
+      "lastCompleted": "task-w2-sight-dashboard-qa-001",
       "model": "google-antigravity/gemini-3-flash"
     },
     "pulse": {
-      "status": "active",
+      "status": "standby",
       "role": "devops-coordinator",
-      "currentTask": "Routine sprint monitoring + backend health monitoring (currently stable)",
+      "currentTask": "Monitor deployment health after dashboard v2 rollout",
       "model": "google-antigravity/gemini-3-flash"
     }
   },
   "systemHealth": {
     "gateways": "5/5 running",
     "ports": "5/5 listening",
-    "backend": "localhost:3000 healthy",
+    "backend": "api.autopus.cloud healthy",
     "vpsApi": "api.autopus.cloud reachable"
   },
-  "nextMilestone": "Implement WebSocket runtime metadata + end-to-end smoke validation",
+  "dashboardV2": {
+    "status": "BUILT — ready for deploy",
+    "buildOutput": "ocaas-project/frontend/dist/",
+    "changesDeployed": false,
+    "completedItems": [
+      "CSS design token system (--surface-*, --text-*, --border-*, --elev-*, --accent, .app-shell)",
+      "React Router DOM — /dashboard, /hub, /chat routes",
+      "Unified AppShell layout with collapsible sidebar + top breadcrumbs",
+      "DashboardSurface and HubSurface wired into router (CSS tokens now render)",
+      "Custom Autopus logo (octopus SVG) + AutopusWordmark component",
+      "Full landing page: hero, how-it-works, features, pricing table, email capture",
+      "JetBrains Mono + Inter font loading via Google Fonts",
+      "OG meta tags, Twitter cards, SEO description",
+      "Tailwind config extended with token-based colors, shadows, animations",
+      "Old monolithic App.tsx removed — replaced by router architecture"
+    ],
+    "pendingItems": [
+      "Stripe billing integration (backend + frontend)",
+      "Telegram connection wizard UI",
+      "Agent templates marketplace",
+      "Memory management panel",
+      "Agent log viewer (real-time stdout/stderr)",
+      "Command palette (Cmd+K)",
+      "Toast notification system",
+      "Onboarding tour (first-login walkthrough)"
+    ]
+  },
+  "nextMilestone": "Deploy dashboard v2 to production, QA pass by Sight",
   "marketValidation": {
-    "lastDigestAt": "2026-02-17T21:55:52+08:00",
+    "lastDigestAt": "2026-02-20T00:30:00+08:00",
     "windowDays": 7,
     "leadsCaptured7d": 0,
     "demos7d": 0,

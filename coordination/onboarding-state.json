@@ -1,0 +1,254 @@
+{
+  "users": {
+    "60c1c02a-7ffb-4762-8dab-5ce5ff060707": {
+      "userId": "60c1c02a-7ffb-4762-8dab-5ce5ff060707",
+      "step": 1,
+      "status": "account_ready",
+      "mode": "first_agent",
+      "createdAgentId": null,
+      "createdAgentIds": [],
+      "firstMessageVerified": false,
+      "checks": {
+        "apiReachable": true,
+        "authOk": true,
+        "runtimeOk": false,
+        "agentCreated": false,
+        "messageRoundtrip": false,
+        "feedVisible": false
+      },
+      "updatedAt": "2026-02-18T04:58:00.383Z",
+      "completedAt": null
+    },
+    "9d19fc22-f5ac-47aa-8d04-86b38cc892ca": {
+      "userId": "9d19fc22-f5ac-47aa-8d04-86b38cc892ca",
+      "step": 3,
+      "status": "first_message_pending",
+      "mode": "first_agent",
+      "createdAgentId": "04d51208-3120-4bc2-91f9-bb9ac7e298dd",
+      "createdAgentIds": [
+        "04d51208-3120-4bc2-91f9-bb9ac7e298dd"
+      ],
+      "firstMessageVerified": false,
+      "checks": {
+        "apiReachable": true,
+        "authOk": true,
+        "runtimeOk": true,
+        "agentCreated": true,
+        "messageRoundtrip": false,
+        "feedVisible": false
+      },
+      "updatedAt": "2026-02-18T04:58:21.008Z",
+      "completedAt": null
+    },
+    "1ab35ef3-fbd4-41de-96c0-c3db6164fac8": {
+      "userId": "1ab35ef3-fbd4-41de-96c0-c3db6164fac8",
+      "step": 3,
+      "status": "first_message_pending",
+      "mode": "first_agent",
+      "createdAgentId": "37931d5d-3e69-4ef2-aec7-f15a09f29cab",
+      "createdAgentIds": [
+        "37931d5d-3e69-4ef2-aec7-f15a09f29cab"
+      ],
+      "firstMessageVerified": false,
+      "checks": {
+        "apiReachable": true,
+        "authOk": true,
+        "runtimeOk": true,
+        "agentCreated": true,
+        "messageRoundtrip": false,
+        "feedVisible": false
+      },
+      "updatedAt": "2026-02-18T04:59:11.104Z",
+      "completedAt": null
+    },
+    "f0937775-4865-4377-b41c-c9f63ec8ba67": {
+      "userId": "f0937775-4865-4377-b41c-c9f63ec8ba67",
+      "step": 3,
+      "status": "completed",
+      "mode": "first_agent",
+      "createdAgentId": "7021d906-9de5-45ad-9471-0f72549bb950",
+      "createdAgentIds": [
+        "7021d906-9de5-45ad-9471-0f72549bb950"
+      ],
+      "firstMessageVerified": true,
+      "checks": {
+        "apiReachable": true,
+        "authOk": true,
+        "runtimeOk": true,
+        "agentCreated": true,
+        "messageRoundtrip": true,
+        "feedVisible": true
+      },
+      "updatedAt": "2026-02-18T04:59:11.133Z",
+      "completedAt": "2026-02-18T04:59:11.130Z"
+    },
+    "e446f00d-2a63-400b-9c2f-97240d96eea9": {
+      "userId": "e446f00d-2a63-400b-9c2f-97240d96eea9",
+      "step": 3,
+      "status": "first_message_pending",
+      "mode": "first_agent",
+      "createdAgentId": "59a42bd4-1b61-412f-b73a-002463a6bc9a",
+      "createdAgentIds": [
+        "59a42bd4-1b61-412f-b73a-002463a6bc9a"
+      ],
+      "firstMessageVerified": false,
+      "checks": {
+        "apiReachable": true,
+        "authOk": true,
+        "runtimeOk": true,
+        "agentCreated": true,
+        "messageRoundtrip": false,
+        "feedVisible": false
+      },
+      "updatedAt": "2026-02-18T05:01:53.994Z",
+      "completedAt": null
+    },
+    "a904f090-43d6-4b34-a9d6-a905375b19aa": {
+      "userId": "a904f090-43d6-4b34-a9d6-a905375b19aa",
+      "step": 3,
+      "status": "completed",
+      "mode": "first_agent",
+      "createdAgentId": "25e0dabd-0207-434f-bd15-f85542e3cac4",
+      "createdAgentIds": [
+        "25e0dabd-0207-434f-bd15-f85542e3cac4"
+      ],
+      "firstMessageVerified": true,
+      "checks": {
+        "apiReachable": true,
+        "authOk": true,
+        "runtimeOk": true,
+        "agentCreated": true,
+        "messageRoundtrip": true,
+        "feedVisible": true
+      },
+      "updatedAt": "2026-02-18T05:01:54.023Z",
+      "completedAt": "2026-02-18T05:01:54.020Z"
+    },
+    "e8e00f52-8ed7-41db-9e65-08bbef4e3ce3": {
+      "userId": "e8e00f52-8ed7-41db-9e65-08bbef4e3ce3",
+      "step": 3,
+      "status": "first_message_pending",
+      "mode": "first_agent",
+      "createdAgentId": "48ade2a8-aa7f-495f-a176-8eccd62d7aea",
+      "createdAgentIds": [
+        "48ade2a8-aa7f-495f-a176-8eccd62d7aea"
+      ],
+      "firstMessageVerified": false,
+      "checks": {
+        "apiReachable": true,
+        "authOk": true,
+        "runtimeOk": true,
+        "agentCreated": true,
+        "messageRoundtrip": false,
+        "feedVisible": false
+      },
+      "updatedAt": "2026-02-18T06:54:14.239Z",
+      "completedAt": null
+    },
+    "095f88e4-cc68-4790-8c41-c4c19609ba5f": {
+      "userId": "095f88e4-cc68-4790-8c41-c4c19609ba5f",
+      "step": 3,
+      "status": "completed",
+      "mode": "first_agent",
+      "createdAgentId": "a045532e-2373-4ed1-bef3-f2120012098d",
+      "createdAgentIds": [
+        "a045532e-2373-4ed1-bef3-f2120012098d"
+      ],
+      "firstMessageVerified": true,
+      "checks": {
+        "apiReachable": true,
+        "authOk": true,
+        "runtimeOk": true,
+        "agentCreated": true,
+        "messageRoundtrip": true,
+        "feedVisible": true
+      },
+      "updatedAt": "2026-02-18T06:54:14.265Z",
+      "completedAt": "2026-02-18T06:54:14.262Z"
+    },
+    "02b90cc4-b8ce-4308-815e-3ee39cdfc73a": {
+      "userId": "02b90cc4-b8ce-4308-815e-3ee39cdfc73a",
+      "step": 3,
+      "status": "first_message_pending",
+      "mode": "first_agent",
+      "createdAgentId": "89d3da44-c6a0-4336-b339-ab9f006b411f",
+      "createdAgentIds": [
+        "89d3da44-c6a0-4336-b339-ab9f006b411f"
+      ],
+      "firstMessageVerified": false,
+      "checks": {
+        "apiReachable": true,
+        "authOk": true,
+        "runtimeOk": true,
+        "agentCreated": true,
+        "messageRoundtrip": false,
+        "feedVisible": false
+      },
+      "updatedAt": "2026-02-18T07:54:09.197Z",
+      "completedAt": null
+    },
+    "815e485b-ea1f-4f43-a4b5-d5ca4ea59e07": {
+      "userId": "815e485b-ea1f-4f43-a4b5-d5ca4ea59e07",
+      "step": 3,
+      "status": "completed",
+      "mode": "first_agent",
+      "createdAgentId": "7d32d761-99a6-4762-b49a-3d9027339889",
+      "createdAgentIds": [
+        "7d32d761-99a6-4762-b49a-3d9027339889"
+      ],
+      "firstMessageVerified": true,
+      "checks": {
+        "apiReachable": true,
+        "authOk": true,
+        "runtimeOk": true,
+        "agentCreated": true,
+        "messageRoundtrip": true,
+        "feedVisible": true
+      },
+      "updatedAt": "2026-02-18T07:54:09.226Z",
+      "completedAt": "2026-02-18T07:54:09.223Z"
+    },
+    "3b3f30f7-56c8-4eed-b5e2-0136b2a9f215": {
+      "userId": "3b3f30f7-56c8-4eed-b5e2-0136b2a9f215",
+      "step": 3,
+      "status": "first_message_pending",
+      "mode": "first_agent",
+      "createdAgentId": "146daeaf-40e4-4390-9375-b1be7c0974dc",
+      "createdAgentIds": [
+        "146daeaf-40e4-4390-9375-b1be7c0974dc"
+      ],
+      "firstMessageVerified": false,
+      "checks": {
+        "apiReachable": true,
+        "authOk": true,
+        "runtimeOk": true,
+        "agentCreated": true,
+        "messageRoundtrip": false,
+        "feedVisible": false
+      },
+      "updatedAt": "2026-02-18T12:55:16.536Z",
+      "completedAt": null
+    },
+    "154a0f38-09bd-44c0-afff-43da73c2b7d9": {
+      "userId": "154a0f38-09bd-44c0-afff-43da73c2b7d9",
+      "step": 3,
+      "status": "completed",
+      "mode": "first_agent",
+      "createdAgentId": "60a473b0-af98-4205-8f40-f7cbcb85355a",
+      "createdAgentIds": [
+        "60a473b0-af98-4205-8f40-f7cbcb85355a"
+      ],
+      "firstMessageVerified": true,
+      "checks": {
+        "apiReachable": true,
+        "authOk": true,
+        "runtimeOk": true,
+        "agentCreated": true,
+        "messageRoundtrip": true,
+        "feedVisible": true
+      },
+      "updatedAt": "2026-02-18T12:55:16.568Z",
+      "completedAt": "2026-02-18T12:55:16.564Z"
+    }
+  }
+}

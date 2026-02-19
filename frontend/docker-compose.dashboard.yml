@@ -1,0 +1,31 @@
+services:
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: /api
+    container_name: ocaas-dashboard
+    restart: always
+    networks:
+      - coolify
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=coolify"
+      - "traefik.http.middlewares.dashboard-gzip.compress=true"
+      - "traefik.http.middlewares.dashboard-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.http-dashboard.entrypoints=http"
+      - "traefik.http.routers.http-dashboard.rule=Host(`dashboard.autopus.cloud`) && PathPrefix(`/`)"
+      - "traefik.http.routers.http-dashboard.middlewares=dashboard-redirect"
+      - "traefik.http.routers.http-dashboard.service=dashboard-svc"
+      - "traefik.http.routers.https-dashboard.entrypoints=https"
+      - "traefik.http.routers.https-dashboard.rule=Host(`dashboard.autopus.cloud`) && PathPrefix(`/`)"
+      - "traefik.http.routers.https-dashboard.middlewares=dashboard-gzip"
+      - "traefik.http.routers.https-dashboard.tls=true"
+      - "traefik.http.routers.https-dashboard.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.https-dashboard.service=dashboard-svc"
+      - "traefik.http.services.dashboard-svc.loadbalancer.server.port=80"
+
+networks:
+  coolify:
+    external: true

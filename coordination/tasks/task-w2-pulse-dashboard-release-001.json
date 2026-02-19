@@ -1,0 +1,41 @@
+{
+  "id": "task-w2-pulse-dashboard-release-001",
+  "title": "Dashboard service rollout coordination",
+  "description": "Coordinate release comms and deployment guardrails for new public dashboard surface.",
+  "assignee": "pulse",
+  "priority": "P1",
+  "track": "fast",
+  "state": "in-progress",
+  "createdAt": "2026-02-18T12:08:00+08:00",
+  "createdBy": "kaiten-forge",
+  "updatedAt": "2026-02-19T03:54:00+08:00",
+  "dueAt": null,
+  "references": [
+    "~/ocaas-project/coordination/status-board.json",
+    "~/ocaas-project/coordination/SHARED-CONTEXT.md"
+  ],
+  "deliverables": [
+    "Update status-board with dual-surface architecture",
+    "Prepare deployment checklist for dashboard.autopus.cloud",
+    "Confirm monitoring targets include dashboard + api + websocket"
+  ],
+  "blockers": [],
+  "dependencies": [],
+  "metadata": {
+    "source": "legacy:inbox-pulse.json"
+  },
+  "history": [
+    {
+      "state": "pending",
+      "at": "2026-02-18T12:08:00+08:00",
+      "by": "kaiten-forge",
+      "note": "Migrated from inbox-pulse.json"
+    },
+    {
+      "state": "in-progress",
+      "at": "2026-02-19T03:54:00+08:00",
+      "by": "kaiten-pulse",
+      "note": "ACK task. Starting rollout coordination."
+    }
+  ]
+}

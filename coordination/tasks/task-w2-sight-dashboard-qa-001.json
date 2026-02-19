@@ -1,0 +1,35 @@
+{
+  "id": "task-w2-sight-dashboard-qa-001",
+  "title": "Dashboard surface QA scope expansion",
+  "description": "Add QA scope for new dashboard.autopus.cloud surface while keeping hub.autopus.cloud as chat-only surface.",
+  "assignee": "sight",
+  "priority": "P1",
+  "track": "fast",
+  "state": "pending",
+  "createdAt": "2026-02-18T12:08:00+08:00",
+  "createdBy": "kaiten-forge",
+  "updatedAt": "2026-02-18T11:45:51+08:00",
+  "dueAt": null,
+  "references": [
+    "~/ocaas-project/coordination/SHARED-CONTEXT.md",
+    "~/ocaas-project/coordination/status-board.json"
+  ],
+  "deliverables": [
+    "QA checklist for dashboard login/agent list/chat/runtime cards",
+    "Cross-surface regression check (hub unaffected)",
+    "Security sanity checks for public dashboard flows"
+  ],
+  "blockers": [],
+  "dependencies": [],
+  "metadata": {
+    "source": "legacy:inbox-sight.json"
+  },
+  "history": [
+    {
+      "state": "pending",
+      "at": "2026-02-18T12:08:00+08:00",
+      "by": "kaiten-forge",
+      "note": "Migrated from inbox-sight.json"
+    }
+  ]
+}

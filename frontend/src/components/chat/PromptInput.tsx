@@ -33,7 +33,7 @@ export const PromptInput: React.FC<PromptInputProps> = ({ input, setInput, onSen
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Message Forge..."
+          placeholder="Message your agent..."
           className="w-full bg-[#171717] border border-white/5 hover:border-white/10 focus:border-white/20 rounded-2xl p-4 pr-14 focus:outline-none focus:ring-0 resize-none min-h-[56px] text-[15px] transition-all shadow-sm"
           rows={1}
         />
@@ -46,7 +46,7 @@ export const PromptInput: React.FC<PromptInputProps> = ({ input, setInput, onSen
         </button>
       </div>
       <p className="text-[10px] text-zinc-600 text-center mt-3 tracking-tight">
-        Forge is a builder AI. Verify critical code before deployment.
+        OCaaS mirrors your OpenClaw runtime. Verify critical output before deployment.
       </p>
     </div>
   );

@@ -20,6 +20,7 @@ const loginSchema = zod_1.z.object({
 });
 router.post('/signup', (0, validate_1.validate)(signupSchema), auth_controller_1.authController.signup);
 router.post('/login', (0, validate_1.validate)(loginSchema), auth_controller_1.authController.login);
+router.post('/google', auth_controller_1.authController.googleLogin);
 router.post('/refresh', auth_controller_1.authController.refresh);
 router.post('/logout', auth_controller_1.authController.logout);
 exports.default = router;

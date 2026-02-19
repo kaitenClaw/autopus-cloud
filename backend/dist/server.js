@@ -6,10 +6,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const app_1 = __importDefault(require("./app"));
 const env_1 = require("./config/env");
 const prisma_1 = require("./config/prisma");
+const socket_service_1 = require("./services/socket.service");
 const server = app_1.default.listen(env_1.env.PORT, () => {
     console.log(`🚀 Server ready at http://localhost:${env_1.env.PORT}`);
     console.log(`🌍 Environment: ${env_1.env.NODE_ENV}`);
 });
+// Initialize Socket.io
+socket_service_1.socketService.initialize(server);
 async function gracefulShutdown(signal) {
     console.log(`\n${signal} signal received: closing HTTP server`);
     server.close(async () => {

@@ -1,0 +1,64 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "OCaaS Agent Task",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "description",
+    "assignee",
+    "priority",
+    "track",
+    "state",
+    "createdAt",
+    "createdBy",
+    "updatedAt",
+    "history"
+  ],
+  "properties": {
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "description": { "type": "string" },
+    "assignee": { "type": "string", "enum": ["prime", "forge", "sight", "pulse"] },
+    "priority": { "type": "string", "enum": ["P0", "P1", "P2"] },
+    "track": { "type": "string", "enum": ["fast", "standard", "deep"] },
+    "state": {
+      "type": "string",
+      "enum": ["pending", "acknowledged", "in_progress", "review", "completed", "failed", "cancelled"]
+    },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "createdBy": { "type": "string" },
+    "updatedAt": { "type": "string", "format": "date-time" },
+    "dueAt": { "type": ["string", "null"], "format": "date-time" },
+    "references": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "deliverables": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "blockers": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "dependencies": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "metadata": { "type": "object" },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["state", "at", "by"],
+        "properties": {
+          "state": { "type": "string" },
+          "at": { "type": "string", "format": "date-time" },
+          "by": { "type": "string" },
+          "note": { "type": "string" }
+        }
+      }
+    }
+  }
+}

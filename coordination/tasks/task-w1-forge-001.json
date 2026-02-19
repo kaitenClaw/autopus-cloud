@@ -1,0 +1,28 @@
+{
+  "id": "task-w1-forge-001",
+  "title": "task-w1-forge-001",
+  "description": "",
+  "assignee": "forge",
+  "priority": "P1",
+  "track": "standard",
+  "state": "completed",
+  "createdAt": "2026-02-18T11:45:51+08:00",
+  "createdBy": "legacy",
+  "updatedAt": "2026-02-18T11:45:51+08:00",
+  "dueAt": null,
+  "references": [],
+  "deliverables": [],
+  "blockers": [],
+  "dependencies": [],
+  "metadata": {
+    "source": "legacy:outbox-forge.json"
+  },
+  "history": [
+    {
+      "state": "completed",
+      "at": "2026-02-18T11:45:51+08:00",
+      "by": "legacy",
+      "note": "Migrated from outbox-forge.json"
+    }
+  ]
+}

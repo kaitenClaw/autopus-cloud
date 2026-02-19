@@ -1,0 +1,62 @@
+{
+  "generatedAt": "2026-02-19T16:40:00+08:00",
+  "defaults": {
+    "primary": "google-antigravity/gemini-3-flash",
+    "fallbacks": [
+      "google/gemini-2.5-flash",
+      "google/gemini-2.0-flash"
+    ]
+  },
+  "profiles": {
+    "default": {
+      "primary": "google-antigravity/gemini-3-flash",
+      "fallbacks": [
+        "google/gemini-2.5-flash",
+        "google/gemini-2.0-flash"
+      ]
+    },
+    "forge": {
+      "primary": "google-antigravity/gemini-3-flash",
+      "fallbacks": [
+        "google/gemini-2.5-flash-thinking",
+        "google/gemini-2.5-flash"
+      ]
+    },
+    "sight": {
+      "primary": "google-antigravity/gemini-3-flash",
+      "fallbacks": [
+        "google/gemini-2.5-flash-thinking",
+        "google/gemini-2.5-flash"
+      ]
+    },
+    "pulse": {
+      "primary": "google-antigravity/gemini-3-flash",
+      "fallbacks": [
+        "google/gemini-2.5-flash",
+        "google/gemini-2.0-flash"
+      ]
+    },
+    "fion": {
+      "primary": "google-antigravity/gemini-3-flash",
+      "fallbacks": [
+        "google/gemini-2.5-flash",
+        "google/gemini-2.0-flash"
+      ]
+    }
+  },
+  "models": [
+    "google-antigravity/gpt-oss-120b-medium",
+    "google-antigravity/gemini-3-pro-high",
+    "google-antigravity/gemini-3-pro-low",
+    "google-antigravity/gemini-3-flash",
+    "google/gemini-2.0-flash",
+    "google/gemini-2.5-flash",
+    "google/gemini-2.5-flash-thinking",
+    "google/gemini-2.5-flash-lite",
+    "openai-codex/gpt-5.3-codex",
+    "openai-codex/gpt-5.2-codex",
+    "openai-codex/gpt-5.1-codex-max",
+    "openai-codex/gpt-5.2",
+    "openai-codex/gpt-5.1-codex-mini"
+  ]
+}

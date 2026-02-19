@@ -10,9 +10,10 @@ const prisma_1 = require("../config/prisma");
 (0, vitest_1.describe)('Agent API', () => {
     let accessToken;
     (0, vitest_1.beforeAll)(async () => {
-        await prisma_1.prisma.message.deleteMany();
-        await prisma_1.prisma.agentConfig.deleteMany();
         await prisma_1.prisma.usage.deleteMany();
+        await prisma_1.prisma.message.deleteMany();
+        await prisma_1.prisma.chatSession.deleteMany();
+        await prisma_1.prisma.agentConfig.deleteMany();
         await prisma_1.prisma.agent.deleteMany();
         await prisma_1.prisma.refreshToken.deleteMany();
         await prisma_1.prisma.subscription.deleteMany();

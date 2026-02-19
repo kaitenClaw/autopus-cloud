@@ -8,9 +8,10 @@ describe('Chat API Streaming', () => {
   let agentId: string;
 
     beforeAll(async () => {
-    await prisma.message.deleteMany();
-    await prisma.agentConfig.deleteMany();
     await prisma.usage.deleteMany();
+    await prisma.message.deleteMany();
+    await prisma.chatSession.deleteMany();
+    await prisma.agentConfig.deleteMany();
     await prisma.agent.deleteMany();
     await prisma.refreshToken.deleteMany();
     await prisma.subscription.deleteMany();

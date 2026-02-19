@@ -95,7 +95,7 @@ export default function KaitenLaunchWizard({ isOpen, onClose, onSuccess }: Kaite
       setStep(3);
       onSuccess();
     } catch (error: any) {
-      setLoadError(error?.response?.data?.message || error?.message || 'Failed to launch KAITEN stack');
+      setLoadError(error?.response?.data?.message || error?.message || 'Failed to launch agent');
     } finally {
       setIsLaunching(false);
     }
@@ -108,8 +108,8 @@ export default function KaitenLaunchWizard({ isOpen, onClose, onSuccess }: Kaite
       <div className="w-full max-w-3xl rounded-2xl border border-white/10 bg-[#121212] text-zinc-200 shadow-2xl">
         <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 sm:px-6">
           <div>
-            <h2 className="text-base font-semibold text-white sm:text-lg">Launch KAITEN</h2>
-            <p className="text-[11px] text-zinc-500 sm:text-xs">One-click multi-agent setup wizard</p>
+            <h2 className="text-base font-semibold text-white sm:text-lg">Create New Agent</h2>
+            <p className="text-[11px] text-zinc-500 sm:text-xs">Setup a new autonomous agent</p>
           </div>
           <button onClick={onClose} className="rounded-lg p-2 text-zinc-400 transition hover:bg-white/5 hover:text-zinc-200">
             <X size={16} />
@@ -133,7 +133,7 @@ export default function KaitenLaunchWizard({ isOpen, onClose, onSuccess }: Kaite
 
           {step === 1 && (
             <div className="space-y-3">
-              <p className="text-xs text-zinc-400">Choose a preset set</p>
+              <p className="text-xs text-zinc-400">Choose a starter template</p>
               {isLoadingPresets ? (
                 <div className="flex items-center gap-2 text-sm text-zinc-400">
                   <Loader2 size={14} className="animate-spin" /> Loading presets...
@@ -163,19 +163,11 @@ export default function KaitenLaunchWizard({ isOpen, onClose, onSuccess }: Kaite
 
           {step === 2 && (
             <div className="space-y-3">
-              <p className="text-xs text-zinc-400">Edit agents and choose which ones to include</p>
+              <p className="text-xs text-zinc-400">Edit agent details</p>
               <div className="space-y-2">
                 {agents.map((agent, index) => (
                   <div key={`${agent.name}-${index}`} className="grid grid-cols-1 gap-2 rounded-xl border border-white/10 bg-[#1a1a1a] p-3 sm:grid-cols-[auto,1fr,1fr] sm:items-center">
-                    <label className="inline-flex items-center gap-2 text-xs text-zinc-300">
-                      <input
-                        type="checkbox"
-                        checked={agent.include}
-                        onChange={(e) => updateAgent(index, 'include', e.target.checked)}
-                        className="h-4 w-4 rounded border-white/10 bg-[#111]"
-                      />
-                      Include
-                    </label>
+                    <div className="inline-flex items-center gap-2 text-xs text-zinc-500">Single agent mode</div>
                     <input
                       value={agent.name}
                       onChange={(e) => updateAgent(index, 'name', e.target.value)}
@@ -191,7 +183,7 @@ export default function KaitenLaunchWizard({ isOpen, onClose, onSuccess }: Kaite
                   </div>
                 ))}
               </div>
-              <p className="text-[11px] text-zinc-500">Selected: {includedCount} agent(s)</p>
+              <p className="text-[11px] text-zinc-500">Plan limit: 1 active agent</p>
             </div>
           )}
 
@@ -272,7 +264,7 @@ export default function KaitenLaunchWizard({ isOpen, onClose, onSuccess }: Kaite
                 className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-500 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isLaunching ? <Loader2 size={14} className="animate-spin" /> : <Rocket size={14} />}
-                Launch KAITEN
+                Launch Agent
               </button>
             )}
           </div>

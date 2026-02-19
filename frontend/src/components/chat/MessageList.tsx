@@ -10,6 +10,7 @@ interface MessageListProps {
   onPromptSelect: (prompt: string) => void;
   isAuthenticated: boolean;
   onAuthOpen: () => void;
+  highlightMessageId?: string | null;
 }
 
 const STARTER_PROMPTS = [

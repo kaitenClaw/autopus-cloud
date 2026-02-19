@@ -1,11 +1,15 @@
 import app from './app';
 import { env } from './config/env';
 import { prisma } from './config/prisma';
+import { socketService } from './services/socket.service';
 
 const server = app.listen(env.PORT, () => {
   console.log(`🚀 Server ready at http://localhost:${env.PORT}`);
   console.log(`🌍 Environment: ${env.NODE_ENV}`);
 });
+
+// Initialize Socket.io
+socketService.initialize(server);
 
 async function gracefulShutdown(signal: string) {
   console.log(`\n${signal} signal received: closing HTTP server`);

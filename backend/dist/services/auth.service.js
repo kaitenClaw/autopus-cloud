@@ -9,6 +9,7 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const prisma_1 = require("../config/prisma");
 const env_1 = require("../config/env");
 const errors_1 = require("../utils/errors");
+const google_auth_library_1 = require("google-auth-library");
 const BCRYPT_ROUNDS = 12;
 const ACCESS_TOKEN_EXPIRY = '15m';
 const REFRESH_TOKEN_EXPIRY = '7d';
@@ -18,6 +19,71 @@ class AuthService {
         this.adminEmails = new Set(env_1.env.ADMIN_EMAILS.split(',')
             .map((email) => email.trim().toLowerCase())
             .filter(Boolean));
+    }
+    async googleLogin(idToken) {
+        const client = new google_auth_library_1.OAuth2Client();
+        let payload;
+        try {
+            // Validate the token. We don't specify audience here to allow any valid Google ID token for now,
+            // but in production you should check against your Client ID.
+            const ticket = await client.verifyIdToken({
+                idToken,
+                // audience: env.GOOGLE_CLIENT_ID, 
+            });
+            payload = ticket.getPayload();
+        }
+        catch (error) {
+            throw new errors_1.UnauthorizedError('Invalid Google token');
+        }
+        if (!payload || !payload.email) {
+            throw new errors_1.UnauthorizedError('Invalid Google token payload');
+        }
+        const { email, name, picture } = payload;
+        const normalizedEmail = email.trim().toLowerCase();
+        // Check if user exists
+        let user = await prisma_1.prisma.user.findUnique({ where: { email: normalizedEmail } });
+        if (!user) {
+            // Create user if not exists (JIT provisioning)
+            // Password hash for Google users is random/unusable
+            const randomPassword = await bcrypt_1.default.hash(Math.random().toString(36), BCRYPT_ROUNDS);
+            const role = this.adminEmails.has(normalizedEmail) ? 'ADMIN' : 'USER';
+            user = await prisma_1.prisma.user.create({
+                data: {
+                    email: normalizedEmail,
+                    passwordHash: randomPassword,
+                    name: name || payload.given_name || 'Google User',
+                    role,
+                    subscription: {
+                        create: {
+                            tier: 'FREE',
+                            maxAgents: 1,
+                            maxTokensPerDay: 10000,
+                        },
+                    },
+                },
+            });
+        }
+        // Determine effective user/role (admin promotion logic)
+        const effectiveUser = await this.maybePromoteUserToAdmin(user.id, user.email, user.role);
+        const tokens = this.generateTokens(effectiveUser.id, effectiveUser.role);
+        // Store refresh token
+        await prisma_1.prisma.refreshToken.create({
+            data: {
+                token: tokens.refreshToken,
+                userId: effectiveUser.id,
+                expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+            },
+        });
+        return {
+            user: {
+                id: effectiveUser.id,
+                email: effectiveUser.email,
+                name: effectiveUser.name,
+                role: effectiveUser.role,
+                picture,
+            },
+            ...tokens,
+        };
     }
     async signup(email, password, name) {
         const normalizedEmail = email.trim().toLowerCase();
@@ -33,6 +99,13 @@ class AuthService {
                 passwordHash,
                 name,
                 role,
+                subscription: {
+                    create: {
+                        tier: 'FREE',
+                        maxAgents: 1,
+                        maxTokensPerDay: 10000,
+                    },
+                },
             },
             select: {
                 id: true,

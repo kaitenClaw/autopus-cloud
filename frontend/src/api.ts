@@ -1,6 +1,22 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+const resolveApiBaseFromHostname = (hostname: string): string => {
+  const host = hostname.toLowerCase();
+  if (host === 'dashboard.autopus.cloud' || host === 'www.dashboard.autopus.cloud') {
+    return 'https://api.autopus.cloud/api';
+  }
+  if (host.endsWith('.autopus.cloud') && host.includes('dashboard')) {
+    return `https://${host.replace('dashboard', 'api')}/api`;
+  }
+  return '/api';
+};
+
+const defaultApiBase = (() => {
+  if (typeof window === 'undefined') return '/api';
+  return resolveApiBaseFromHostname(window.location.hostname);
+})();
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || defaultApiBase;
 
 const getAuthToken = () => localStorage.getItem('ocaas_token');
 
@@ -25,7 +41,11 @@ export interface Session {
   id: string;
   agentId: string;
   title: string;
+  memoryScope?: string;
+  channel?: string;
+  chatType?: string;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface Message {
@@ -58,8 +78,36 @@ export interface KAITENAgentRuntime {
   runtimeIp: string | null;
   serviceState: string | null;
   model: string;
+  configuredPrimaryModel?: string | null;
+  configuredFallbacks?: string[];
   error: string | null;
   checkedAt: string;
+}
+
+export interface ModelCatalog {
+  models: string[];
+  defaults: { primary: string; fallbacks: string[] } | null;
+  profiles: Record<string, { primary: string; fallbacks: string[] }>;
+  generatedAt: string | null;
+}
+
+export interface CoordinationOverview {
+  agents: Record<string, { status?: string; role?: string; currentTask?: string; model?: string }>;
+  activeTasks: Array<{
+    id: string;
+    title: string;
+    assignee: string;
+    state: string;
+    priority: string;
+    track: string;
+    updatedAt: string | null;
+    dependencies: string[];
+  }>;
+  assigneeLoad: Record<string, { total: number; inProgress: number; review: number }>;
+  agentRoutines?: Array<{ id: string; status: string; model: string; currentTask: string; role: string }>;
+  tasksByAssignee?: Record<string, Array<{ id: string; title?: string; state?: string; priority?: string; track?: string }>>;
+  chains: Array<{ taskId: string; dependsOn: string[]; assignee: string; state: string }>;
+  totalTasks: number;
 }
 
 // Utility to extract data from {status, data: {...}} response
@@ -77,23 +125,51 @@ export const getAgents = async (): Promise<Agent[]> => {
 };
 
 export const getSessions = async (agentId: string): Promise<Session[]> => {
-  // Backend session routes are not implemented yet; provide stable local default.
-  return [{ id: 'default', agentId, title: 'Default Session', createdAt: new Date().toISOString() }];
+  const response = await api.get(`/agents/${agentId}/sessions`);
+  const data = extractData(response);
+  return data.sessions ?? [];
+};
+
+export const getOpenClawThreads = async (opts: { agentId?: string; profile?: string }): Promise<Session[]> => {
+  const response = await api.get('/hub/openclaw/threads', { params: opts });
+  const data = extractData(response);
+  const threads = Array.isArray(data?.threads) ? data.threads : [];
+  return threads.map((thread: any) => ({
+    id: String(thread.id),
+    agentId: String(opts.agentId || `kaiten:${opts.profile || 'unknown'}`),
+    title: String(thread.title || 'Telegram Thread'),
+    memoryScope: 'TELEGRAM',
+    channel: String(thread.channel || 'telegram'),
+    chatType: String(thread.chatType || 'direct'),
+    createdAt: thread.updatedAt || new Date().toISOString(),
+    updatedAt: thread.updatedAt || new Date().toISOString(),
+  }));
 };
 
 export const createSession = async (agentId: string, title: string): Promise<Session> => {
-  // Local-only session placeholder until backend session APIs are added.
-  return { id: `${Date.now()}`, agentId, title, createdAt: new Date().toISOString() };
+  const response = await api.post(`/agents/${agentId}/sessions`, { title });
+  const data = extractData(response);
+  return data.session;
 };
 
-export const getMessages = async (agentId: string, _sessionId: string): Promise<Message[]> => {
-  const response = await api.get(`/agents/${agentId}/messages`);
+export const getMessages = async (agentId: string, sessionId: string): Promise<Message[]> => {
+  const response = await api.get(`/agents/${agentId}/messages`, { params: { sessionId } });
   const data = extractData(response);
   return data.messages ?? [];
 };
 
-export const sendMessage = async (agentId: string, message: string, _sessionId?: string): Promise<Message> => {
-  const response = await api.post(`/agents/${agentId}/message`, { message });
+export const getOpenClawThreadMessages = async (agentId: string, threadId: string): Promise<Message[]> => {
+  const isVirtual = agentId.startsWith('kaiten:');
+  const profile = isVirtual ? agentId.replace('kaiten:', '') : undefined;
+  const response = await api.get(`/hub/openclaw/thread/${threadId}`, {
+    params: isVirtual ? { profile } : { agentId },
+  });
+  const data = extractData(response);
+  return Array.isArray(data?.messages) ? data.messages : [];
+};
+
+export const sendMessage = async (agentId: string, message: string, sessionId?: string): Promise<Message> => {
+  const response = await api.post(`/agents/${agentId}/message`, { message, sessionId });
   const data = extractData(response);
   return data.assistantMessage;
 };
@@ -136,16 +212,13 @@ export interface BulkCreateAgentsSummary {
   failed: BulkCreateResultItem[];
 }
 
-const LOCAL_KAITEN_DEFAULT_PRESETS: LaunchPresetSet[] = [
+const LOCAL_AGENT_DEFAULT_PRESETS: LaunchPresetSet[] = [
   {
-    id: 'default-kaiten',
-    name: 'Default KAITEN Stack',
-    description: 'Prime / Forge / Sight / Pulse',
+    id: 'solo-starter',
+    name: 'Solo Starter',
+    description: 'Create one OpenClaw agent and start chatting immediately.',
     agents: [
-      { name: 'Prime', model: 'gpt-4o', include: true },
-      { name: 'Forge', model: 'gpt-4o', include: true },
-      { name: 'Sight', model: 'gpt-4o', include: true },
-      { name: 'Pulse', model: 'gpt-4o', include: true },
+      { name: 'My Agent', model: 'openai-codex/gpt-5.2', include: true },
     ],
   },
 ];
@@ -156,10 +229,10 @@ const normalizePresetSet = (preset: any, index: number): LaunchPresetSet => ({
   description: preset?.description ? String(preset.description) : undefined,
   agents: Array.isArray(preset?.agents)
     ? preset.agents.map((agent: any, agentIndex: number) => ({
-        name: String(agent?.name ?? `Agent ${agentIndex + 1}`),
-        model: String(agent?.model ?? 'gpt-4o'),
-        include: agent?.include !== false,
-      }))
+      name: String(agent?.name ?? `Agent ${agentIndex + 1}`),
+      model: String(agent?.model ?? 'openai-codex/gpt-5.2'),
+      include: agent?.include !== false,
+    }))
     : [],
 });
 
@@ -170,19 +243,44 @@ export const getAgentPresets = async (): Promise<LaunchPresetSet[]> => {
     const rawPresets = Array.isArray(data)
       ? data
       : Array.isArray(data?.presets)
-      ? data.presets
-      : [];
+        ? data.presets
+        : [];
 
     const normalized: LaunchPresetSet[] = rawPresets
       .map((preset: any, index: number) => normalizePresetSet(preset, index))
       .filter((preset: LaunchPresetSet) => preset.agents.length > 0);
-    return normalized.length > 0 ? normalized : LOCAL_KAITEN_DEFAULT_PRESETS;
+    return normalized.length > 0 ? normalized : LOCAL_AGENT_DEFAULT_PRESETS;
   } catch (error: any) {
     if (error?.response?.status === 404) {
-      return LOCAL_KAITEN_DEFAULT_PRESETS;
+      return LOCAL_AGENT_DEFAULT_PRESETS;
     }
     throw error;
   }
+};
+
+export interface BusinessValue {
+  proposition: string;
+  mvpDefinition: string;
+  priorities: string[];
+  launchTargets: {
+    signupTarget: number;
+    payingCustomersTarget: number;
+    mrrTargetUsd: number;
+  };
+  progress: {
+    signupsPct: number;
+    payingCustomersPct: number;
+    mrrPct: number;
+  };
+  blockers: string[];
+  recommendedActions: string[];
+  sources: string[];
+}
+
+export const getBusinessValue = async (): Promise<BusinessValue> => {
+  const response = await api.get('/system/business/value');
+  const data = extractData(response);
+  return data as BusinessValue;
 };
 
 export const bulkCreateAgents = async (payload: {
@@ -190,7 +288,16 @@ export const bulkCreateAgents = async (payload: {
   autoStart: boolean;
   agents: Array<{ name: string; model: string }>;
 }): Promise<BulkCreateAgentsSummary> => {
-  const response = await api.post('/agents/bulk-create', payload);
+  const requestPayload = {
+    presetId: payload.presetId,
+    autoStart: payload.autoStart,
+    agents: payload.agents.map((agent) => ({
+      name: agent.name,
+      modelPreset: agent.model,
+    })),
+  };
+
+  const response = await api.post('/agents/bulk-create', requestPayload);
   const data = extractData(response);
 
   const createdRaw = Array.isArray(data?.created) ? data.created : [];
@@ -212,6 +319,25 @@ export const bulkCreateAgents = async (payload: {
   }
 
   const resultsRaw = Array.isArray(data?.results) ? data.results : [];
+  const agentsRaw = Array.isArray(data?.agents) ? data.agents : [];
+  if (agentsRaw.length) {
+    const created = agentsRaw
+      .filter((item: any) => item?.status === 'created')
+      .map((item: any) => ({
+        name: String(item?.name ?? item?.agent?.name ?? 'Unknown'),
+        success: true,
+        id: item?.agent?.id ? String(item.agent.id) : undefined,
+      }));
+    const failed = agentsRaw
+      .filter((item: any) => item?.status !== 'created')
+      .map((item: any) => ({
+        name: String(item?.name ?? 'Unknown'),
+        success: false,
+        error: item?.message ? String(item.message) : 'Failed',
+      }));
+    return { created, failed };
+  }
+
   const created = resultsRaw
     .filter((item: any) => item?.success)
     .map((item: any) => ({ name: String(item?.name ?? 'Unknown'), success: true, id: item?.id ? String(item.id) : undefined }));
@@ -227,6 +353,40 @@ export const getKaitenAgentsStatus = async (): Promise<KAITENAgentRuntime[]> => 
   return data.agents ?? [];
 };
 
+export const getModelCatalog = async (): Promise<ModelCatalog> => {
+  const response = await api.get('/system/model-catalog');
+  const data = extractData(response);
+  return {
+    models: Array.isArray(data?.models) ? data.models : [],
+    defaults: data?.defaults ?? null,
+    profiles: data?.profiles ?? {},
+    generatedAt: data?.generatedAt ?? null,
+  };
+};
+
+export const getCoordinationOverview = async (): Promise<CoordinationOverview> => {
+  const response = await api.get('/system/coordination/overview');
+  const data = extractData(response);
+  return {
+    agents: data?.agents || {},
+    activeTasks: Array.isArray(data?.activeTasks) ? data.activeTasks : [],
+    assigneeLoad: data?.assigneeLoad || {},
+    agentRoutines: Array.isArray(data?.agentRoutines) ? data.agentRoutines : [],
+    tasksByAssignee: data?.tasksByAssignee || {},
+    chains: Array.isArray(data?.chains) ? data.chains : [],
+    totalTasks: Number(data?.totalTasks || 0),
+  };
+};
+
+export const updateModelChainForProfile = async (
+  profile: string,
+  payload: { primary: string; fallbacks: string[] }
+): Promise<{ profile: string; chain: { primary: string; fallbacks: string[] }; generatedAt: string }> => {
+  const response = await api.put(`/system/model-catalog/profile/${encodeURIComponent(profile)}`, payload);
+  const data = extractData(response);
+  return data;
+};
+
 export const promoteSelfToAdmin = async (): Promise<{ promoted: boolean; reason: string }> => {
   const response = await api.post('/system/admin/promote-self');
   const data = extractData(response);
@@ -240,8 +400,37 @@ export interface AuthResponse {
   accessToken: string;
 }
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const shouldRetryAuth = (error: any): boolean => {
+  const status = error?.response?.status;
+  if (status === 502 || status === 503 || status === 504) return true;
+  const message = String(error?.message || '').toLowerCase();
+  return message.includes('network error') || message.includes('timeout');
+};
+
 export const login = async (email: string, password: string): Promise<AuthResponse> => {
-  const response = await api.post('/auth/login', { email, password });
+  const maxAttempts = 3;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      const response = await api.post('/auth/login', { email, password });
+      const data = extractData(response);
+      return { accessToken: data.accessToken };
+    } catch (error: any) {
+      const isLastAttempt = attempt === maxAttempts;
+      if (isLastAttempt || !shouldRetryAuth(error)) {
+        throw error;
+      }
+      await sleep(300 * attempt);
+    }
+  }
+
+  throw new Error('Login failed');
+};
+
+export const googleLogin = async (token: string): Promise<AuthResponse> => {
+  const response = await api.post('/auth/google', { token });
   const data = extractData(response);
   return { accessToken: data.accessToken };
 };
@@ -254,10 +443,212 @@ export const signup = async (name: string, email: string, password: string): Pro
   await api.post('/auth/signup', payload);
 };
 
+// ── Dashboard Overview ─────────────────────────────────────────────
+
+export interface DashboardOverview {
+  summary: {
+    runtime: { running: number; total: number; error: number };
+  };
+  usage: {
+    requests24h: number;
+    requests7d: number;
+    tokens24h: number;
+    tokens7d: number;
+  };
+  fallbackRoutes: Array<{
+    step: number;
+    route: string;
+    provider: string;
+    model: string;
+    reason: string;
+  }>;
+  routingInsights?: {
+    summary: {
+      totalEvents: number;
+      totalEscalations: number;
+      totalFallbacks: number;
+      estimatedCostUsd: number;
+      incrementalCostUsd: number;
+    };
+    byAgent: Array<{
+      agentId: string;
+      agentName: string;
+      primaryModel: string;
+      escalations: number;
+      fallbacks: number;
+      totalEvents: number;
+      estimatedCostUsd: number;
+      incrementalCostUsd: number;
+      lastEventAt: string | null;
+      events: Array<{
+        timestamp: string;
+        eventType: 'ESCALATION' | 'FALLBACK';
+        fromModel: string;
+        toModel: string;
+        tokens: number;
+        estimatedCostUsd: number;
+        incrementalCostUsd: number;
+      }>;
+    }>;
+    generatedAt: string;
+  };
+  runtimeAgents: Array<{
+    id: string;
+    name: string;
+    status: string;
+    model: string;
+    location: string;
+    gatewayMode: string;
+    error: string | null;
+  }>;
+  models: Array<{
+    model: string;
+    requests: number;
+    tokens: number;
+  }>;
+  coordination?: {
+    agents: Array<{
+      id: string;
+      activeCount: number;
+      stateCounts: { in_progress: number; review: number };
+      oldestActiveMinutes: number;
+    }>;
+  };
+  memoryScopes: Record<string, number>;
+  recentSessions: Array<{
+    id: string;
+    title: string;
+    memoryScope: string;
+    agent: { name: string };
+    messageCount: number;
+  }>;
+  alerts: Array<{
+    code: string;
+    level: 'info' | 'warning' | 'critical';
+    message: string;
+  }>;
+  agentCapabilities?: {
+    profiles: Array<{
+      profile: string;
+      name: string;
+      primary: string;
+      fallbacks: string[];
+      availableModels: string[];
+      skills: string[];
+      packageIds: string[];
+    }>;
+    allSkills: string[];
+  };
+  specialModelPackages?: Array<{
+    id: string;
+    name: string;
+    description: string;
+    model: string;
+    skills: string[];
+    tasks: string[];
+    applicableProfiles: string[];
+  }>;
+}
+
+export interface OnboardingState {
+  status: 'pending' | 'active' | 'completed';
+  step: number;
+  checks: {
+    apiReachable: boolean;
+    authOk: boolean;
+    runtimeOk: boolean;
+    agentCreated: boolean;
+    messageRoundtrip: boolean;
+    feedVisible: boolean;
+  };
+}
+
+export const getDashboardOverview = async (): Promise<DashboardOverview> => {
+  const response = await api.get('/dashboard/overview');
+  const data = extractData(response);
+  return data;
+};
+
+export const getOnboardingState = async (): Promise<OnboardingState> => {
+  const response = await api.get('/dashboard/onboarding');
+  const data = extractData(response);
+  return data;
+};
+
+export const bootstrapOnboarding = async (opts: {
+  mode: 'first_agent' | 'kaiten_core';
+  autoStart?: boolean;
+}): Promise<{ state: OnboardingState }> => {
+  const response = await api.post('/dashboard/onboarding/bootstrap', opts);
+  const data = extractData(response);
+  return data;
+};
+
+export const verifyOnboardingFirstMessage = async (): Promise<{ state: OnboardingState }> => {
+  const response = await api.post('/dashboard/onboarding/verify');
+  const data = extractData(response);
+  return data;
+};
+
+// ── Hub Feed ──────────────────────────────────────────────────────
+
+export interface HubFeedEvent {
+  id: string;
+  eventType: string;
+  direction: string;
+  scope: string;
+  threadId: string;
+  contentPreview: string;
+  createdAt: string;
+  agent?: { id: string; name: string };
+  session?: { id: string; title: string; memoryScope: string };
+  task?: { id: string };
+  participants?: { from: string; to: string };
+  route?: string;
+  reason?: string;
+  model?: string;
+  latencyMs?: number;
+  tokenCount?: number;
+  traceId?: string;
+}
+
+export interface HubFeedQuery {
+  limit?: number;
+  scope?: string;
+  timeWindow?: string;
+  eventTypes?: string[];
+  direction?: string;
+  agentId?: string;
+  sessionId?: string;
+  cursor?: string;
+}
+
+export const getHubFeed = async (
+  query: HubFeedQuery,
+): Promise<{ events: HubFeedEvent[]; nextCursor: string | null }> => {
+  const response = await api.get('/hub/feed', { params: query });
+  const data = extractData(response);
+  return {
+    events: Array.isArray(data?.events) ? data.events : [],
+    nextCursor: data?.nextCursor ?? null,
+  };
+};
+
+export const getHubThread = async (
+  threadId: string,
+  scope: string,
+): Promise<{ events: HubFeedEvent[] }> => {
+  const response = await api.get(`/hub/thread/${threadId}`, { params: { scope } });
+  const data = extractData(response);
+  return { events: Array.isArray(data?.events) ? data.events : [] };
+};
+
+// ── Streaming ─────────────────────────────────────────────────────
+
 export const streamMessage = async (
-  agentId: string, 
-  sessionId: string, 
-  message: string, 
+  agentId: string,
+  sessionId: string,
+  message: string,
   onChunk: (chunk: string) => void
 ): Promise<void> => {
   const token = getAuthToken();
@@ -287,7 +678,7 @@ export const streamMessage = async (
     const { done, value } = await reader.read();
     if (done) break;
     buffer += decoder.decode(value, { stream: true });
-    
+
     // Server-Sent Events parsing
     const lines = buffer.split('\n');
     buffer = lines.pop() || ''; // Keep the last, potentially incomplete, line in the buffer

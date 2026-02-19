@@ -8,7 +8,7 @@ import { messageProxyService } from '../services/message-proxy.service';
 export class ChatController {
   sendMessage = asyncHandler(async (req: AuthRequest, res: Response) => {
     const agentId = String(req.params.id);
-    const { message, stream } = req.body;
+    const { message, stream, sessionId } = req.body;
     const userId = req.user!.userId;
 
     // Verify agent ownership
@@ -20,10 +20,28 @@ export class ChatController {
       throw new NotFoundError('Agent not found');
     }
 
+    // Ensure session exists and belongs to agent
+    let targetSessionId = sessionId;
+    if (!targetSessionId) {
+      const defaultSession = await prisma.chatSession.findFirst({
+        where: { agentId },
+        orderBy: { createdAt: 'asc' }
+      });
+      if (defaultSession) {
+        targetSessionId = defaultSession.id;
+      } else {
+        const newSession = await prisma.chatSession.create({
+          data: { agentId, title: 'Default Session' }
+        });
+        targetSessionId = newSession.id;
+      }
+    }
+
     // 1. Save user message to DB
     const userMessage = await prisma.message.create({
       data: {
         agentId,
+        sessionId: targetSessionId,
         role: 'user',
         content: message
       }
@@ -53,6 +71,7 @@ Use Start/Spawner first to attach runtime, then chat will route live.`;
         const assistantMessage = await prisma.message.create({
           data: {
             agentId,
+            sessionId: targetSessionId,
             role: 'assistant',
             content: assistantResponseContent
           }
@@ -88,6 +107,7 @@ Use Start/Spawner first to attach runtime, then chat will route live.`;
     const assistantMessage = await prisma.message.create({
       data: {
         agentId,
+        sessionId: targetSessionId,
         role: 'assistant',
         content: assistantResponseContent
       }
@@ -105,6 +125,7 @@ Use Start/Spawner first to attach runtime, then chat will route live.`;
   getHistory = asyncHandler(async (req: AuthRequest, res: Response) => {
     const agentId = String(req.params.id);
     const userId = req.user!.userId;
+    const { sessionId } = req.query;
 
     // Verify agent ownership
     const agent = await prisma.agent.findFirst({
@@ -115,8 +136,13 @@ Use Start/Spawner first to attach runtime, then chat will route live.`;
       throw new NotFoundError('Agent not found');
     }
 
+    const where: any = { agentId };
+    if (sessionId) {
+      where.sessionId = String(sessionId);
+    }
+
     const messages = await prisma.message.findMany({
-      where: { agentId },
+      where,
       orderBy: { createdAt: 'asc' }
     });
 

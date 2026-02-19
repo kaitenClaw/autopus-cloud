@@ -61,8 +61,9 @@ model Agent {
   config           Json?
   usage            Usage[]
   
-  // New Relations
+  // Relations
   messages         Message[]
+  sessions         ChatSession[]
   agentConfig      AgentConfig?
 
   createdAt        DateTime    @default(now())
@@ -77,14 +78,40 @@ enum AgentStatus {
   ERROR
 }
 
+model ChatSession {
+  id          String       @id @default(uuid())
+  agent       Agent        @relation(fields: [agentId], references: [id])
+  agentId     String
+  title       String
+  memoryScope MemoryScope  @default(SESSION)
+  metadata    Json?
+  messages    Message[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  archivedAt  DateTime?
+
+  @@index([agentId, createdAt])
+}
+
+enum MemoryScope {
+  SESSION
+  WORKSPACE
+  GLOBAL
+}
+
 model Message {
-  id        String   @id @default(uuid())
-  agent     Agent    @relation(fields: [agentId], references: [id])
+  id        String       @id @default(uuid())
+  agent     Agent        @relation(fields: [agentId], references: [id])
   agentId   String
-  role      String   // 'user', 'assistant', 'system'
-  content   String   @db.Text
+  session   ChatSession? @relation(fields: [sessionId], references: [id])
+  sessionId String?
+  role      String       // 'user', 'assistant', 'system'
+  content   String       @db.Text
   metadata  Json?
-  createdAt DateTime @default(now())
+  createdAt DateTime     @default(now())
+
+  @@index([agentId, createdAt])
+  @@index([sessionId, createdAt])
 }
 
 model AgentConfig {

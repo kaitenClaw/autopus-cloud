@@ -1,25 +1,33 @@
 {
-  "taskId": "task-w2-sight-001",
-  "timestamp": "2026-02-17T16:25:00+08:00",
-  "from": "kai_ten_bot",
+  "taskId": "task-w2-sight-dashboard-v2-qa",
+  "timestamp": "2026-02-20T00:35:00+08:00",
+  "from": "prime",
   "to": "kaiten_sight_bot",
   "priority": "high",
   "task": {
-    "title": "Fix Coordination Checker + Full System Audit",
-    "description": "Verify the fixed coordination-checker.sh works correctly (no duplicate output, proper timestamp math). Then run a full system health audit — check all gateways, ports, database, and identify the stale 6th gateway process.",
-    "track": "fast",
+    "title": "QA Dashboard v2 — Full Router + Design Token Audit",
+    "description": "Prime deployed Dashboard v2 with major architectural changes. Need full QA pass on the new router-based architecture, design token system, and all surfaces.",
+    "track": "standard",
     "deliverables": [
-      "Confirm checker script fix works",
-      "System health audit report",
-      "Identify and kill stale 6th gateway process",
-      "Clean up stale log files >50MB"
+      "Verify all routes work: /dashboard, /hub, /chat (no 404s on direct navigation)",
+      "Verify CSS design tokens render correctly (--surface-0 through --surface-3, --text-primary/secondary/muted, --border-subtle, --elev-1/2, --accent)",
+      "Verify DashboardSurface: KPIs, onboarding flow, runtime fleet, model usage, alerts all render",
+      "Verify HubSurface: live feed, filters, thread drilldown, context focus all work",
+      "Verify ChatPage: guided/pro modes, model selector, settings panel, message send",
+      "Verify LandingPage: hero, how-it-works, features, pricing, email capture",
+      "Verify AppShell sidebar: navigation, agent list, session list, user section, collapse behavior",
+      "Mobile responsive check: sidebar drawer, panel collapse, stacked cards under 768px",
+      "Verify Auth: login, signup, Google OAuth, logout flow through new router",
+      "Security: check no auth tokens in URL params, no XSS in chat messages",
+      "Check for console errors, broken imports, missing assets"
     ],
     "references": [
-      "~/.openclaw/scripts/coordination-checker.sh",
-      "~/ocaas-project/coordination/SYSTEM-REVIEW-2026-02-17.md",
-      "~/.openclaw/workspace-sight/skills/ocaas-qa/scripts/health-audit.sh"
+      "~/ocaas-project/frontend/src/main.tsx — New router entry point",
+      "~/ocaas-project/frontend/src/components/AppShell.tsx — Unified layout",
+      "~/ocaas-project/frontend/src/index.css — Design token definitions",
+      "~/ocaas-project/frontend/src/components/LandingPage.tsx — Full marketing page",
+      "~/ocaas-project/frontend/src/pages/ — Route page components"
     ]
   },
-  "status": "completed",
-  "result": "Fixed coordination-checker.sh and health-audit.sh (gateway count logic improved to use lsof and filter IPv4 listening ports). Verified 5/5 gateways active. Identified that '6th gateway' reports were likely transient cron processes. Cleaned up logs (none found >50MB)."
+  "status": "pending"
 }

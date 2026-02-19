@@ -4,11 +4,13 @@ import { prisma } from '../config/prisma';
 import { portManager } from './port-manager';
 import { profileGenerator } from './profile-generator';
 import { NotFoundError } from '../utils/errors';
+import { socketService } from './socket.service';
 
 const execAsync = promisify(exec);
 
 export class SpawnerService {
   async startAgent(agentId: string) {
+    // ... logic ...
     const agent = await prisma.agent.findUnique({
       where: { id: agentId },
       include: { user: true }
@@ -17,7 +19,10 @@ export class SpawnerService {
     if (!agent) throw new NotFoundError('Agent not found');
     if (agent.status === 'RUNNING') return agent;
 
+    socketService.emit('agent:status', { agentId, status: 'STARTING' });
+
     const port = await portManager.getAvailablePort();
+    // ...
     const profilePath = await profileGenerator.generate({
       agentId: agent.id,
       modelPrimary: agent.modelPreset,
@@ -59,6 +64,8 @@ export class SpawnerService {
         }
       });
 
+      socketService.emit('agent:status', { agentId, status: 'RUNNING', port });
+
       return { ...agent, status: 'RUNNING', port };
     } catch (error) {
       console.error(`Failed to spawn agent ${agentId}:`, error);
@@ -66,6 +73,7 @@ export class SpawnerService {
         where: { id: agentId },
         data: { status: 'ERROR' }
       });
+      socketService.emit('agent:status', { agentId, status: 'ERROR' });
       throw error;
     }
   }
@@ -73,6 +81,8 @@ export class SpawnerService {
   async stopAgent(agentId: string) {
     const agent = await prisma.agent.findUnique({ where: { id: agentId } });
     if (!agent) throw new NotFoundError('Agent not found');
+
+    socketService.emit('agent:status', { agentId, status: 'STOPPING' });
 
     const containerName = `agent-${agent.id}`;
     await execAsync(`docker stop ${containerName}`).catch(() => {});
@@ -82,6 +92,8 @@ export class SpawnerService {
       where: { id: agentId },
       data: { status: 'STOPPED', port: null }
     });
+
+    socketService.emit('agent:status', { agentId, status: 'STOPPED' });
   }
 }
 

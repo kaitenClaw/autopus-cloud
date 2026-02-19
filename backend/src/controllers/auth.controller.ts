@@ -29,6 +29,34 @@ export class AuthController {
         accessToken
       }
     });
+    res.json({
+      status: 'success',
+      data: {
+        user,
+        accessToken
+      }
+    });
+  });
+
+  googleLogin = asyncHandler(async (req: Request, res: Response) => {
+    const { token } = req.body;
+    const { user, accessToken, refreshToken } = await authService.googleLogin(token);
+
+    // Set refresh token in httpOnly cookie
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    res.json({
+      status: 'success',
+      data: {
+        user,
+        accessToken
+      }
+    });
   });
 
   refresh = asyncHandler(async (req: Request, res: Response) => {

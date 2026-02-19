@@ -5,11 +5,13 @@ const agent_service_1 = require("../services/agent.service");
 const spawner_service_1 = require("../services/spawner.service");
 const message_proxy_service_1 = require("../services/message-proxy.service");
 const errorHandler_1 = require("../middleware/errorHandler");
-const DEFAULT_KAITEN_PRESETS = [
-    { name: 'Prime', suggestedModel: 'gpt-5' },
-    { name: 'Forge', suggestedModel: 'claude-sonnet-4-20250514' },
-    { name: 'Sight', suggestedModel: 'gpt-4.1' },
-    { name: 'Pulse', suggestedModel: 'gemini-2.5-flash' },
+const DEFAULT_AGENT_PRESETS = [
+    {
+        id: 'solo-starter',
+        name: 'Solo Starter',
+        description: 'Create one OpenClaw agent and start chatting immediately.',
+        agents: [{ name: 'My Agent', model: 'openai-codex/gpt-5.2' }],
+    },
 ];
 class AgentController {
     constructor() {
@@ -22,16 +24,24 @@ class AgentController {
         this.bulkCreate = (0, errorHandler_1.asyncHandler)(async (req, res) => {
             const { agents, autoStart = false } = req.body;
             const userId = req.user.userId;
+            const activeCount = await agent_service_1.agentService.getAgents(userId).then((list) => list.length);
+            if (activeCount > 0) {
+                return res.status(409).json({
+                    status: 'error',
+                    message: 'Starter tier supports one active agent. Delete the existing agent or upgrade plan.',
+                });
+            }
             const results = [];
             for (const item of agents) {
                 try {
-                    const createdAgent = await agent_service_1.agentService.createAgent(userId, item.name, item.modelPreset);
+                    const modelPreset = item.modelPreset || item.model || 'gemini-3-flash';
+                    const createdAgent = await agent_service_1.agentService.createAgent(userId, item.name, modelPreset);
                     if (autoStart) {
                         await spawner_service_1.spawnerService.startAgent(createdAgent.id);
                     }
                     results.push({
                         name: item.name,
-                        modelPreset: item.modelPreset,
+                        modelPreset,
                         status: 'created',
                         message: autoStart ? 'Agent created and started' : 'Agent created',
                         agent: createdAgent,
@@ -41,7 +51,7 @@ class AgentController {
                     const message = error instanceof Error ? error.message : 'Unknown error';
                     results.push({
                         name: item.name,
-                        modelPreset: item.modelPreset,
+                        modelPreset: item.modelPreset || item.model || 'gemini-3-flash',
                         status: 'failed',
                         message,
                     });
@@ -50,7 +60,7 @@ class AgentController {
             res.status(201).json({ status: 'success', data: { agents: results } });
         });
         this.getPresets = (0, errorHandler_1.asyncHandler)(async (_req, res) => {
-            res.json({ status: 'success', data: { presets: DEFAULT_KAITEN_PRESETS } });
+            res.json({ status: 'success', data: { presets: DEFAULT_AGENT_PRESETS } });
         });
         this.list = (0, errorHandler_1.asyncHandler)(async (req, res) => {
             const userId = req.user.userId;
