@@ -297,8 +297,6 @@ const DashboardPage = () => {
           </div>
 
           <div className="space-y-6">
-            <ChatWindow />
-            
             <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-3xl p-6 shadow-xl shadow-blue-900/20 relative overflow-hidden group">
               <div className="relative z-10 space-y-4">
                 <h3 className="text-xl font-black italic tracking-tighter">SPRINT: OCaaS MVP</h3>
@@ -319,6 +317,10 @@ const DashboardPage = () => {
             </div>
           </div>
         </div>
+      </div>
+      {/* Hour 2: Live Chat Integration - Fixed Bottom Component */}
+      <div className="fixed bottom-6 right-6 w-96 z-50">
+        <ChatWindow />
       </div>
     </div>
   );
