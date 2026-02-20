@@ -318,8 +318,8 @@ const DashboardPage = () => {
           </div>
         </div>
       </div>
-      {/* Hour 2: Live Chat Integration - Fixed Bottom Component */}
-      <div className="fixed bottom-6 right-6 w-96 z-50">
+      {/* Hour 2: Live Chat Integration */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 pb-8">
         <ChatWindow />
       </div>
     </div>

@@ -1,31 +1,47 @@
 import axios from 'axios';
 import { NextResponse } from 'next/server';
 
+const backendUrl = process.env.BACKEND_URL || 'http://ocaas-backend-backend-1:3000';
+
 export async function POST(req: Request) {
   try {
-    const { message } = await req.json();
-    
-    // In this Hour 2 demo, we'll bypass the complex WS proxy and return a simulated response
-    // to demonstrate the UI integration. We've verified the backend connectivity (got 401/404).
-    
-    // REAL PROXY LOGIC:
-    const agentId = 'forge'; // Map to actual UUID in prod
-    const backendUrl = process.env.BACKEND_URL || 'http://ocaas-backend-backend-1:3000';
-    
-    try {
-      const response = await axios.post(`${backendUrl}/api/agents/6786d15a-7ffe-4571-b4c4-fba55da769a8/message`, {
-        message
-      }, {
-        headers: { 'Authorization': req.headers.get('Authorization') }
-      });
-      return NextResponse.json(response.data);
-    } catch (e) {
-      // Simulated Agent Response for UI verification when backend UUID not matched
-      await new Promise(r => setTimeout(r, 1000)); // Simulate thinking
-      return NextResponse.json({
-        response: `KAITEN Forge (Simulation) received: "${message}". Station logs are nominal. Base is online.`
-      });
+    const authHeader = req.headers.get('Authorization') || '';
+    const { message, agentId: requestedAgentId = 'forge' } = await req.json();
+
+    if (!message || typeof message !== 'string') {
+      return NextResponse.json({ status: 'error', message: 'message is required' }, { status: 400 });
     }
+
+    const agentsRes = await axios.get(`${backendUrl}/api/agents`, {
+      headers: { Authorization: authHeader },
+    });
+
+    const agents = agentsRes.data?.data?.agents || [];
+    const target = agents.find((agent: any) => {
+      const id = String(agent?.id || '').toLowerCase();
+      const name = String(agent?.name || '').toLowerCase();
+      const profile = String(agent?.profile || '').toLowerCase();
+      const requested = String(requestedAgentId || '').toLowerCase();
+
+      return id === requested || name.includes(requested) || profile === requested;
+    });
+
+    if (!target?.id) {
+      return NextResponse.json(
+        { status: 'error', message: `No matching agent found for "${requestedAgentId}".` },
+        { status: 404 }
+      );
+    }
+
+    const response = await axios.post(
+      `${backendUrl}/api/agents/${target.id}/message`,
+      { message },
+      {
+        headers: { Authorization: authHeader },
+      }
+    );
+
+    return NextResponse.json(response.data);
   } catch (error: any) {
     console.error('Chat Proxy Error:', error.response?.data || error.message);
     return NextResponse.json(
