@@ -144,5 +144,8 @@ model Usage {
   userId    String
   tokens    Int
   model     String
+  provider  String?
+  cost      Float?
+  metadata  Json?
   timestamp DateTime @default(now())
 }

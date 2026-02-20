@@ -4,6 +4,7 @@ import { asyncHandler } from '../middleware/errorHandler';
 import { AuthRequest } from '../middleware/authenticate';
 import { NotFoundError } from '../utils/errors';
 import { messageProxyService } from '../services/message-proxy.service';
+import { calculateCost } from '../utils/cost-calc';
 
 export class ChatController {
   sendMessage = asyncHandler(async (req: AuthRequest, res: Response) => {
@@ -77,6 +78,19 @@ Use Start/Spawner first to attach runtime, then chat will route live.`;
           }
         });
 
+        // Track usage (Estimation for now since OpenClaw doesn't return usage in stream yet)
+        const estimatedTokens = Math.ceil((message.length + assistantResponseContent.length) / 4);
+        const model = agent.modelPreset || 'unknown';
+        await prisma.usage.create({
+          data: {
+            userId,
+            agentId,
+            tokens: estimatedTokens,
+            model: model,
+            cost: calculateCost(model, 'unknown', estimatedTokens)
+          }
+        });
+
         res.write(`data: ${JSON.stringify({ type: 'done', data: { userMessage, assistantMessage } })}\n\n`);
         res.end();
       } catch (error) {
@@ -112,6 +126,19 @@ Use Start/Spawner first to attach runtime, then chat will route live.`;
         sessionId: targetSessionId,
         role: 'assistant',
         content: assistantResponseContent
+      }
+    });
+
+    // Track usage (Estimation)
+    const estimatedTokens = Math.ceil((message.length + assistantResponseContent.length) / 4);
+    const model = agent.modelPreset || 'unknown';
+    await prisma.usage.create({
+      data: {
+        userId,
+        agentId,
+        tokens: estimatedTokens,
+        model: model,
+        cost: calculateCost(model, 'unknown', estimatedTokens)
       }
     });
 

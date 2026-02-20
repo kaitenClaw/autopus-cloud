@@ -17,6 +17,7 @@ import systemRoutes from './routes/system.routes';
 import adminRoutes from './routes/admin.routes';
 import dashboardRoutes from './routes/dashboard.routes';
 import hubRoutes from './routes/hub.routes';
+import usageRoutes from './routes/usage.routes';
 import { authenticate } from './middleware/authenticate';
 import { requireAdmin } from './middleware/requireAdmin';
 
@@ -152,6 +153,7 @@ app.use('/api/system', systemRoutes);
 app.use('/api/admin', authenticate, requireAdmin, adminRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/hub', hubRoutes);
+app.use('/api/usage', usageRoutes);
 
 // 404 Handler
 app.use((req, res, next) => {

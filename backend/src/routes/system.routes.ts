@@ -1,12 +1,15 @@
 import { Router } from 'express';
 import { authenticate } from '../middleware/authenticate';
 import { systemController } from '../controllers/system.controller';
+import { usageController } from '../controllers/usage.controller';
 
 const router = Router();
 
 router.use(authenticate);
 
 router.get('/runtime', systemController.getRuntimeStatus);
+router.get('/usage', usageController.getSummary);
+router.post('/usage/track', usageController.logUsage);
 router.get('/kaiten/agents', systemController.getKaitenAgentsStatus);
 router.get('/model-catalog', systemController.getModelCatalog);
 router.put('/model-catalog/profile/:profile', systemController.updateModelChain);

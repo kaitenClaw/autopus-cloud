@@ -21,6 +21,7 @@ const system_routes_1 = __importDefault(require("./routes/system.routes"));
 const admin_routes_1 = __importDefault(require("./routes/admin.routes"));
 const dashboard_routes_1 = __importDefault(require("./routes/dashboard.routes"));
 const hub_routes_1 = __importDefault(require("./routes/hub.routes"));
+const usage_routes_1 = __importDefault(require("./routes/usage.routes"));
 const authenticate_1 = require("./middleware/authenticate");
 const requireAdmin_1 = require("./middleware/requireAdmin");
 const app = (0, express_1.default)();
@@ -149,6 +150,7 @@ app.use('/api/system', system_routes_1.default);
 app.use('/api/admin', authenticate_1.authenticate, requireAdmin_1.requireAdmin, admin_routes_1.default);
 app.use('/api/dashboard', dashboard_routes_1.default);
 app.use('/api/hub', hub_routes_1.default);
+app.use('/api/usage', usage_routes_1.default);
 // 404 Handler
 app.use((req, res, next) => {
     next(new errors_1.NotFoundError(`Route ${req.originalUrl} not found`));
