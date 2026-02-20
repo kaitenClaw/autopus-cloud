@@ -3,7 +3,8 @@ import {
   getAgents, getMessages, sendMessage, getConfig, updateConfig, streamMessage, getSessions, createSession,
   getOpenClawThreads, getOpenClawThreadMessages, getKaitenAgentsStatus,
   getModelCatalog, getCoordinationOverview, getBusinessValue,
-  type Agent, type Message, type AgentConfig, type Session, type ModelCatalog
+  type Agent, type Message, type AgentConfig, type Session, type ModelCatalog,
+  type KAITENAgentRuntime,
 } from '../api';
 import { runPolledTask } from '../utils/polling';
 
@@ -58,6 +59,7 @@ export function useChatState() {
   const [coordinationOverview, setCoordinationOverview] = useState<any | null>(null);
   const [businessValue, setBusinessValue] = useState<any | null>(null);
   const [modelCatalog, setModelCatalog] = useState<ModelCatalog | null>(null);
+  const [kaitenRuntimes, setKaitenRuntimes] = useState<KAITENAgentRuntime[]>([]);
   const initialConfigRef = useRef<AgentConfig | null>(null);
   const configSaveTimeoutRef = useRef<number | null>(null);
 
@@ -77,6 +79,7 @@ export function useChatState() {
           getKaitenAgentsStatus().catch(() => []),
         ]);
       });
+      setKaitenRuntimes(kaitenStatus);
       const virtualAgents: Agent[] = kaitenStatus.map((agent) => ({
         id: `kaiten:${normalizeKaitenProfile(agent.id)}`,
         name: normalizeKaitenProfile(agent.name) === 'kaiten' ? 'KAITEN' : agent.name,
