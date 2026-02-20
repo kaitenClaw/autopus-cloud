@@ -34,8 +34,12 @@ app.use((req, res, next) => {
     next();
 });
 app.use((0, helmet_1.default)());
+const allowedOrigins = env_1.env.ALLOWED_ORIGINS
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
 app.use((0, cors_1.default)({
-    origin: env_1.env.ALLOWED_ORIGINS.split(','),
+    origin: allowedOrigins,
     credentials: true
 }));
 app.use((0, compression_1.default)());

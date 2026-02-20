@@ -9,6 +9,8 @@ services:
       - DATABASE_URL=${DATABASE_URL}
       - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - PORT=${PORT:-3000}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
       - NODE_ENV=production
     restart: always
 

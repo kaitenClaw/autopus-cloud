@@ -32,8 +32,13 @@ app.use((req, res, next) => {
   next();
 });
 app.use(helmet());
+const allowedOrigins = env.ALLOWED_ORIGINS
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 app.use(cors({
-  origin: env.ALLOWED_ORIGINS.split(','),
+  origin: allowedOrigins,
   credentials: true
 }));
 app.use(compression());

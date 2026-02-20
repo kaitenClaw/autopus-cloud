@@ -7,8 +7,9 @@ const app_1 = __importDefault(require("./app"));
 const env_1 = require("./config/env");
 const prisma_1 = require("./config/prisma");
 const socket_service_1 = require("./services/socket.service");
-const server = app_1.default.listen(env_1.env.PORT, () => {
-    console.log(`🚀 Server ready at http://localhost:${env_1.env.PORT}`);
+const HOST = '0.0.0.0';
+const server = app_1.default.listen(env_1.env.PORT, HOST, () => {
+    console.log(`🚀 Server ready at http://${HOST}:${env_1.env.PORT}`);
     console.log(`🌍 Environment: ${env_1.env.NODE_ENV}`);
 });
 // Initialize Socket.io

@@ -1,13 +1,13 @@
 {
-  "lastUpdated": "2026-02-20T03:24:00+08:00",
-  "buildPhase": "Week 2: Dashboard Elevation (Replit/Cursor-Level UI)",
+  "lastUpdated": "2026-02-20T22:24:00+08:00",
+  "buildPhase": "Week 2: Dashboard Elevation (Replit/Cursor-Level UI) — Post-Launch Iteration",
   "weekNumber": 2,
-  "overallStatus": "in-progress",
+  "overallStatus": "active-iteration",
   "agents": {
     "prime": {
       "status": "active",
       "role": "orchestrator",
-      "currentTask": "Dashboard v2 deployment — UI foundation complete, deploying to production",
+      "currentTask": "Production maintenance and KAITEN runtime tracking optimization",
       "model": "claude-opus-4-6"
     },
     "forge": {
@@ -18,29 +18,29 @@
       "model": "google-antigravity/gemini-3-flash"
     },
     "sight": {
-      "status": "pending",
+      "status": "active",
       "role": "qa-diagnostician",
-      "currentTask": "QA on new router-based dashboard (post-deploy)",
+      "currentTask": "QA on live chat window and production dashboard v2 stability",
       "lastCompleted": "task-w2-sight-dashboard-qa-001",
       "model": "google-antigravity/gemini-3-flash"
     },
     "pulse": {
-      "status": "standby",
+      "status": "active",
       "role": "devops-coordinator",
-      "currentTask": "Monitor deployment health after dashboard v2 rollout",
+      "currentTask": "Monitor production deployment and health checks",
       "model": "google-antigravity/gemini-3-flash"
     }
   },
   "systemHealth": {
     "gateways": "5/5 running",
     "ports": "5/5 listening",
-    "backend": "api.autopus.cloud healthy",
+    "backend": "api.autopus.cloud healthy (v0.2.0)",
     "vpsApi": "api.autopus.cloud reachable"
   },
   "dashboardV2": {
-    "status": "BUILT — ready for deploy",
+    "status": "DEPLOYED — Production Active",
     "buildOutput": "ocaas-project/frontend/dist/",
-    "changesDeployed": false,
+    "changesDeployed": true,
     "completedItems": [
       "CSS design token system (--surface-*, --text-*, --border-*, --elev-*, --accent, .app-shell)",
       "React Router DOM — /dashboard, /hub, /chat routes",
@@ -51,7 +51,9 @@
       "JetBrains Mono + Inter font loading via Google Fonts",
       "OG meta tags, Twitter cards, SEO description",
       "Tailwind config extended with token-based colors, shadows, animations",
-      "Old monolithic App.tsx removed — replaced by router architecture"
+      "Old monolithic App.tsx removed — replaced by router architecture",
+      "Integration of Live Chat Window (Commit 59eee55)",
+      "KAITEN agent runtime tracking added to chat state (Commit bcad9af)"
     ],
     "pendingItems": [
       "Stripe billing integration (backend + frontend)",
@@ -66,7 +68,7 @@
   },
   "nextMilestone": "Deploy dashboard v2 to production, QA pass by Sight",
   "marketValidation": {
-    "lastDigestAt": "2026-02-20T00:30:00+08:00",
+    "lastDigestAt": "2026-02-20T18:00:03+08:00",
     "windowDays": 7,
     "leadsCaptured7d": 0,
     "demos7d": 0,
