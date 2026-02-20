@@ -70,7 +70,7 @@ const ChatWindow = () => {
       <div className="px-4 py-3 border-b border-zinc-800 bg-zinc-950 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Circle className="w-2 h-2 fill-green-500 text-green-500 animate-pulse" />
-          <h2 className="font-semibold text-sm text-white">Live Command</h2>
+          <h2 className="font-semibold text-sm text-white">Chat Window</h2>
         </div>
         {isLoading && <span className="text-[10px] text-zinc-500 italic">Processing...</span>}
       </div>
