@@ -1,4 +1,4 @@
-# Use the base image for building
+# Production build stage
 FROM node:20-alpine AS builder
 
 WORKDIR /app
@@ -7,26 +7,26 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-# Copy source code and build the application
+# Copy source code and build
 COPY . .
 RUN npm run build
 
-# Use a production-ready server
+# Runner stage
 FROM node:20-alpine AS runner
 
 WORKDIR /app
 
-# Copy only necessary files from the builder
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/node_modules ./node_modules
+# Add src and config files for runtime resolution if needed
+COPY --from=builder /app/src ./src
+COPY --from=builder /app/next.config.ts ./
+COPY --from=builder /app/tsconfig.json ./
 
-# Set environment to production
 ENV NODE_ENV=production
 
-# Expose the frontend port
 EXPOSE 3000
 
-# Start the application
 CMD ["npm", "start"]

@@ -7,10 +7,22 @@ const message_proxy_service_1 = require("../services/message-proxy.service");
 const errorHandler_1 = require("../middleware/errorHandler");
 const DEFAULT_AGENT_PRESETS = [
     {
-        id: 'solo-starter',
-        name: 'Solo Starter',
-        description: 'Create one OpenClaw agent and start chatting immediately.',
-        agents: [{ name: 'My Agent', model: 'openai-codex/gpt-5.2' }],
+        id: 'ghostwriter',
+        name: 'Digital Ghostwriter',
+        description: 'Specializes in tone-matching and content creation for X/Moltbook.',
+        agents: [{ name: 'My Writer', model: 'google-antigravity/gemini-3-flash' }],
+    },
+    {
+        id: 'growth-hacker',
+        name: 'Growth Hacker',
+        description: 'Proactive outreach and business lead generation partner.',
+        agents: [{ name: 'My Growth Partner', model: 'google-antigravity/gemini-3-pro-high' }],
+    },
+    {
+        id: 'solo-cfo',
+        name: 'Solo CFO',
+        description: 'Monitors usage, billing, and system health for your business.',
+        agents: [{ name: 'My CFO', model: 'openai-codex/gpt-5.3-codex' }],
     },
 ];
 class AgentController {

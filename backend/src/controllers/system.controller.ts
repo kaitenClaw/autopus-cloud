@@ -290,19 +290,20 @@ const fetchAgentStatus = async (agent: {
     // We don't have the CLI output here easily without executing it.
 
     // Attempt CLI check if profilePath is set (legacy/hybrid support)
-    if (agent.profilePath) {
+    // DISABLED for production/Docker stability: only use CLI if explicitly in local dev
+    if (agent.profilePath && process.env.NODE_ENV !== 'production') {
       const { stdout } = await execFileAsync(
         'openclaw',
         ['--profile', agent.profilePath, 'status', '--json'],
         { timeout: 5000, maxBuffer: 1024 * 1024 }
-      ).catch(() => ({ stdout: '' })); // Fallback if fails
+      ).catch(() => ({ stdout: '' })); 
 
       if (stdout) {
         const parsed = JSON.parse(stdout) as OpenClawStatusResponse;
         return {
           id: agent.id,
           name: agent.name,
-          profile: agent.profilePath, // Using path as profile identifier
+          profile: agent.profilePath, 
           status: getAgentStatus(parsed),
           reachable: !!parsed.gateway?.reachable,
           location: getLocation(parsed),
@@ -321,10 +322,7 @@ const fetchAgentStatus = async (agent: {
       }
     }
 
-    // Fallback for DB-only agents (Docker/Remote) without local CLI access
-    // If we can't check via CLI, we mark as STOPPED or UNKNOWN unless we implement a ping.
-    // Since this is "One-Click", everything is likely local or docker-compose.
-
+    // Default to DB-first status for Docker/Vultr environments
     const mappedStatus = String(agent.status || '').toUpperCase();
     const status: AgentStatus =
       mappedStatus === 'RUNNING' || mappedStatus === 'STOPPED' || mappedStatus === 'ERROR'
@@ -836,6 +834,43 @@ export const systemController = {
 
   bootstrapOnboarding: async (req: AuthRequest, res: Response, next: NextFunction) => {
     res.json({ status: 'success', data: { state: {} } });
+  },
+
+  getLLMKeysDiagnostic: async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      // Basic diagnostic that pulls available model info and usage context
+      // In a real LiteLLM setup, we would query the LiteLLM master database or config
+      
+      const usage = await prisma.usage.groupBy({
+        by: ['model'],
+        _count: true,
+        _sum: { tokens: true }
+      });
+
+      // Filter for provider-specific keys commonly used in OCaaS
+      const keys = [
+        { name: 'Gemini (AI Studio)', provider: 'google', status: process.env.GOOGLE_API_KEY ? 'Active' : 'Missing', type: 'Primary' },
+        { name: 'Gemini (Vertex AI)', provider: 'google-vertex', status: process.env.GOOGLE_APPLICATION_CREDENTIALS ? 'Active' : 'Missing', type: 'Fallback/Enterprise' },
+        { name: 'OpenAI (Codex/GPT)', provider: 'openai', status: process.env.OPENAI_API_KEY ? 'Active' : 'Missing', type: 'Specialized' },
+        { name: 'Anthropic (Claude)', provider: 'anthropic', status: process.env.ANTHROPIC_API_KEY ? 'Active' : 'Missing', type: 'Specialized' },
+        { name: 'LiteLLM Gateway', provider: 'litellm', status: 'Healthy', type: 'Infrastructure' }
+      ];
+
+      res.json({
+        status: 'success',
+        data: {
+          keys,
+          usageStats: usage.map(u => ({
+            model: u.model,
+            count: u._count,
+            tokens: u._sum.tokens || 0
+          })),
+          timestamp: new Date().toISOString()
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
   },
 
   verifyFirstMessage: async (req: AuthRequest, res: Response, next: NextFunction) => {

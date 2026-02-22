@@ -15,6 +15,8 @@ const envSchema = zod_1.z.object({
     ALLOWED_ORIGINS: zod_1.z.string().default('http://localhost:3000'),
     ADMIN_EMAILS: zod_1.z.string().optional().default(''),
     NODE_ENV: zod_1.z.enum(['development', 'production', 'test']).default('development'),
+    GOOGLE_CLIENT_ID: zod_1.z.string().min(1, 'GOOGLE_CLIENT_ID is required for OAuth validation'),
+    LITELLM_MASTER_KEY: zod_1.z.string().optional().default('vertex-proxy'),
 });
 const _env = envSchema.safeParse(process.env);
 if (!_env.success) {

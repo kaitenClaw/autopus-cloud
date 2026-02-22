@@ -36,54 +36,58 @@ export default function SignUpTab({ onSignUpSuccess }: SignUpTabProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-zinc-400 mb-1">Name (Optional)</label>
+        <label className="block text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">Name (Optional)</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full p-2.5 rounded-lg bg-[#212121] border border-white/5 focus:ring-indigo-500 focus:border-indigo-500 text-sm placeholder-zinc-500"
+          className="w-full p-2.5 rounded-lg bg-[var(--surface-0)] border border-[var(--border-subtle)] focus:ring-1 focus:ring-[var(--accent)] focus:border-[var(--accent)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition"
           placeholder="John Doe"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-zinc-400 mb-1">Email</label>
+        <label className="block text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">Email</label>
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-2.5 rounded-lg bg-[#212121] border border-white/5 focus:ring-indigo-500 focus:border-indigo-500 text-sm placeholder-zinc-500"
+          className="w-full p-2.5 rounded-lg bg-[var(--surface-0)] border border-[var(--border-subtle)] focus:ring-1 focus:ring-[var(--accent)] focus:border-[var(--accent)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition"
           placeholder="your@example.com"
           required
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-zinc-400 mb-1">Password</label>
+        <label className="block text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">Password</label>
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-2.5 rounded-lg bg-[#212121] border border-white/5 focus:ring-indigo-500 focus:border-indigo-500 text-sm placeholder-zinc-500"
+          className="w-full p-2.5 rounded-lg bg-[var(--surface-0)] border border-[var(--border-subtle)] focus:ring-1 focus:ring-[var(--accent)] focus:border-[var(--accent)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition"
           placeholder="••••••••"
           required
         />
       </div>
 
       {error && (
-        <div className="bg-red-500/20 text-red-400 p-3 rounded-lg text-sm">
+        <div className="bg-[var(--error-muted)] text-[var(--error)] p-3 rounded-lg text-sm border border-[var(--error)]/20">
           {error}
         </div>
       )}
 
       <button
         type="submit"
-        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white p-2.5 rounded-lg font-semibold transition flex items-center justify-center gap-2 disabled:opacity-50"
+        className="w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--surface-0)] p-2.5 rounded-lg font-bold transition flex items-center justify-center gap-2 disabled:opacity-50"
         disabled={isLoading}
       >
         {isLoading && <Loader2 size={16} className="animate-spin" />}
-        Create OCaaS Workspace
+        Birth Your Agent
       </button>
+
+      <p className="text-center text-[10px] text-[var(--text-muted)]">
+        By signing up, you agree to our Terms of Service.
+      </p>
     </form>
   );
 }

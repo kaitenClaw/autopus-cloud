@@ -1,3 +1,4 @@
+import { ActivityStream } from '../hub/ActivityStream';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ArrowRightLeft,
@@ -139,7 +140,7 @@ export default function HubSurface({
       if (sessionFilter !== 'all') query.sessionId = sessionFilter;
       if (loadMore && nextCursor) query.cursor = nextCursor;
 
-      if (!loadMore && !shouldPoll()) return;
+      if (!loadMore && !shouldPoll('hub.feed', 30000)) return;
       setFeedLoading(true);
       if (!loadMore) setFeedError(null);
 
@@ -366,29 +367,34 @@ export default function HubSurface({
 
               <div className="flex flex-1 items-center justify-center p-8">
                 <div className="w-full max-w-xl rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-1)] p-5">
-                  <p className="mb-2 text-xs uppercase tracking-[0.14em] text-[var(--text-muted)]">Conversation Surface</p>
-                  <h2 className="text-lg font-semibold text-[var(--text-primary)]">Use Chat For Messaging</h2>
-                  <p className="mt-2 text-sm text-[var(--text-muted)]">
-                    Hub now focuses on runtime and live event monitoring. Open Chat to start or continue conversations.
-                  </p>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <button
-                      onClick={() => (window.location.href = '/chat')}
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-2)] px-3 py-2 text-xs font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--surface-3)]"
-                    >
-                      <MessageSquare size={14} />
-                      Open Chat
-                    </button>
-                    {messages.length > 0 ? (
-                      <span className="inline-flex items-center rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-2)] px-3 py-2 text-xs text-[var(--text-muted)]">
-                        Recent messages: {messages.length}
-                      </span>
-                    ) : null}
-                    {highlightMessageId ? (
-                      <span className="inline-flex items-center rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-2)] px-3 py-2 text-xs text-[var(--text-muted)]">
-                        Highlighted event: {highlightMessageId.slice(0, 8)}...
-                      </span>
-                    ) : null}
+                  {/* Activity Stream - NEW */}
+                  <ActivityStream />
+                  
+                  <div className="mt-4 pt-4 border-t border-[var(--border-subtle)]">
+                    <p className="mb-2 text-xs uppercase tracking-[0.14em] text-[var(--text-muted)]">Conversation Surface</p>
+                    <h2 className="text-lg font-semibold text-[var(--text-primary)]">Use Chat For Messaging</h2>
+                    <p className="mt-2 text-sm text-[var(--text-muted)]">
+                      Hub now focuses on runtime and live event monitoring. Open Chat to start or continue conversations.
+                    </p>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <button
+                        onClick={() => (window.location.href = '/chat')}
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-2)] px-3 py-2 text-xs font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--surface-3)]"
+                      >
+                        <MessageSquare size={14} />
+                        Open Chat
+                      </button>
+                      {messages.length > 0 ? (
+                        <span className="inline-flex items-center rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-2)] px-3 py-2 text-xs text-[var(--text-muted)]">
+                          Recent messages: {messages.length}
+                        </span>
+                      ) : null}
+                      {highlightMessageId ? (
+                        <span className="inline-flex items-center rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-2)] px-3 py-2 text-xs text-[var(--text-muted)]">
+                          Highlighted event: {highlightMessageId.slice(0, 8)}...
+                        </span>
+                      ) : null}
+                    </div>
                   </div>
                 </div>
               </div>

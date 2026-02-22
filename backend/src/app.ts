@@ -45,14 +45,19 @@ app.use(cors({
   credentials: true
 }));
 app.use(compression());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+// Body size limits - prevent DoS via large payloads
+app.use(express.json({ limit: '100kb' }));
+app.use(express.urlencoded({ extended: true, limit: '100kb' }));
 app.use(cookieParser());
 
-// Global Rate Limiter - Relaxed for beta testing
+// Global Rate Limiter - Stricter for production security
 const globalLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: 300, // Limit each IP to 300 requests per minute
+  max: (req) => {
+    // Authenticated users: 60 requests/min, Anonymous: 30 requests/min
+    return req.header('authorization') ? 60 : 30;
+  },
   standardHeaders: true,
   legacyHeaders: false,
   skip: (req) => {
@@ -73,9 +78,9 @@ const globalLimiter = rateLimit({
       requestId,
       timestamp: new Date().toISOString(),
     }));
-    res.status(429).json({ message: 'Too many requests from this IP, please try again after 15 minutes' });
+    res.status(429).json({ message: 'Too many requests from this IP, please try again after a minute' });
   },
-  message: { message: 'Too many requests from this IP, please try again after 15 minutes' }
+  message: { message: 'Too many requests from this IP, please try again after a minute' }
 });
 app.use(globalLimiter);
 
@@ -124,24 +129,18 @@ app.get(['/health', '/api/health'], async (_req, res) => {
 
   let litellmStatus: 'connected' | 'disconnected' = 'disconnected';
   try {
-    // Test LiteLLM by making a dummy chat completion request
-    const litellmTestResponse = await fetch('http://localhost:4000/v1/chat/completions', {
-      method: 'POST',
+    // Health check LiteLLM proxy without making a live model call
+    const litellmHealthResponse = await fetch('http://localhost:4000/health/liveliness', {
+      method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer vertex-proxy' // Use the master key configured in litellm.yaml
-      },
-      body: JSON.stringify({
-        model: 'ollama/qwen3:8b', // Use local Ollama model (bypasses API key issues)
-        messages: [{ role: 'user', content: 'health check' }]
-      })
+        'Authorization': 'Bearer ' + (env.LITELLM_MASTER_KEY || 'vertex-proxy')
+      }
     });
-    // If the response is OK (200-299), consider LiteLLM connected
-    if (litellmTestResponse.ok) {
+    if (litellmHealthResponse.ok) {
       litellmStatus = 'connected';
     }
   } catch {
-    // LiteLLM unreachable or request failed
+    // LiteLLM unreachable
   }
 
   res.json({

@@ -1,33 +1,30 @@
 {
-  "taskId": "task-w2-sight-dashboard-v2-qa",
-  "timestamp": "2026-02-20T00:35:00+08:00",
-  "from": "prime",
-  "to": "kaiten_sight_bot",
-  "priority": "high",
-  "task": {
-    "title": "QA Dashboard v2 — Full Router + Design Token Audit",
-    "description": "Prime deployed Dashboard v2 with major architectural changes. Need full QA pass on the new router-based architecture, design token system, and all surfaces.",
-    "track": "standard",
-    "deliverables": [
-      "Verify all routes work: /dashboard, /hub, /chat (no 404s on direct navigation)",
-      "Verify CSS design tokens render correctly (--surface-0 through --surface-3, --text-primary/secondary/muted, --border-subtle, --elev-1/2, --accent)",
-      "Verify DashboardSurface: KPIs, onboarding flow, runtime fleet, model usage, alerts all render",
-      "Verify HubSurface: live feed, filters, thread drilldown, context focus all work",
-      "Verify ChatPage: guided/pro modes, model selector, settings panel, message send",
-      "Verify LandingPage: hero, how-it-works, features, pricing, email capture",
-      "Verify AppShell sidebar: navigation, agent list, session list, user section, collapse behavior",
-      "Mobile responsive check: sidebar drawer, panel collapse, stacked cards under 768px",
-      "Verify Auth: login, signup, Google OAuth, logout flow through new router",
-      "Security: check no auth tokens in URL params, no XSS in chat messages",
-      "Check for console errors, broken imports, missing assets"
-    ],
-    "references": [
-      "~/ocaas-project/frontend/src/main.tsx — New router entry point",
-      "~/ocaas-project/frontend/src/components/AppShell.tsx — Unified layout",
-      "~/ocaas-project/frontend/src/index.css — Design token definitions",
-      "~/ocaas-project/frontend/src/components/LandingPage.tsx — Full marketing page",
-      "~/ocaas-project/frontend/src/pages/ — Route page components"
-    ]
+  "taskId": "mvp-marathon-sight-001",
+  "title": "QA & SECURITY AUDIT - START NOW",
+  "startedAt": "2026-02-22T20:40:00+08:00",
+  "deadline": "2026-02-23T09:00:00+08:00",
+  "priority": "CRITICAL",
+  "status": "ACTIVE_NOW",
+  "model_chain_updated": "✅ NOW: kimi-coding → openrouter/kimi → openrouter/haiku",
+  "owner": "Prime",
+  "message": "🚀 START TESTING NOW - APPROVAL DUE AT 9 AM",
+  "mission": "Comprehensive testing - functional, security, performance",
+  "test_phases": [
+    "Phase 1: Functional testing - login, dashboard, graphs, model selector",
+    "Phase 2: Performance testing - <200ms response, load test 10+ users",
+    "Phase 3: Security testing - no console secrets, CORS, JWT, XSS",
+    "Phase 4: Final polish - mobile responsive, accessibility, edge cases"
+  ],
+  "success_criteria": {
+    "zero_critical_bugs": true,
+    "zero_console_errors": true,
+    "all_core_features_working": true,
+    "sight_approval_required": true
   },
-  "status": "pending"
+  "bug_format": "Bug: [Title] | Severity: [CRITICAL/HIGH/LOW] | Steps: [How to reproduce]",
+  "timeline": {
+    "now": "START TESTING (parallel with Forge build)",
+    "09:00_AM": "APPROVAL DELIVERED - Ready for launch"
+  },
+  "action": "BEGIN NOW"
 }

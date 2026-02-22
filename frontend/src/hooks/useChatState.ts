@@ -43,7 +43,7 @@ export function useChatState() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobileViewport());
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(!isMobileViewport());
-  const [activeRightPanelTab, setActiveRightPanelTab] = useState<'settings' | 'interactions' | 'coordination'>('settings');
+  const [activeRightPanelTab, setActiveRightPanelTab] = useState<'context' | 'settings' | 'interactions' | 'coordination'>('settings');
   const [error, setError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(!!getAuthToken());
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -464,6 +464,7 @@ export function useChatState() {
     modelOptions, modelFallbackByProfile, defaultModelChain,
     coordinationOverview,
     businessValue,
+    kaitenRuntimes,
     handleCreateSession, handleSend, handleLogout,
     handleUpdateConfig,
     handleLoginSuccess, handleSignUpSuccess, handleLaunchSuccess,

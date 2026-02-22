@@ -35,6 +35,9 @@ export default function LandingPage() {
     e.preventDefault();
     if (email.trim()) {
       setEmailSubmitted(true);
+      // Open signup flow — the email is already captured in state
+      // and can be pre-filled in the auth modal
+      setTimeout(() => setShowAuth(true), 600);
     }
   };
 
@@ -95,33 +98,33 @@ export default function LandingPage() {
           </div>
 
           <h1 className="mx-auto max-w-4xl text-5xl font-extrabold tracking-tighter md:text-7xl">
-            <span className="bg-gradient-to-b from-white via-white to-zinc-500 bg-clip-text text-transparent">
-              Your Personal AI Team.
+            <span className="bg-gradient-to-b from-white via-white to-zinc-400 bg-clip-text text-transparent">
+              Your Autonomous Partner.
             </span>
             <br />
-            <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
-              One Click Away.
+            <span className="bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] bg-clip-text text-transparent">
+              Born in the Cloud.
             </span>
           </h1>
 
           <p className="mx-auto mt-6 max-w-2xl text-lg text-[var(--text-secondary)] md:text-xl">
-            Skip the infrastructure complexity. Launch and manage your AI team from one
-            dashboard, orchestrate tasks from chat, and track everything in real time.
+            Tell it what you need. It shapes itself, learns your business, and never sleeps.
+            Deploy AI agents to Telegram in 30 seconds — no code, no config, just conversation.
           </p>
 
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <button
               onClick={() => setShowAuth(true)}
-              className="inline-flex items-center gap-2 rounded-2xl bg-[var(--accent)] px-8 py-4 text-lg font-bold text-white shadow-[0_0_40px_-10px_rgba(99,102,241,0.5)] transition-all hover:scale-105 hover:bg-[var(--accent-hover)] active:scale-95"
+              className="inline-flex items-center gap-2 rounded-2xl bg-[var(--accent)] px-8 py-4 text-lg font-bold text-[var(--surface-0)] shadow-[0_0_40px_-10px_rgba(0,242,255,0.4)] transition-all hover:scale-105 hover:brightness-110 active:scale-95"
             >
               <Rocket size={20} />
-              Launch Console
+              Birth Your Agent
             </button>
             <button
               onClick={() => navigate('/dashboard')}
               className="inline-flex items-center gap-2 rounded-2xl border border-[var(--border-default)] bg-[var(--surface-1)] px-8 py-4 text-lg font-bold transition-all hover:bg-[var(--surface-2)]"
             >
-              Explore Dashboard
+              Open Dashboard
               <ArrowRight size={18} />
             </button>
           </div>
@@ -137,9 +140,9 @@ export default function LandingPage() {
           transition={{ duration: 0.6 }}
           className="mb-12 text-center"
         >
-          <p className="text-label mb-3 text-[var(--accent-hover)]">How It Works</p>
+          <p className="text-label mb-3 text-[var(--accent)]">How It Works</p>
           <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-            From Zero to AI Team in 3 Steps
+            From Idea to Autonomous Agent in 30 Seconds
           </h2>
         </motion.div>
 
@@ -148,20 +151,20 @@ export default function LandingPage() {
             {
               step: '01',
               icon: Bot,
-              title: 'Create Your Agent',
-              desc: 'Pick a model, set personality and skills. Your agent gets its own Docker runtime with isolated memory.',
+              title: 'Describe Your Need',
+              desc: 'No config screens. Just tell it what you need — "a researcher who tracks crypto news" — and the Soul is born.',
             },
             {
               step: '02',
               icon: Send,
-              title: 'Connect via Telegram',
-              desc: 'Link your Telegram bot. Send messages to control your agent, assign tasks, and get real-time updates.',
+              title: 'Open in Telegram',
+              desc: 'Your agent goes live instantly. Message it on Telegram to assign tasks, ask questions, and get real-time updates.',
             },
             {
               step: '03',
               icon: Activity,
-              title: 'Scale Your Swarm',
-              desc: 'Add more agents. They coordinate autonomously — shared memory, task handoffs, fallback routing.',
+              title: 'Watch It Grow',
+              desc: 'It learns your patterns, remembers context, and evolves. Add more agents — they coordinate autonomously.',
             },
           ].map((item, i) => (
             <motion.div
@@ -194,20 +197,20 @@ export default function LandingPage() {
           transition={{ duration: 0.6 }}
           className="mb-12 text-center"
         >
-          <p className="text-label mb-3 text-emerald-400">Platform Features</p>
+          <p className="text-label mb-3 text-[var(--success)]">Platform Capabilities</p>
           <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-            Everything You Need to Run AI Agents
+            The Cloud Brain. You Provide the Intent.
           </h2>
         </motion.div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {[
-            { icon: Zap, title: 'One-Click Deploy', desc: 'Docker-isolated runtimes. Your agent is live in seconds.', color: 'text-amber-400' },
-            { icon: ShieldCheck, title: 'Enterprise Security', desc: 'Tenant isolation, JWT auth, role-based access, audit logs.', color: 'text-emerald-400' },
-            { icon: Globe, title: 'Multi-Model Routing', desc: 'Auto-fallback across Gemini, Claude, GPT. Smart cost optimization.', color: 'text-blue-400' },
-            { icon: MessageSquare, title: 'Telegram Control', desc: 'Manage agents from chat. Send tasks, get updates, approve actions.', color: 'text-violet-400' },
-            { icon: Layers, title: 'Persistent Memory', desc: 'Session, workspace, and global memory scopes. Agents learn and remember.', color: 'text-rose-400' },
-            { icon: BrainCircuit, title: 'Agent Coordination', desc: 'KAITEN-style task handoffs. Agents collaborate autonomously.', color: 'text-cyan-400' },
+            { icon: Zap, title: 'Instant Factory', desc: 'Press a button — your agent spawns on our cloud. Zero CLI, zero Docker, zero config.', color: 'text-[var(--accent)]' },
+            { icon: MessageSquare, title: 'Telegram Native', desc: 'Your agent lives where you live. Command it from chat — tasks, questions, approvals.', color: 'text-[var(--accent-secondary)]' },
+            { icon: Layers, title: 'Durable Memory', desc: 'Session, workspace, and global scopes. Your agent remembers everything and evolves daily.', color: 'text-[var(--warning)]' },
+            { icon: Globe, title: 'Smart Model Routing', desc: 'Auto-fallback across Gemini, Claude, GPT. Cost-optimized — you never overpay.', color: 'text-[var(--info)]' },
+            { icon: BrainCircuit, title: 'Agent Swarm', desc: 'Agents coordinate autonomously. Task handoffs, shared context, parallel execution.', color: 'text-violet-400' },
+            { icon: ShieldCheck, title: 'Enterprise Grade', desc: 'Tenant isolation, encrypted memory, audit logs. Your data stays your data.', color: 'text-[var(--success)]' },
           ].map((item, i) => (
             <motion.div
               key={item.title}
@@ -323,16 +326,16 @@ export default function LandingPage() {
           className="rounded-2xl border border-[var(--border-subtle)] bg-gradient-to-br from-[var(--surface-1)] to-[var(--accent-muted)] p-10 text-center"
         >
           <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
-            Ready to orchestrate your AI swarm?
+            Birth your first agent today.
           </h2>
           <p className="mx-auto mt-3 max-w-lg text-[var(--text-secondary)]">
-            Join the waitlist for early access. Be the first to deploy agents on Autopus Cloud.
+            Enter your email to create an account. Your autonomous partner is 30 seconds away.
           </p>
 
           {emailSubmitted ? (
-            <div className="mt-6 inline-flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-5 py-3 text-sm font-semibold text-emerald-400">
+            <div className="mt-6 inline-flex items-center gap-2 rounded-xl border border-[var(--success)]/30 bg-[var(--success)]/10 px-5 py-3 text-sm font-semibold text-[var(--success)]">
               <Check size={16} />
-              You're on the list. We'll be in touch.
+              Opening signup — let's build your agent.
             </div>
           ) : (
             <form onSubmit={handleEmailCapture} className="mx-auto mt-6 flex max-w-md gap-3">

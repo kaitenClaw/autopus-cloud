@@ -25,10 +25,15 @@ export default {
           hover: 'var(--accent-hover)',
           muted: 'var(--accent-muted)',
         },
+        'accent-secondary': {
+          DEFAULT: 'var(--accent-secondary)',
+          hover: 'var(--accent-secondary-hover)',
+          muted: 'var(--accent-secondary-muted)',
+        },
         // Legacy compat
-        background: '#0b0b0b',
-        sidebar: '#111111',
-        chat: '#1c1c1c',
+        background: '#0b0e11',
+        sidebar: '#0d1117',
+        chat: '#1a1f25',
         border: 'var(--border-subtle)',
       },
       borderColor: {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -12,18 +12,21 @@ import {
   Menu,
   X,
   ChevronRight,
+  Package,
 } from 'lucide-react';
 import { cn } from '../utils';
 import { AutopusLogo, AutopusWordmark } from './AutopusLogo';
 import AuthModal from './Auth/AuthModal';
 import KaitenLaunchWizard from './KaitenLaunchWizard';
 import { useChatState } from '../hooks/useChatState';
+import type { KAITENAgentRuntime } from '../api';
 // Agent/Session types used via useChatState
 
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/hub', label: 'Hub', icon: Activity },
   { to: '/chat', label: 'Chat', icon: MessageSquare },
+  { to: '/marketplace', label: 'Marketplace', icon: Package },
   { to: '/settings', label: 'Settings', icon: Settings },
 ] as const;
 
@@ -51,11 +54,24 @@ export default function AppShell() {
     handleSignUpSuccess,
     handleLaunchSuccess,
     handleCreateSession,
+    kaitenRuntimes,
   } = chat;
 
   const closeMobileSidebar = () => setMobileSidebarOpen(false);
   const visibleAgents = agents.filter((agent) => agent.name.trim().toLowerCase() !== 'prime');
   const mapAgentLabel = (name: string) => (name.trim().toLowerCase() === 'prime' ? 'KAITEN' : name);
+
+  // Build a lookup from agent id → runtime info for sidebar enrichment
+  const runtimeByAgent = useMemo(() => {
+    const map = new Map<string, KAITENAgentRuntime>();
+    for (const rt of kaitenRuntimes) {
+      const key = `kaiten:${rt.id?.toLowerCase()}`;
+      map.set(key, rt);
+      // Also map by profile name for fallback matching
+      if (rt.profile) map.set(`kaiten:${rt.profile.toLowerCase()}`, rt);
+    }
+    return map;
+  }, [kaitenRuntimes]);
 
   return (
     <div className="flex h-screen overflow-hidden bg-surface-0 text-[var(--text-primary)]">
@@ -145,38 +161,68 @@ export default function AppShell() {
               Agents
             </p>
           )}
-          {/* TODO(human): Design the agent sidebar item.
-             Each agent should feel "alive" — not just a name in a list.
-             Consider: status dot (running/stopped/error), model badge,
-             last-active indicator, personality hint.
-             Replace this block with your design for a single agent row.
-             The `agent` object has: { id, name }.
-             `selectedAgent?.id === agent.id` tells you if this one is active.
-             `sidebarCollapsed` tells you if the sidebar is narrow (icon-only).
-          */}
           <div className="space-y-1">
-            {visibleAgents.map((agent) => (
-              <button
-                key={agent.id}
-                onClick={() => setSelectedAgent(agent)}
-                className={cn(
-                  'flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm transition-all',
-                  selectedAgent?.id === agent.id
-                    ? 'bg-[var(--surface-2)] text-white shadow-sm'
-                    : 'text-[var(--text-muted)] hover:bg-[var(--surface-2)]/60 hover:text-[var(--text-secondary)]'
-                )}
-              >
-                <div
+            {visibleAgents.map((agent) => {
+              const rt = runtimeByAgent.get(agent.id.toLowerCase());
+              const isSelected = selectedAgent?.id === agent.id;
+              const status = rt?.status ?? 'UNKNOWN';
+              const isRunning = status === 'RUNNING';
+              const isError = status === 'ERROR';
+              const modelRaw = rt?.activeModel || rt?.model || '';
+              const modelShort = modelRaw.replace(/^.*\//, '').replace(/^gemini-/, 'g').replace(/^claude-/, 'c').replace(/^gpt-/, 'gpt').slice(0, 12);
+
+              return (
+                <button
+                  key={agent.id}
+                  onClick={() => setSelectedAgent(agent)}
+                  title={rt ? `${status} · ${modelRaw}` : agent.name}
                   className={cn(
-                    'flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition',
-                    selectedAgent?.id === agent.id ? 'bg-[var(--accent-muted)]' : 'bg-[var(--surface-2)]'
+                    'group flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm transition-all',
+                    isSelected
+                      ? 'bg-[var(--surface-2)] text-white shadow-sm'
+                      : 'text-[var(--text-muted)] hover:bg-[var(--surface-2)]/60 hover:text-[var(--text-secondary)]'
                   )}
                 >
-                  <Bot size={14} className={selectedAgent?.id === agent.id ? 'text-[var(--accent-hover)]' : ''} />
-                </div>
-                {!sidebarCollapsed && <span className="truncate font-medium">{mapAgentLabel(agent.name)}</span>}
-              </button>
-            ))}
+                  {/* Agent icon with status dot */}
+                  <div className="relative shrink-0">
+                    <div
+                      className={cn(
+                        'flex h-7 w-7 items-center justify-center rounded-lg transition',
+                        isSelected ? 'bg-[var(--accent-muted)]' : 'bg-[var(--surface-2)]'
+                      )}
+                    >
+                      <Bot size={14} className={isSelected ? 'text-[var(--accent-hover)]' : ''} />
+                    </div>
+                    {/* Status indicator dot */}
+                    <span
+                      className={cn(
+                        'absolute -bottom-0.5 -right-0.5 block h-2.5 w-2.5 rounded-full border-2 border-[var(--sidebar-bg)]',
+                        isRunning && 'bg-emerald-400',
+                        isError && 'bg-red-400',
+                        !isRunning && !isError && 'bg-zinc-500'
+                      )}
+                    />
+                  </div>
+
+                  {/* Name + model badge (when sidebar expanded) */}
+                  {!sidebarCollapsed && (
+                    <div className="min-w-0 flex-1">
+                      <span className="block truncate font-medium leading-tight">{mapAgentLabel(agent.name)}</span>
+                      {modelShort && (
+                        <span className="block truncate text-[10px] leading-tight text-[var(--text-muted)] opacity-70">
+                          {modelShort}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Pulse indicator for running agents (expanded only) */}
+                  {!sidebarCollapsed && isRunning && (
+                    <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-emerald-400/60" />
+                  )}
+                </button>
+              );
+            })}
           </div>
 
           {/* Sessions under selected agent */}
@@ -218,7 +264,7 @@ export default function AppShell() {
         <div className="border-t border-[var(--sidebar-border)] p-3">
           {isAuthenticated ? (
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-500 text-[10px] font-bold text-white shadow-lg">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-[var(--accent)] to-[var(--accent-secondary)] text-[10px] font-bold text-[var(--surface-0)] shadow-lg">
                 {currentUser.name.slice(0, 2).toUpperCase()}
               </div>
               {!sidebarCollapsed && (

@@ -108,8 +108,8 @@ export default function KaitenLaunchWizard({ isOpen, onClose, onSuccess }: Kaite
       <div className="w-full max-w-3xl rounded-2xl border border-white/10 bg-[#121212] text-zinc-200 shadow-2xl">
         <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 sm:px-6">
           <div>
-            <h2 className="text-base font-semibold text-white sm:text-lg">Create New Agent</h2>
-            <p className="text-[11px] text-zinc-500 sm:text-xs">Setup a new autonomous agent</p>
+            <h2 className="text-base font-semibold text-white sm:text-lg">Hire Your First Partner</h2>
+            <p className="text-[11px] text-zinc-500 sm:text-xs">Your new teammate is ready to join</p>
           </div>
           <button onClick={onClose} className="rounded-lg p-2 text-zinc-400 transition hover:bg-white/5 hover:text-zinc-200">
             <X size={16} />
@@ -120,7 +120,7 @@ export default function KaitenLaunchWizard({ isOpen, onClose, onSuccess }: Kaite
           <div className="flex items-center gap-2 text-[11px] sm:text-xs">
             {[1, 2, 3].map((num) => (
               <div key={num} className={cn('rounded-full px-2 py-1', step === num ? 'bg-white text-black' : 'bg-white/5 text-zinc-400')}>
-                Step {num}
+                {num === 1 ? '1. Choose Role' : num === 2 ? '2. Customize' : '3. Confirm'}
               </div>
             ))}
           </div>
@@ -133,7 +133,7 @@ export default function KaitenLaunchWizard({ isOpen, onClose, onSuccess }: Kaite
 
           {step === 1 && (
             <div className="space-y-3">
-              <p className="text-xs text-zinc-400">Choose a starter template</p>
+              <p className="text-xs text-zinc-400">What role do you need?</p>
               {isLoadingPresets ? (
                 <div className="flex items-center gap-2 text-sm text-zinc-400">
                   <Loader2 size={14} className="animate-spin" /> Loading presets...
@@ -163,27 +163,50 @@ export default function KaitenLaunchWizard({ isOpen, onClose, onSuccess }: Kaite
 
           {step === 2 && (
             <div className="space-y-3">
-              <p className="text-xs text-zinc-400">Edit agent details</p>
+              <p className="text-xs text-zinc-400">Meet your partner</p>
               <div className="space-y-2">
                 {agents.map((agent, index) => (
                   <div key={`${agent.name}-${index}`} className="grid grid-cols-1 gap-2 rounded-xl border border-white/10 bg-[#1a1a1a] p-3 sm:grid-cols-[auto,1fr,1fr] sm:items-center">
-                    <div className="inline-flex items-center gap-2 text-xs text-zinc-500">Single agent mode</div>
+                    <div className="inline-flex items-center gap-2 text-xs text-zinc-500">Your new partner</div>
                     <input
                       value={agent.name}
                       onChange={(e) => updateAgent(index, 'name', e.target.value)}
                       className="rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-zinc-100 focus:outline-none"
-                      placeholder="Agent name"
+                      placeholder="Partner name"
                     />
-                    <input
-                      value={agent.model}
-                      onChange={(e) => updateAgent(index, 'model', e.target.value)}
-                      className="rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-zinc-100 focus:outline-none"
-                      placeholder="Model"
-                    />
+                    <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-[#111] p-2">
+                      <button
+                        onClick={() => updateAgent(index, 'model', 'google-antigravity/gemini-3-flash')}
+                        className={cn(
+                          'flex-1 px-3 py-2 text-sm text-zinc-100 rounded-md transition',
+                          agent.model === 'google-antigravity/gemini-3-flash' ? 'bg-indigo-500' : 'hover:bg-white/5'
+                        )}
+                      >
+                        Creative ⚡
+                      </button>
+                      <button
+                        onClick={() => updateAgent(index, 'model', 'google-antigravity/gemini-3-pro-low')}
+                        className={cn(
+                          'flex-1 px-3 py-2 text-sm text-zinc-100 rounded-md transition',
+                          agent.model === 'google-antigravity/gemini-3-pro-low' ? 'bg-indigo-500' : 'hover:bg-white/5'
+                        )}
+                      >
+                        Balanced ⚖️
+                      </button>
+                      <button
+                        onClick={() => updateAgent(index, 'model', 'google-antigravity/gemini-3-pro-high')}
+                        className={cn(
+                          'flex-1 px-3 py-2 text-sm text-zinc-100 rounded-md transition',
+                          agent.model === 'google-antigravity/gemini-3-pro-high' ? 'bg-indigo-500' : 'hover:bg-white/5'
+                        )}
+                      >
+                        Analytical 🔬
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
-              <p className="text-[11px] text-zinc-500">Plan limit: 1 active agent</p>
+              <p className="text-[11px] text-zinc-500">Starter plan: 1 partner on your team</p>
             </div>
           )}
 
@@ -198,7 +221,7 @@ export default function KaitenLaunchWizard({ isOpen, onClose, onSuccess }: Kaite
                       onChange={(e) => setAutoStart(e.target.checked)}
                       className="h-4 w-4 rounded border-white/10 bg-[#111]"
                     />
-                    Auto start created agents
+                    Start working immediately
                   </label>
 
                   <div className="rounded-xl border border-white/10 bg-[#1a1a1a] p-3 text-xs text-zinc-300">
@@ -207,7 +230,7 @@ export default function KaitenLaunchWizard({ isOpen, onClose, onSuccess }: Kaite
                       {agents
                         .filter((agent) => agent.include)
                         .map((agent, index) => (
-                          <li key={`${agent.name}-${index}`}>{agent.name} · {agent.model}</li>
+                          <li key={`${agent.name}-${index}`}>{agent.name}</li>
                         ))}
                     </ul>
                   </div>
@@ -216,11 +239,11 @@ export default function KaitenLaunchWizard({ isOpen, onClose, onSuccess }: Kaite
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-emerald-300">
                     <CheckCircle2 size={16} />
-                    <span className="text-sm font-medium">Launch completed</span>
+                    <span className="text-sm font-medium">Welcome to your team!</span>
                   </div>
                   <div className="rounded-xl border border-white/10 bg-[#1a1a1a] p-3 text-xs text-zinc-300">
-                    <p>Created: <span className="text-emerald-300">{summary.created.length}</span></p>
-                    <p>Failed: <span className="text-red-300">{summary.failed.length}</span></p>
+                    <p>New partners: <span className="text-emerald-300">{summary.created.length}</span></p>
+                    <p>Need attention: <span className="text-red-300">{summary.failed.length}</span></p>
                     {summary.failed.length > 0 && (
                       <ul className="mt-2 space-y-1 text-red-200">
                         {summary.failed.map((item, i) => (
@@ -237,7 +260,7 @@ export default function KaitenLaunchWizard({ isOpen, onClose, onSuccess }: Kaite
 
         <div className="flex flex-col-reverse gap-2 border-t border-white/10 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <div className="text-[11px] text-zinc-500">
-            {step < 3 ? 'Next: configure and confirm launch' : summary ? 'Agent list and matrix refreshed' : 'Confirm and launch now'}
+            {step < 3 ? 'Next: meet and confirm' : summary ? 'Your partner is ready to work' : 'Confirm and hire now'}
           </div>
           <div className="flex items-center gap-2">
             {step > 1 && !summary && (
@@ -264,7 +287,7 @@ export default function KaitenLaunchWizard({ isOpen, onClose, onSuccess }: Kaite
                 className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-500 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isLaunching ? <Loader2 size={14} className="animate-spin" /> : <Rocket size={14} />}
-                Launch Agent
+                Hire Partner
               </button>
             )}
           </div>

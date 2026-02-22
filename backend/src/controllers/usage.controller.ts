@@ -3,6 +3,7 @@ import { prisma } from '../config/prisma';
 import { asyncHandler } from '../middleware/errorHandler';
 import { AuthRequest } from '../middleware/authenticate';
 import { calculateCost } from '../utils/cost-calculator';
+import { logger } from '../utils/logger';
 
 export class UsageController {
   /**
@@ -21,6 +22,11 @@ export class UsageController {
     }
 
     const costUsd = calculateCost(provider, model, tokens);
+    
+    logger.info(`Usage tracked: ${tokens} tokens on ${provider}/${model}`, { 
+      userId, 
+      source: agentId || 'System' 
+    });
 
     const usage = await prisma.usage.create({
       data: {

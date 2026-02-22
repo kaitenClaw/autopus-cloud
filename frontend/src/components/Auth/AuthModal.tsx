@@ -17,20 +17,23 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, onSignUpSuc
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-      <div className="bg-[#171717] rounded-xl shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto border border-white/10 flex flex-col">
-        <div className="p-4 border-b border-white/5 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-white">Welcome to OCaaS</h2>
-          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-200 transition">
-            <X size={20} />
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-[var(--surface-1)] rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto border border-[var(--border-default)] flex flex-col">
+        <div className="p-5 border-b border-[var(--border-subtle)] flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-bold text-[var(--text-primary)]">Welcome to Autopus</h2>
+            <p className="text-xs text-[var(--text-muted)] mt-0.5">Your autonomous partner awaits</p>
+          </div>
+          <button onClick={onClose} className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition rounded-lg p-1 hover:bg-[var(--surface-2)]">
+            <X size={18} />
           </button>
         </div>
 
-        <div className="flex border-b border-white/5">
+        <div className="flex border-b border-[var(--border-subtle)] px-2 pt-1">
           <button
             className={cn(
-              "flex-1 py-3 text-sm font-medium transition",
-              activeTab === 'login' ? "text-white border-b-2 border-indigo-500" : "text-zinc-400 hover:text-zinc-200"
+              "flex-1 py-2.5 text-sm font-semibold transition rounded-t-lg",
+              activeTab === 'login' ? "text-[var(--accent)] border-b-2 border-[var(--accent)]" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
             )}
             onClick={() => setActiveTab('login')}
           >
@@ -38,8 +41,8 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, onSignUpSuc
           </button>
           <button
             className={cn(
-              "flex-1 py-3 text-sm font-medium transition",
-              activeTab === 'signup' ? "text-white border-b-2 border-indigo-500" : "text-zinc-400 hover:text-zinc-200"
+              "flex-1 py-2.5 text-sm font-semibold transition rounded-t-lg",
+              activeTab === 'signup' ? "text-[var(--accent)] border-b-2 border-[var(--accent)]" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
             )}
             onClick={() => setActiveTab('signup')}
           >

@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getModelCatalog, updateModelChainForProfile, type ModelCatalog } from '../api';
+import { StripeCheckout } from '../components/billing/StripeCheckout';
 
-type SettingsTab = 'models' | 'app' | 'account' | 'integrations' | 'advanced';
+type SettingsTab = 'models' | 'billing' | 'app' | 'account' | 'integrations' | 'advanced';
 
 const TABS: Array<{ id: SettingsTab; label: string }> = [
   { id: 'models', label: 'Models' },
+  { id: 'billing', label: 'Billing' },
   { id: 'app', label: 'App' },
   { id: 'account', label: 'Account' },
   { id: 'integrations', label: 'Integrations' },
@@ -141,6 +143,29 @@ export default function SettingsPage() {
               {saving ? 'Saving...' : 'Save Model Chain'}
             </button>
             {status ? <p className="text-xs text-[var(--text-muted)]">{status}</p> : null}
+          </section>
+        )}
+
+        {tab === 'billing' && (
+          <section className="space-y-6">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)] p-6">
+                <h3 className="text-sm font-semibold mb-2">Current Plan</h3>
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="px-2 py-1 rounded bg-zinc-100 dark:bg-zinc-800 text-xs font-bold uppercase tracking-wider">Free Tier</span>
+                </div>
+                <p className="text-sm text-[var(--text-muted)] mb-4">
+                  Your team is currently on the free plan with limited runtime hours and shared resources.
+                </p>
+              </div>
+
+              <StripeCheckout 
+                planName="Pro Accelerator" 
+                amount={49} 
+                onSuccess={() => setStatus('Upgraded successfully!')}
+                onCancel={() => {}}
+              />
+            </div>
           </section>
         )}
 

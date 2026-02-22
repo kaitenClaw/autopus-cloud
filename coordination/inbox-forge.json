@@ -1,32 +1,29 @@
 {
-  "taskId": "task-w2-forge-next-features",
-  "timestamp": "2026-02-20T00:35:00+08:00",
-  "from": "prime",
+  "taskId": "forge-mvp-001",
+  "timestamp": "2026-02-23T00:40:00+08:00",
+  "from": "kai_ten_bot",
   "to": "kaiten_forge_bot",
-  "priority": "high",
+  "priority": "P0-critical",
   "task": {
-    "title": "Post-Deploy Feature Build — Telegram Wizard + Stripe + Agent Templates",
-    "description": "Dashboard v2 foundation is deployed. Now build the missing product features. Pick up after Sight completes QA.",
-    "track": "standard",
+    "title": "Fix MVP Blockers - DB + LiteLLM + Gateway",
+    "description": "解決 API degraded 狀態，修復三個 P0 問題，令 MVP 可以運作。",
     "deliverables": [
-      "Telegram Connection Wizard — step-by-step UI: Create bot via BotFather > Paste token > Verify connection > Live status indicator",
-      "Memory Management Panel — view/edit/search across SESSION/WORKSPACE/GLOBAL scopes with timeline view",
-      "Agent Log Viewer — real-time stdout/stderr stream with search, connected via WebSocket",
-      "Stripe Billing Integration — checkout flow, subscription management, usage metering dashboard",
-      "Agent Templates Marketplace — curated presets (Customer Support, Research Assistant, Code Reviewer)"
+      "Database 連接修復（migrate + connection test）",
+      "LiteLLM Proxy 啟動同 health check",
+      "Gateway 端口衝突解決（統一啟動流程）",
+      "API /health 返回 healthy"
     ],
-    "context": {
-      "architecture": "React 19 + Vite + Tailwind + react-router-dom",
-      "designTokens": "All new components MUST use CSS custom properties (--surface-*, --text-*, --accent, etc.) from index.css. NO hardcoded hex colors.",
-      "routing": "Add new routes in main.tsx, wrap in AppShell Outlet pattern. See DashboardPage.tsx for reference.",
-      "priority": "Telegram Wizard first (signature feature), then Memory Panel, then Stripe"
-    },
-    "references": [
-      "~/ocaas-project/frontend/src/index.css — Design tokens",
-      "~/ocaas-project/frontend/src/main.tsx — Router structure",
-      "~/ocaas-project/frontend/src/components/AppShell.tsx — Layout shell",
-      "~/ocaas-project/coordination/status-board.json — Current state"
-    ]
+    "checklist": [
+      "[ ] Prisma migrate deploy",
+      "[ ] DATABASE_URL 檢查（.env 同實際連線）",
+      "[ ] LiteLLM config 驗證，port 4000 啟動",
+      "[ ] Gateway 啟動 script 加 preflight port check",
+      "[ ] 測試 /api/auth/register + /api/agents/create"
+    ],
+    "deadline": "2026-02-23 06:00 HKT",
+    "blockerEscalation": "如果遇到權限 / 伺服器問題，立即通知 Prime"
   },
-  "status": "pending"
+  "status": "in_progress",
+  "acknowledgedAt": "2026-02-22T16:51:32Z",
+  "acknowledgedBy": "kaiten_forge_bot"
 }

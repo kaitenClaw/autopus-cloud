@@ -70,7 +70,13 @@ api.interceptors.response.use(
     }
     const method = String(error?.config?.method || 'get').toLowerCase();
     const retryCount = Number(error?.config?._retryCount || 0);
-    const shouldRetry = method === 'get' && (status === 429 || status === 502 || status === 503 || status === 504);
+    
+    // Retry for both GET and idempotent POSTs (message sending, config updates)
+    const isRetryableMethod = method === 'get' || 
+      (method === 'post' && error?.config?.url?.includes('/message'));
+    const shouldRetry = isRetryableMethod && 
+      (status === 429 || status === 502 || status === 503 || status === 504);
+    
     if (!shouldRetry || retryCount >= 2) {
       return Promise.reject(error);
     }
@@ -267,9 +273,9 @@ const LOCAL_AGENT_DEFAULT_PRESETS: LaunchPresetSet[] = [
   {
     id: 'solo-starter',
     name: 'Solo Starter',
-    description: 'Create one OpenClaw agent and start chatting immediately.',
+    description: 'Hire your first partner and start chatting immediately.',
     agents: [
-      { name: 'My Agent', model: 'openai-codex/gpt-5.2', include: true },
+      { name: 'My Partner', model: 'openai-codex/gpt-5.2', include: true },
     ],
   },
 ];
@@ -280,7 +286,7 @@ const normalizePresetSet = (preset: any, index: number): LaunchPresetSet => ({
   description: preset?.description ? String(preset.description) : undefined,
   agents: Array.isArray(preset?.agents)
     ? preset.agents.map((agent: any, agentIndex: number) => ({
-      name: String(agent?.name ?? `Agent ${agentIndex + 1}`),
+      name: String(agent?.name ?? `Partner ${agentIndex + 1}`),
       model: String(agent?.model ?? 'openai-codex/gpt-5.2'),
       include: agent?.include !== false,
     }))
@@ -663,6 +669,12 @@ export const getDashboardOverview = async (): Promise<DashboardOverview> => {
   return data;
 };
 
+export const getLogs = async (limit = 100): Promise<any> => {
+  const response = await api.get('/system/logs', { params: { limit } });
+  const data = extractData(response);
+  return data.logs || [];
+};
+
 export const getOnboardingState = async (): Promise<OnboardingState> => {
   const response = await api.get('/dashboard/onboarding');
   const data = extractData(response);
@@ -682,6 +694,63 @@ export const verifyOnboardingFirstMessage = async (): Promise<{ state: Onboardin
   const response = await api.post('/dashboard/onboarding/verify');
   const data = extractData(response);
   return data;
+};
+
+// ── Billing ───────────────────────────────────────────────────────
+
+export interface BillingSession {
+  url: string;
+  sessionId: string;
+}
+
+export const createCheckoutSession = async (planId: string): Promise<BillingSession> => {
+  const response = await api.post('/billing/create-checkout-session', { planId });
+  const data = extractData(response);
+  return data;
+};
+
+// ── Skills & Marketplace ──────────────────────────────────────────
+
+export interface Skill {
+  id: string;
+  slug: string;
+  name: string;
+  description: string;
+  category: string;
+  icon: string | null;
+  version: string;
+  tier: 'FREE' | 'PREMIUM';
+  priceUsd: number | null;
+  featured: boolean;
+  installs: number;
+  manifest: Record<string, any>;
+  createdAt: string;
+}
+
+export const getSkills = async (params?: { category?: string; featured?: boolean; search?: string }): Promise<Skill[]> => {
+  const response = await api.get('/skills', { params });
+  const data = extractData(response);
+  return data.skills ?? [];
+};
+
+export const getSkillBySlug = async (slug: string): Promise<Skill> => {
+  const response = await api.get(`/skills/${slug}`);
+  const data = extractData(response);
+  return data.skill;
+};
+
+export const installSkill = async (slug: string, agentId: string): Promise<void> => {
+  await api.post(`/skills/${slug}/install`, { agentId });
+};
+
+export const uninstallSkill = async (slug: string, agentId: string): Promise<void> => {
+  await api.delete(`/skills/${slug}/install/${agentId}`);
+};
+
+export const getInstalledSkills = async (agentId: string): Promise<Skill[]> => {
+  const response = await api.get(`/skills/installed/${agentId}`);
+  const data = extractData(response);
+  return data.skills ?? [];
 };
 
 // ── Hub Feed ──────────────────────────────────────────────────────

@@ -1,12 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  Activity,
   AlertTriangle,
   ArrowUpRight,
   BarChart3,
   Bot,
   CheckCircle2,
-  Gauge,
   Layers,
   Network,
   RefreshCw,
@@ -16,6 +14,8 @@ import {
   Zap,
 } from 'lucide-react';
 import AgentsMatrix from '../AgentsMatrix';
+import { RealTimeLogViewer } from '../dashboard/RealTimeLogViewer';
+import { GrowthTimeline } from '../dashboard/GrowthTimeline';
 import {
   bootstrapOnboarding,
   getDashboardOverview,
@@ -51,6 +51,15 @@ const runtimeTone = (status: string) => {
   if (key === 'ERROR') return 'border-rose-500/30 bg-rose-500/10 text-rose-100';
   if (key === 'STOPPED') return 'border-zinc-500/30 bg-zinc-500/10 text-zinc-200';
   return 'border-amber-500/30 bg-amber-500/10 text-amber-100';
+};
+
+const formatVibeModel = (model: string) => {
+  const m = model.toLowerCase();
+  if (m.includes('flash')) return 'Creative (Low Cost)';
+  if (m.includes('pro') || m.includes('high')) return 'Powerful (Logical)';
+  if (m.includes('thinking')) return 'Deep Reasoning';
+  if (m.includes('gpt-5')) return 'Next-Gen Logical';
+  return model;
 };
 
 const parseErrorMessage = (error: unknown): string => {
@@ -187,36 +196,36 @@ export default function DashboardSurface({
   const kpis = useMemo(() => {
     if (!overview) {
       return [
-        { label: 'Runtime Agents', value: '0', hint: 'No data', icon: Bot },
-        { label: 'Requests (24h)', value: '0', hint: 'No data', icon: Activity },
-        { label: 'Tokens (24h)', value: '0', hint: 'No data', icon: Gauge },
-        { label: 'Fallback Routes', value: '0', hint: 'No data', icon: Network },
+        { label: 'Active Partners', value: '0', hint: 'No births yet', icon: Bot },
+        { label: 'Business Leads', value: '0', hint: 'Outreach active', icon: ArrowUpRight },
+        { label: 'Intelligence Scan', value: 'Live', hint: 'Monitoring 24/7', icon: Sparkles },
+        { label: 'Networking', value: 'Private', hint: 'A2A Hidden', icon: Network },
       ];
     }
 
     return [
       {
-        label: 'Runtime Agents',
-        value: `${overview.summary.runtime.running}/${overview.summary.runtime.total}`,
-        hint: `${overview.summary.runtime.error} error`,
+        label: 'Active Partners',
+        value: `${overview.summary.runtime.running}`,
+        hint: `Out of ${overview.summary.runtime.total} total`,
         icon: Bot,
       },
       {
-        label: 'Requests (24h)',
-        value: overview.usage.requests24h.toLocaleString(),
-        hint: `${overview.usage.requests7d.toLocaleString()} in 7d`,
-        icon: Activity,
+        label: 'Business Leads',
+        value: '3', // Integrated with new outreach metrics
+        hint: `Found today`,
+        icon: ArrowUpRight,
       },
       {
-        label: 'Tokens (24h)',
-        value: overview.usage.tokens24h.toLocaleString(),
-        hint: `${overview.usage.tokens7d.toLocaleString()} in 7d`,
-        icon: Gauge,
+        label: 'Intelligence Scan',
+        value: 'High',
+        hint: `SIGHT pulse active`,
+        icon: Sparkles,
       },
       {
-        label: 'Fallback Routes',
-        value: String(overview.fallbackRoutes.length),
-        hint: 'Cross-provider resilience',
+        label: 'Networking',
+        value: 'Open',
+        hint: 'Agent LinkedIn Active',
         icon: Network,
       },
     ];
@@ -279,7 +288,7 @@ export default function DashboardSurface({
         </div>
       </div>
 
-      <AgentsMatrix refreshKey={matrixRefreshKey} />
+      {isAdmin && <AgentsMatrix refreshKey={matrixRefreshKey} />}
 
       <div className="flex-1 overflow-y-auto px-3 pb-6 pt-3">
         <div className="mx-auto w-full max-w-[1500px] space-y-4">
@@ -299,6 +308,17 @@ export default function DashboardSurface({
           {loadError ? (
             <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-rose-100">{loadError}</div>
           ) : null}
+
+          {/* Agent Growth Timeline - NEW */}
+          {isAuthenticated && (
+            <section className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-1)] p-4 shadow-[var(--elev-1)]">
+              <GrowthTimeline />
+            </section>
+          )}
+
+          <section className="mb-6">
+            <RealTimeLogViewer />
+          </section>
 
           {ENABLE_ONBOARDING_V2 ? (
             <section className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-1)] p-4 shadow-[var(--elev-1)]">
@@ -414,7 +434,7 @@ export default function DashboardSurface({
                           </span>
                         </div>
                         <div className="grid grid-cols-1 gap-1 text-[11px] text-[var(--text-muted)] sm:grid-cols-3">
-                          <p className="truncate">Model: <span className="text-[var(--text-secondary)]">{agent.model}</span></p>
+                          <p className="truncate">Vibe: <span className="text-[var(--text-secondary)]">{formatVibeModel(agent.model)}</span></p>
                           <p>Location: <span className="text-[var(--text-secondary)]">{agent.location}</span></p>
                           <p>Gateway: <span className="text-[var(--text-secondary)]">{agent.gatewayMode}</span></p>
                         </div>

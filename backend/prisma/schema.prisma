@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider     = "postgresql"
+  url          = env("DATABASE_URL")
+  relationMode = "foreignKeys"
 }
 
 model User {
@@ -13,22 +14,16 @@ model User {
   passwordHash  String
   name          String?
   role          UserRole       @default(USER)
-  subscription  Subscription?
-  agents        Agent[]
-  refreshTokens RefreshToken[]
-  usage         Usage[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
-}
-
-enum UserRole {
-  USER
-  ADMIN
+  agents        Agent[]
+  refreshTokens RefreshToken[]
+  subscription  Subscription?
+  usage         Usage[]
 }
 
 model Subscription {
   id                   String           @id @default(uuid())
-  user                 User             @relation(fields: [userId], references: [id])
   userId               String           @unique
   tier                 SubscriptionTier @default(FREE)
   maxAgents            Int              @default(1)
@@ -37,6 +32,100 @@ model Subscription {
   stripeSubscriptionId String?
   createdAt            DateTime         @default(now())
   updatedAt            DateTime         @updatedAt
+  user                 User             @relation(fields: [userId], references: [id])
+}
+
+model Agent {
+  id               String        @id @default(uuid())
+  name             String
+  modelPreset      String
+  status           AgentStatus   @default(STOPPED)
+  userId           String
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  deletedAt        DateTime?
+  config           Json?
+  customPrompt     String?
+  gatewayPid       Int?
+  port             Int?
+  profilePath      String?
+  telegramBotToken String?
+  user             User          @relation(fields: [userId], references: [id])
+  agentConfig      AgentConfig?
+  sessions         ChatSession[]
+  messages         Message[]
+  usage            Usage[]
+}
+
+model ChatSession {
+  id          String      @id @default(uuid())
+  agentId     String
+  title       String
+  memoryScope MemoryScope @default(SESSION)
+  metadata    Json?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  archivedAt  DateTime?
+  agent       Agent       @relation(fields: [agentId], references: [id])
+  messages    Message[]
+
+  @@index([agentId, createdAt])
+}
+
+model Message {
+  id        String       @id @default(uuid())
+  agentId   String
+  role      String
+  content   String
+  metadata  Json?
+  createdAt DateTime     @default(now())
+  sessionId String?
+  agent     Agent        @relation(fields: [agentId], references: [id])
+  session   ChatSession? @relation(fields: [sessionId], references: [id])
+
+  @@index([agentId, createdAt])
+  @@index([sessionId, createdAt])
+}
+
+model AgentConfig {
+  id            String   @id @default(uuid())
+  agentId       String   @unique
+  systemPrompt  String?
+  model         String
+  temperature   Float    @default(0.7)
+  topP          Float    @default(1.0)
+  maxTokens     Int      @default(2048)
+  stopSequences String[]
+  updatedAt     DateTime @updatedAt
+  agent         Agent    @relation(fields: [agentId], references: [id])
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Usage {
+  id        String   @id @default(uuid())
+  agentId   String?
+  userId    String
+  tokens    Int
+  model     String
+  timestamp DateTime @default(now())
+  cost      Float?
+  metadata  Json?
+  provider  String?
+  agent     Agent?   @relation(fields: [agentId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+enum UserRole {
+  USER
+  ADMIN
 }
 
 enum SubscriptionTier {
@@ -46,51 +135,11 @@ enum SubscriptionTier {
   ENTERPRISE
 }
 
-model Agent {
-  id               String      @id @default(uuid())
-  name             String
-  modelPreset      String
-  status           AgentStatus @default(STOPPED)
-  user             User        @relation(fields: [userId], references: [id])
-  userId           String
-  port             Int?
-  profilePath      String?
-  telegramBotToken String?
-  gatewayPid       Int?
-  customPrompt     String?     @db.Text
-  config           Json?
-  usage            Usage[]
-  
-  // Relations
-  messages         Message[]
-  sessions         ChatSession[]
-  agentConfig      AgentConfig?
-
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
-  deletedAt        DateTime?
-}
-
 enum AgentStatus {
   STARTING
   RUNNING
   STOPPED
   ERROR
-}
-
-model ChatSession {
-  id          String       @id @default(uuid())
-  agent       Agent        @relation(fields: [agentId], references: [id])
-  agentId     String
-  title       String
-  memoryScope MemoryScope  @default(SESSION)
-  metadata    Json?
-  messages    Message[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  archivedAt  DateTime?
-
-  @@index([agentId, createdAt])
 }
 
 enum MemoryScope {
@@ -99,53 +148,42 @@ enum MemoryScope {
   GLOBAL
 }
 
-model Message {
-  id        String       @id @default(uuid())
-  agent     Agent        @relation(fields: [agentId], references: [id])
+// ── Skills & Marketplace ─────────────────────────────────────
+
+model Skill {
+  id          String        @id @default(uuid())
+  slug        String        @unique
+  name        String
+  description String        @db.Text
+  category    String        @default("general")
+  icon        String?
+  version     String        @default("1.0.0")
+  tier        SkillTier     @default(FREE)
+  priceUsd    Float?
+  featured    Boolean       @default(false)
+  installs    Int           @default(0)
+  manifest    Json
+  authorId    String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  installations SkillInstall[]
+}
+
+enum SkillTier {
+  FREE
+  PREMIUM
+}
+
+model SkillInstall {
+  id        String   @id @default(uuid())
+  skillId   String
   agentId   String
-  session   ChatSession? @relation(fields: [sessionId], references: [id])
-  sessionId String?
-  role      String       // 'user', 'assistant', 'system'
-  content   String       @db.Text
-  metadata  Json?
-  createdAt DateTime     @default(now())
-
-  @@index([agentId, createdAt])
-  @@index([sessionId, createdAt])
-}
-
-model AgentConfig {
-  id             String   @id @default(uuid())
-  agent          Agent    @relation(fields: [agentId], references: [id])
-  agentId        String   @unique
-  systemPrompt   String?  @db.Text
-  model          String
-  temperature    Float    @default(0.7)
-  topP           Float    @default(1.0)
-  maxTokens      Int      @default(2048)
-  stopSequences  String[]
-  updatedAt      DateTime @updatedAt
-}
-
-model RefreshToken {
-  id        String   @id @default(uuid())
-  token     String   @unique
-  user      User     @relation(fields: [userId], references: [id])
   userId    String
-  expiresAt DateTime
   createdAt DateTime @default(now())
-}
+  skill     Skill    @relation(fields: [skillId], references: [id])
 
-model Usage {
-  id        String   @id @default(uuid())
-  agent     Agent?   @relation(fields: [agentId], references: [id])
-  agentId   String?
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
-  tokens    Int
-  model     String
-  provider  String?
-  cost      Float?
-  metadata  Json?
-  timestamp DateTime @default(now())
+  @@unique([skillId, agentId])
+  @@index([agentId])
+  @@index([userId])
 }

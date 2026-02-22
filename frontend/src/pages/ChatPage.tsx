@@ -1,6 +1,7 @@
 import { useOutletContext } from 'react-router-dom';
 import { MessageList } from '../components/chat/MessageList';
 import { PromptInput } from '../components/chat/PromptInput';
+import { ContextPanel } from '../components/chat/ContextPanel';
 import { Settings, CloudOff, X, Loader2, CheckCircle2, CircleDollarSign } from 'lucide-react';
 import { cn } from '../utils';
 import { VibeSliders } from '../components/VibeSliders';
@@ -131,7 +132,7 @@ export default function ChatPage() {
         {/* Panel tabs */}
         <div className="flex items-center justify-between border-b border-[var(--border-subtle)] p-3">
           <div className="flex items-center gap-0.5 rounded-xl bg-[var(--surface-0)] p-0.5">
-            {(['settings', 'interactions', 'coordination'] as const).map((tab) => (
+            {(['context', 'settings', 'interactions', 'coordination'] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveRightPanelTab(tab)}
@@ -156,6 +157,20 @@ export default function ChatPage() {
 
         {/* Panel content */}
         <div className="flex-1 overflow-y-auto scrollbar-thin">
+          {activeRightPanelTab === 'context' && (
+            <div className="p-4">
+              <ContextPanel
+                activeSkills={[]}
+                recentMemories={[]}
+                suggestedPrompts={[]}
+                onPromptClick={(prompt) => {
+                  setInput(prompt);
+                  handleSend();
+                }}
+              />
+            </div>
+          )}
+
           {activeRightPanelTab === 'settings' && (
             <div className="p-4 space-y-4">
               <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-2)] p-3">

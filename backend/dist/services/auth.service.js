@@ -24,11 +24,10 @@ class AuthService {
         const client = new google_auth_library_1.OAuth2Client();
         let payload;
         try {
-            // Validate the token. We don't specify audience here to allow any valid Google ID token for now,
-            // but in production you should check against your Client ID.
+            // Validate the token with proper audience check
             const ticket = await client.verifyIdToken({
                 idToken,
-                // audience: env.GOOGLE_CLIENT_ID, 
+                audience: env_1.env.GOOGLE_CLIENT_ID,
             });
             payload = ticket.getPayload();
         }
@@ -44,20 +43,21 @@ class AuthService {
         let user = await prisma_1.prisma.user.findUnique({ where: { email: normalizedEmail } });
         if (!user) {
             // Create user if not exists (JIT provisioning)
-            // Password hash for Google users is random/unusable
             const randomPassword = await bcrypt_1.default.hash(Math.random().toString(36), BCRYPT_ROUNDS);
-            const role = this.adminEmails.has(normalizedEmail) ? 'ADMIN' : 'USER';
+            // Determine role: Fion is a standard user, Alton's list are admins
+            const isAdmin = this.adminEmails.has(normalizedEmail);
+            const role = isAdmin ? 'ADMIN' : 'USER';
             user = await prisma_1.prisma.user.create({
                 data: {
                     email: normalizedEmail,
                     passwordHash: randomPassword,
-                    name: name || payload.given_name || 'Google User',
+                    name: name || payload.given_name || (normalizedEmail.includes('fion') ? 'Fion' : 'User'),
                     role,
                     subscription: {
                         create: {
-                            tier: 'FREE',
-                            maxAgents: 1,
-                            maxTokensPerDay: 10000,
+                            tier: isAdmin ? 'PRO' : 'FREE',
+                            maxAgents: isAdmin ? 10 : 1,
+                            maxTokensPerDay: isAdmin ? 1000000 : 10000,
                         },
                     },
                 },

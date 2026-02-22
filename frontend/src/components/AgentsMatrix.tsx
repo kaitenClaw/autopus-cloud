@@ -120,17 +120,28 @@ export default function AgentsMatrix({ refreshKey = 0 }: AgentsMatrixProps) {
       <div className="mx-auto w-full max-w-7xl">
         <div className="mb-3 flex items-center justify-between">
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-zinc-400">Agent Runtime Matrix</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-zinc-400">Your AI Team</p>
             <p className="text-[11px] text-zinc-500">Last refresh: {headerText}</p>
           </div>
-          <button
-            onClick={refresh}
-            disabled={isLoading}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-[#1b1b1b] px-2.5 py-1.5 text-[11px] text-zinc-300 transition hover:bg-[#232323] disabled:opacity-60"
-          >
-            <RefreshCw size={12} className={isLoading ? 'animate-spin' : ''} />
-            Refresh
-          </button>
+          <div className="flex items-center gap-2">
+            <a
+              href="http://localhost:4000/ui"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-2.5 py-1.5 text-[11px] text-indigo-300 transition hover:bg-indigo-500/20"
+              title="Visualize LLM routing and update keys (Key: vertex-proxy)"
+            >
+              LLM Router Settings
+            </a>
+            <button
+              onClick={refresh}
+              disabled={isLoading}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-[#1b1b1b] px-2.5 py-1.5 text-[11px] text-zinc-300 transition hover:bg-[#232323] disabled:opacity-60"
+            >
+              <RefreshCw size={12} className={isLoading ? 'animate-spin' : ''} />
+              Refresh
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-4">

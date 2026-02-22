@@ -1,27 +1,30 @@
 {
-  "taskId": "task-w2-pulse-deploy-monitor",
-  "timestamp": "2026-02-20T00:35:00+08:00",
-  "from": "prime",
+  "taskId": "pulse-cloud-001",
+  "timestamp": "2026-02-23T00:40:00+08:00",
+  "from": "kai_ten_bot",
   "to": "kaiten_pulse_bot",
   "priority": "high",
   "task": {
-    "title": "Monitor Dashboard v2 Deployment + Start Marketing Pipeline",
-    "description": "Prime is deploying Dashboard v2 to production. Monitor the rollout, verify health, then kick off the marketing content pipeline.",
-    "track": "standard",
+    "title": "Pulse Cloud Migration (OpenRouter)",
+    "description": "將 Pulse 遷移到雲端 VPS，用 OpenRouter API（唔駛本地 LiteLLM/Gateway）。",
     "deliverables": [
-      "Monitor dashboard.autopus.cloud after deploy — verify 200 OK, no 502s",
-      "Verify all routes return 200: /dashboard, /hub, /chat",
-      "Check container health: docker ps for ocaas-dashboard container",
-      "Verify API health: api.autopus.cloud/health returns OK",
-      "Start marketing pipeline: create first 'build in public' thread draft for X (@autopus_cloud)",
-      "Draft ProductHunt listing description",
-      "Record current system metrics as deployment baseline"
+      "Docker image 用 OpenRouter config（無 local gateway）",
+      "VPS 部署測試（可以同 Forge 同步進行）",
+      "獨立 profile 驗證",
+      "報告：成功 / 失敗原因 / 改進建議"
     ],
-    "references": [
-      "~/.openclaw/workspace/CLOUD-MIGRATION-RUNBOOK.md — Container ops",
-      "~/ocaas-project/marketing/MARKETING-AND-MODEL-STRATEGY.md — Content strategy",
-      "~/ocaas-project/coordination/status-board.json — Current state"
-    ]
+    "config": {
+      "provider": "openrouter",
+      "modelFallback": [
+        "openrouter/gemini-3-flash",
+        "openrouter/haiku"
+      ],
+      "gatewayMode": "cloud",
+      "vpsTarget": "108.160.137.70"
+    },
+    "parallelTrack": "同 forge-mvp-001 同步進行，唔使等 Forge 完成"
   },
-  "status": "pending"
+  "status": "in_progress",
+  "acknowledgedAt": "2026-02-22T16:51:23Z",
+  "acknowledgedBy": "kaiten_pulse_bot"
 }

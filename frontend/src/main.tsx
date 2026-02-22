@@ -7,6 +7,7 @@ import DashboardPage from './pages/DashboardPage';
 import HubPage from './pages/HubPage';
 import ChatPage from './pages/ChatPage';
 import SettingsPage from './pages/SettingsPage';
+import MarketplacePage from './pages/MarketplacePage';
 import './index.css';
 
 function AppRouter() {
@@ -33,6 +34,7 @@ function AppRouter() {
         <Route path="/hub" element={<HubPage />} />
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/marketplace" element={<MarketplacePage />} />
       </Route>
 
       {/* Catch-all */}

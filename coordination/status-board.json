@@ -1,85 +1,49 @@
 {
-  "lastUpdated": "2026-02-21T08:57:12+08:00",
-  "buildPhase": "Week 2: Dashboard Elevation (Replit/Cursor-Level UI) — Post-Launch Iteration",
-  "weekNumber": 2,
-  "overallStatus": "active-iteration",
+  "lastUpdated": "2026-02-22T16:51:32Z",
+  "sprint": "MVP Fast-Track",
+  "status": "active",
   "agents": {
     "prime": {
-      "status": "standby",
       "role": "orchestrator",
-      "currentTask": "Command Center implementation and /api/chat connectivity",
-      "model": "claude-opus-4-6"
+      "status": "coordinating",
+      "currentTask": "parallel-deployment",
+      "mode": "cloud-migration-prep"
     },
     "forge": {
-      "status": "active",
       "role": "builder",
-      "currentTask": "Background cron processing and production VPS maintenance",
-      "lastCompleted": "Manual VPS deployment of 'command-center' updates",
-      "model": "google-antigravity/gemini-3-flash"
-    },
-    "sight": {
-      "status": "active",
-      "role": "qa-diagnostician",
-      "currentTask": "System health monitoring and Dashboard v2 UI stability checks",
-      "lastCompleted": "Innovation Duty research report",
-      "model": "google-antigravity/gemini-3-flash"
+      "status": "in_progress",
+      "currentTask": "forge-mvp-001",
+      "taskTitle": "Fix MVP Blockers - DB + LiteLLM + Gateway",
+      "priority": "P0-critical",
+      "deadline": "2026-02-23 06:00 HKT",
+      "blockers": []
     },
     "pulse": {
-      "status": "active",
-      "role": "devops-coordinator",
-      "currentTask": "Sprint monitor check & production health monitoring",
-      "model": "google-antigravity/gemini-3-flash"
+      "role": "devops",
+      "status": "in_progress",
+      "currentTask": "pulse-cloud-001",
+      "taskTitle": "Pulse Cloud Migration (OpenRouter)",
+      "priority": "high",
+      "deadline": "ASAP",
+      "blockers": []
+    },
+    "sight": {
+      "role": "qa",
+      "status": "standby",
+      "currentTask": null,
+      "waitingFor": "forge-mvp-001 completion",
+      "nextAction": "validate /health + run smoke tests"
     }
   },
-  "systemHealth": {
-    "gateways": "6/5 running (1 stale pulse process)",
-    "ports": "5/5 listening",
-    "backend": "api.autopus.cloud healthy (v0.2.0)",
-    "vpsApi": "api.autopus.cloud reachable"
-  },
-  "dashboardV2": {
-    "status": "DEPLOYED — Production Active",
-    "buildOutput": "ocaas-project/frontend/dist/",
-    "changesDeployed": true,
-    "completedItems": [
-      "CSS design token system (--surface-*, --text-*, --border-*, --elev-*, --accent, .app-shell)",
-      "React Router DOM — /dashboard, /hub, /chat routes",
-      "Unified AppShell layout with collapsible sidebar + top breadcrumbs",
-      "DashboardSurface and HubSurface wired into router (CSS tokens now render)",
-      "Custom Autopus logo (octopus SVG) + AutopusWordmark component",
-      "Full landing page: hero, how-it-works, features, pricing table, email capture",
-      "JetBrains Mono + Inter font loading via Google Fonts",
-      "OG meta tags, Twitter cards, SEO description",
-      "Tailwind config extended with token-based colors, shadows, animations",
-      "Old monolithic App.tsx removed — replaced by router architecture",
-      "Integration of Live Chat Window (Commit 59eee55)",
-      "KAITEN agent runtime tracking added to chat state (Commit bcad9af)",
-      "Implement Chat Window and connect to /api/chat (Commit 90bfc2c)"
-    ],
-    "pendingItems": [
-      "Stripe billing integration (backend + frontend)",
-      "Telegram connection wizard UI",
-      "Agent templates marketplace",
-      "Memory management panel",
-      "Agent log viewer (real-time stdout/stderr)",
-      "Command palette (Cmd+K)",
-      "Toast notification system",
-      "Onboarding tour (first-login walkthrough)"
-    ]
-  },
-  "nextMilestone": "Deploy dashboard v2 to production, QA pass by Sight",
-  "marketValidation": {
-    "lastDigestAt": "2026-02-20T18:00:03+08:00",
-    "windowDays": 7,
-    "leadsCaptured7d": 0,
-    "demos7d": 0,
-    "paid7d": 0,
-    "netNewMrr7dUsd": 0.0,
-    "allTimeMrrUsd": 0.0,
-    "goalProgressPct": {
-      "signupsPct": 0.0,
-      "payingCustomersPct": 0.0,
-      "mrrPct": 0.0
-    }
-  }
+  "criticalPath": [
+    "forge-mvp-001: API healthy",
+    "pulse-cloud-001: Cloud agent working",
+    "sight-validate: QA pass",
+    "prime: Go/No-Go decision"
+  ],
+  "notes": [
+    "Parallel execution: Forge fixes local MVP, Pulse tests cloud migration",
+    "Goal: Have both local + cloud paths working for comparison",
+    "Token optimization: Only Prime responds to user in group"
+  ]
 }

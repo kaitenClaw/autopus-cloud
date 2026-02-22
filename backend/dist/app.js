@@ -22,6 +22,8 @@ const admin_routes_1 = __importDefault(require("./routes/admin.routes"));
 const dashboard_routes_1 = __importDefault(require("./routes/dashboard.routes"));
 const hub_routes_1 = __importDefault(require("./routes/hub.routes"));
 const usage_routes_1 = __importDefault(require("./routes/usage.routes"));
+const billing_routes_1 = __importDefault(require("./routes/billing.routes"));
+const skills_routes_1 = __importDefault(require("./routes/skills.routes"));
 const authenticate_1 = require("./middleware/authenticate");
 const requireAdmin_1 = require("./middleware/requireAdmin");
 const app = (0, express_1.default)();
@@ -44,13 +46,17 @@ app.use((0, cors_1.default)({
     credentials: true
 }));
 app.use((0, compression_1.default)());
-app.use(express_1.default.json());
-app.use(express_1.default.urlencoded({ extended: true }));
+// Body size limits - prevent DoS via large payloads
+app.use(express_1.default.json({ limit: '100kb' }));
+app.use(express_1.default.urlencoded({ extended: true, limit: '100kb' }));
 app.use((0, cookie_parser_1.default)());
-// Global Rate Limiter
+// Global Rate Limiter - Stricter for production security
 const globalLimiter = (0, express_rate_limit_1.default)({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per windowMs
+    windowMs: 1 * 60 * 1000, // 1 minute
+    max: (req) => {
+        // Authenticated users: 60 requests/min, Anonymous: 30 requests/min
+        return req.header('authorization') ? 60 : 30;
+    },
     standardHeaders: true,
     legacyHeaders: false,
     skip: (req) => {
@@ -71,9 +77,9 @@ const globalLimiter = (0, express_rate_limit_1.default)({
             requestId,
             timestamp: new Date().toISOString(),
         }));
-        res.status(429).json({ message: 'Too many requests from this IP, please try again after 15 minutes' });
+        res.status(429).json({ message: 'Too many requests from this IP, please try again after a minute' });
     },
-    message: { message: 'Too many requests from this IP, please try again after 15 minutes' }
+    message: { message: 'Too many requests from this IP, please try again after a minute' }
 });
 app.use(globalLimiter);
 const authenticatedReadLimiter = (0, express_rate_limit_1.default)({
@@ -108,38 +114,38 @@ const authLimiter = (0, express_rate_limit_1.default)({
 });
 // Health Check
 const appStartTime = Date.now();
-app.get('/health', async (_req, res) => {
-    const uptimeMs = Date.now() - appStartTime;
-    const hours = Math.floor(uptimeMs / 3600000);
-    const minutes = Math.floor((uptimeMs % 3600000) / 60000);
-    let database = 'disconnected';
-    let agentStats = { total: 0, running: 0, stopped: 0 };
+app.get(['/health', '/api/health'], async (_req, res) => {
+    let databaseStatus = 'disconnected';
     try {
         await prisma_1.prisma.$queryRaw `SELECT 1`;
-        database = 'connected';
-        const counts = await prisma_1.prisma.agent.groupBy({
-            by: ['status'],
-            where: { deletedAt: null },
-            _count: true,
+        databaseStatus = 'connected';
+    }
+    catch {
+        // DB unreachable
+    }
+    let litellmStatus = 'disconnected';
+    try {
+        // Health check LiteLLM proxy without making a live model call
+        const litellmHealthResponse = await fetch('http://localhost:4000/health/liveliness', {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + (env_1.env.LITELLM_MASTER_KEY || 'vertex-proxy')
+            }
         });
-        for (const row of counts) {
-            agentStats.total += row._count;
-            if (row.status === 'RUNNING')
-                agentStats.running = row._count;
-            if (row.status === 'STOPPED')
-                agentStats.stopped = row._count;
+        if (litellmHealthResponse.ok) {
+            litellmStatus = 'connected';
         }
     }
     catch {
-        // DB unreachable — return degraded status
+        // LiteLLM unreachable
     }
     res.json({
-        status: database === 'connected' ? 'ok' : 'degraded',
-        version: '0.2.0',
-        database,
-        uptime: `${hours}h ${minutes}m`,
-        agents: agentStats,
-        timestamp: new Date().toISOString(),
+        status: (databaseStatus === 'connected' && litellmStatus === 'connected') ? 'ok' : 'degraded',
+        version: '1.0.0', // Updated version
+        services: {
+            database: databaseStatus,
+            litellm: litellmStatus,
+        },
     });
 });
 // Routes
@@ -151,6 +157,8 @@ app.use('/api/admin', authenticate_1.authenticate, requireAdmin_1.requireAdmin, 
 app.use('/api/dashboard', dashboard_routes_1.default);
 app.use('/api/hub', hub_routes_1.default);
 app.use('/api/usage', usage_routes_1.default);
+app.use('/api/billing', billing_routes_1.default);
+app.use('/api/skills', skills_routes_1.default);
 // 404 Handler
 app.use((req, res, next) => {
     next(new errors_1.NotFoundError(`Route ${req.originalUrl} not found`));

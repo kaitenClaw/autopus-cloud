@@ -1,43 +1,60 @@
-const inFlight = new Map<string, Promise<unknown>>();
-const cooldownUntil = new Map<string, number>();
+import { useEffect, useState, useCallback } from 'react';
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+/**
+ * A hook for simple HTTP polling that mimics a stream.
+ * Useful as a fallback for Socket.io.
+ */
+export function usePolling<T>(
+  fetcher: () => Promise<T[]>,
+  intervalMs: number = 2000,
+  enabled: boolean = true
+) {
+  const [data, setData] = useState<T[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-export const shouldPoll = () => {
-  if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return false;
-  return localStorage.getItem('autopus_polling_enabled') !== 'false';
-};
-
-export const runPolledTask = async <T>(key: string, task: () => Promise<T>): Promise<T | undefined> => {
-  if (!shouldPoll()) return;
-  const now = Date.now();
-  const blockedUntil = cooldownUntil.get(key) || 0;
-  if (blockedUntil > now) return;
-  if (inFlight.has(key)) return inFlight.get(key) as Promise<T>;
-
-  const runner: Promise<T> = (async (): Promise<T> => {
-    let attempts = 0;
-    while (attempts < 3) {
-      try {
-        return await task();
-      } catch (error: any) {
-        attempts += 1;
-        const status = error?.response?.status;
-        const retryable = status === 429 || status === 502 || status === 503 || status === 504;
-        if (!retryable || attempts >= 3) {
-          if (retryable) {
-            cooldownUntil.set(key, Date.now() + 30000);
-          }
-          throw error;
-        }
-        const delay = 300 * Math.pow(2, attempts - 1) + Math.floor(Math.random() * 120);
-        await sleep(delay);
-      }
+  const poll = useCallback(async () => {
+    try {
+      const result = await fetcher();
+      setData(result);
+      setError(null);
+    } catch (err) {
+      setError(err as Error);
+    } finally {
+      setIsLoading(false);
     }
-    throw new Error('Polling task failed after retries');
-  })()
-    .finally(() => inFlight.delete(key));
+  }, [fetcher]);
 
-  inFlight.set(key, runner as Promise<unknown>);
-  return runner;
-};
+  useEffect(() => {
+    if (!enabled) return;
+
+    poll();
+    const id = setInterval(poll, intervalMs);
+    return () => clearInterval(id);
+  }, [poll, intervalMs, enabled]);
+
+  return { data, isLoading, error, refetch: poll };
+}
+
+// Global registry for polling tasks to prevent overlapping requests
+const pendingTasks: Record<string, Promise<any> | null> = {};
+const lastRun: Record<string, number> = {};
+
+export async function runPolledTask<T>(key: string, task: () => Promise<T>): Promise<T> {
+  if (pendingTasks[key]) {
+    return pendingTasks[key];
+  }
+
+  const promise = task().finally(() => {
+    pendingTasks[key] = null;
+    lastRun[key] = Date.now();
+  });
+
+  pendingTasks[key] = promise;
+  return promise;
+}
+
+export function shouldPoll(key: string, intervalMs: number): boolean {
+  const last = lastRun[key] || 0;
+  return Date.now() - last > intervalMs;
+}

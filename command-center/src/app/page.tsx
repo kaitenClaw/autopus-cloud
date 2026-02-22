@@ -49,9 +49,18 @@ const ChatWindow = () => {
       });
       const data = await response.json();
       
+      let replyText = 'No response from agent.';
+      if (data.status === 'success' && data.data?.assistantMessage?.content) {
+        replyText = data.data.assistantMessage.content;
+      } else if (data.response) {
+        replyText = data.response;
+      } else if (data.message) {
+        replyText = data.message;
+      }
+
       setMessages((prev) => [...prev, { 
         sender: 'agent', 
-        text: data.response || data.data?.assistantMessage?.content || data.message || 'No response from agent.' 
+        text: replyText
       }]);
     } catch (error) {
       console.error('Error sending message:', error);

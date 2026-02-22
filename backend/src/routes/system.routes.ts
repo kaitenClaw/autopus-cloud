@@ -15,6 +15,11 @@ router.get('/model-catalog', systemController.getModelCatalog);
 router.put('/model-catalog/profile/:profile', systemController.updateModelChain);
 router.get('/coordination/overview', systemController.getCoordinationOverview);
 router.get('/business/value', systemController.getBusinessValue);
+router.get('/diagnostics/llm-keys', systemController.getLLMKeysDiagnostic);
+router.get('/logs', (req, res, next) => {
+  const { logController } = require('../controllers/log.controller');
+  return logController.getLogs(req, res, next);
+});
 router.post('/admin/promote-self', systemController.promoteSelfToAdmin);
 
 // Deprecated hub compatibility routes (canonical routes live under /api/hub/*)

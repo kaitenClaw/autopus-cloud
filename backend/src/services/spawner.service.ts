@@ -3,13 +3,37 @@ import { promisify } from 'util';
 import { prisma } from '../config/prisma';
 import { portManager } from './port-manager';
 import { profileGenerator } from './profile-generator';
-import { NotFoundError } from '../utils/errors';
+import { NotFoundError, ValidationError } from '../utils/errors';
 import { socketService } from './socket.service';
 
 const execAsync = promisify(exec);
 
+// UUID validation regex
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export class SpawnerService {
+  private validateAgentId(agentId: string): void {
+    if (!UUID_REGEX.test(agentId)) {
+      throw new ValidationError('Invalid agent ID format');
+    }
+  }
+
+  // Container name validation - alphanumeric and hyphens only
+  private readonly CONTAINER_NAME_REGEX = /^[a-z0-9-]+$/;
+
+  private sanitizeContainerName(name: string): string {
+    // Remove any potentially dangerous characters
+    const sanitized = name.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    if (!this.CONTAINER_NAME_REGEX.test(sanitized) || sanitized.length === 0) {
+      throw new ValidationError('Invalid container name format');
+    }
+    return sanitized;
+  }
+
   async startAgent(agentId: string) {
+    // Validate agentId to prevent command injection
+    this.validateAgentId(agentId);
+    
     // ... logic ...
     const agent = await prisma.agent.findUnique({
       where: { id: agentId },
@@ -33,7 +57,8 @@ export class SpawnerService {
 
     // Start docker container for the agent
     // Note: We use the kaiten-agent:latest image built earlier
-    const containerName = `agent-${agent.id}`;
+    // Sanitize container name to prevent injection
+    const containerName = this.sanitizeContainerName(`agent-${agent.id}`);
     
     // Command to run the agent in a container
     const cmd = `docker run -d \
@@ -54,6 +79,17 @@ export class SpawnerService {
       const { stdout } = await execAsync(cmd);
       const containerId = stdout.trim();
 
+      // Wait a moment for container to start
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Verify container is actually running (health check)
+      const { stdout: healthCheck } = await execAsync(`docker ps -q --filter "id=${containerId}" --filter "status=running"`);
+      if (!healthCheck.trim()) {
+        // Container not running - get logs for debugging
+        const { stdout: logs } = await execAsync(`docker logs ${containerId} 2>&1 || echo "No logs available"`);
+        throw new Error(`Container failed to start. Logs: ${logs}`);
+      }
+
       await prisma.agent.update({
         where: { id: agentId },
         data: {
@@ -73,12 +109,15 @@ export class SpawnerService {
         where: { id: agentId },
         data: { status: 'ERROR' }
       });
-      socketService.emit('agent:status', { agentId, status: 'ERROR' });
+      socketService.emit('agent:status', { agentId, status: 'ERROR', error: error instanceof Error ? error.message : 'Unknown error' });
       throw error;
     }
   }
 
   async stopAgent(agentId: string) {
+    // Validate agentId to prevent command injection
+    this.validateAgentId(agentId);
+    
     const agent = await prisma.agent.findUnique({ where: { id: agentId } });
     if (!agent) throw new NotFoundError('Agent not found');
 
