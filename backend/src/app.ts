@@ -130,12 +130,18 @@ app.get(['/health', '/api/health'], async (_req, res) => {
   let litellmStatus: 'connected' | 'disconnected' = 'disconnected';
   try {
     // Health check LiteLLM proxy without making a live model call
-    const litellmHealthResponse = await fetch('http://localhost:4000/health/liveliness', {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2000); // 2s timeout
+    const litellmHost = env.LITELLM_HOST || 'localhost';
+    const litellmPort = env.LITELLM_PORT || '4000';
+    const litellmHealthResponse = await fetch(`http://${litellmHost}:${litellmPort}/health/liveliness`, {
       method: 'GET',
       headers: {
         'Authorization': 'Bearer ' + (env.LITELLM_MASTER_KEY || 'vertex-proxy')
-      }
+      },
+      signal: controller.signal
     });
+    clearTimeout(timeoutId);
     if (litellmHealthResponse.ok) {
       litellmStatus = 'connected';
     }
@@ -144,7 +150,7 @@ app.get(['/health', '/api/health'], async (_req, res) => {
   }
 
   res.json({
-    status: (databaseStatus === 'connected' && litellmStatus === 'connected') ? 'ok' : 'degraded',
+    status: databaseStatus === 'connected' ? 'ok' : 'degraded',
     version: '1.0.0', // Updated version
     services: {
       database: databaseStatus,

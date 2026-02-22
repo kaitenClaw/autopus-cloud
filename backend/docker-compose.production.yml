@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    container_name: ocaas-backend
+    ports:
+      - "4000:3000"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - PORT=${PORT:-3000}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      - NODE_ENV=production
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY}
+      - LITELLM_PROXY_URL=${LITELLM_PROXY_URL:-http://litellm:4000}
+    restart: always
+    networks:
+      - ocaas-network
+    labels:
+      # Traefik routing labels for HTTPS
+      - "traefik.enable=true"
+      - "traefik.http.routers.ocaas-backend.rule=Host(`api.autopus.cloud`)"
+      - "traefik.http.routers.ocaas-backend.entrypoints=websecure"
+      - "traefik.http.routers.ocaas-backend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.ocaas-backend.loadbalancer.server.port=3000"
+      - "traefik.http.middlewares.ocaas-backend-ratelimit.ratelimit.average=100"
+      - "traefik.http.routers.ocaas-backend.middlewares=ocaas-backend-ratelimit"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: ocaas-postgres
+    environment:
+      - POSTGRES_USER=ocaas
+      - POSTGRES_PASSWORD=ocaas_password
+      - POSTGRES_DB=ocaas
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    restart: always
+    networks:
+      - ocaas-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ocaas -d ocaas"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    ports:
+      # Only expose for debugging - remove in production
+      - "127.0.0.1:5433:5432"
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  ocaas-network:
+    driver: bridge

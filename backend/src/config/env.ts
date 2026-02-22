@@ -13,6 +13,8 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   GOOGLE_CLIENT_ID: z.string().min(1, 'GOOGLE_CLIENT_ID is required for OAuth validation'),
   LITELLM_MASTER_KEY: z.string().optional().default('vertex-proxy'),
+  LITELLM_HOST: z.string().optional().default('localhost'),
+  LITELLM_PORT: z.string().optional().default('4000'),
 });
 
 const _env = envSchema.safeParse(process.env);
