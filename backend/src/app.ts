@@ -18,6 +18,8 @@ import adminRoutes from './routes/admin.routes';
 import dashboardRoutes from './routes/dashboard.routes';
 import hubRoutes from './routes/hub.routes';
 import usageRoutes from './routes/usage.routes';
+import billingRoutes from './routes/billing.routes';
+import skillsRoutes from './routes/skills.routes';
 import { authenticate } from './middleware/authenticate';
 import { requireAdmin } from './middleware/requireAdmin';
 
@@ -47,10 +49,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Global Rate Limiter
+// Global Rate Limiter - Relaxed for beta testing
 const globalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 300, // Limit each IP to 300 requests per minute
   standardHeaders: true,
   legacyHeaders: false,
   skip: (req) => {
@@ -111,37 +113,44 @@ const authLimiter = rateLimit({
 
 // Health Check
 const appStartTime = Date.now();
-app.get('/health', async (_req, res) => {
-  const uptimeMs = Date.now() - appStartTime;
-  const hours = Math.floor(uptimeMs / 3600000);
-  const minutes = Math.floor((uptimeMs % 3600000) / 60000);
-
-  let database: 'connected' | 'disconnected' = 'disconnected';
-  let agentStats = { total: 0, running: 0, stopped: 0 };
+app.get(['/health', '/api/health'], async (_req, res) => {
+  let databaseStatus: 'connected' | 'disconnected' = 'disconnected';
   try {
     await prisma.$queryRaw`SELECT 1`;
-    database = 'connected';
-    const counts = await prisma.agent.groupBy({
-      by: ['status'],
-      where: { deletedAt: null },
-      _count: true,
+    databaseStatus = 'connected';
+  } catch {
+    // DB unreachable
+  }
+
+  let litellmStatus: 'connected' | 'disconnected' = 'disconnected';
+  try {
+    // Test LiteLLM by making a dummy chat completion request
+    const litellmTestResponse = await fetch('http://localhost:4000/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer vertex-proxy' // Use the master key configured in litellm.yaml
+      },
+      body: JSON.stringify({
+        model: 'ollama/qwen3:8b', // Use local Ollama model (bypasses API key issues)
+        messages: [{ role: 'user', content: 'health check' }]
+      })
     });
-    for (const row of counts) {
-      agentStats.total += row._count;
-      if (row.status === 'RUNNING') agentStats.running = row._count;
-      if (row.status === 'STOPPED') agentStats.stopped = row._count;
+    // If the response is OK (200-299), consider LiteLLM connected
+    if (litellmTestResponse.ok) {
+      litellmStatus = 'connected';
     }
   } catch {
-    // DB unreachable — return degraded status
+    // LiteLLM unreachable or request failed
   }
 
   res.json({
-    status: database === 'connected' ? 'ok' : 'degraded',
-    version: '0.2.0',
-    database,
-    uptime: `${hours}h ${minutes}m`,
-    agents: agentStats,
-    timestamp: new Date().toISOString(),
+    status: (databaseStatus === 'connected' && litellmStatus === 'connected') ? 'ok' : 'degraded',
+    version: '1.0.0', // Updated version
+    services: {
+      database: databaseStatus,
+      litellm: litellmStatus,
+    },
   });
 });
 
@@ -154,6 +163,8 @@ app.use('/api/admin', authenticate, requireAdmin, adminRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/hub', hubRoutes);
 app.use('/api/usage', usageRoutes);
+app.use('/api/billing', billingRoutes);
+app.use('/api/skills', skillsRoutes);
 
 // 404 Handler
 app.use((req, res, next) => {

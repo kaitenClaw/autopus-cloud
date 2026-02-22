@@ -14,7 +14,7 @@ interface MessageListProps {
 }
 
 const STARTER_PROMPTS = [
-  'Summarize today\'s agent health in plain English.',
+  'Summarize today\'s partner health in plain English.',
   'Create a 3-step plan to automate my support workflow.',
   'Explain this system like I am new to AI tooling.',
   'Draft a launch update for my team.'
@@ -44,7 +44,7 @@ export const MessageList: React.FC<MessageListProps> = ({
         </div>
         <h2 className="text-3xl font-bold text-white tracking-tight">How can I help you today?</h2>
         <p className="text-zinc-500 max-w-md text-sm leading-relaxed">
-          Select an agent and start a conversation. Your history will be saved automatically to your workspace.
+          Select a partner and start a conversation. Your history will be saved automatically to your workspace.
         </p>
         
         {playgroundMode === 'guided' && (

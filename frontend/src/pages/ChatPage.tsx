@@ -3,6 +3,7 @@ import { MessageList } from '../components/chat/MessageList';
 import { PromptInput } from '../components/chat/PromptInput';
 import { Settings, CloudOff, X, Loader2, CheckCircle2, CircleDollarSign } from 'lucide-react';
 import { cn } from '../utils';
+import { VibeSliders } from '../components/VibeSliders';
 import type { UseChatState } from '../hooks/useChatState';
 
 export default function ChatPage() {
@@ -13,6 +14,8 @@ export default function ChatPage() {
     messages,
     input,
     setInput,
+    config,
+    setConfig,
     isConfigSaving,
     lastSaved,
     isLoading,
@@ -40,7 +43,7 @@ export default function ChatPage() {
           <div className="flex items-center gap-3">
             <div className="flex flex-col">
               <span className="text-sm font-semibold text-[var(--text-primary)]">
-                {selectedAgent?.name || 'Select an agent'}
+                {selectedAgent?.name || 'Select a partner'}
               </span>
               {selectedSession && (
                 <span className="text-[10px] text-[var(--text-muted)] truncate max-w-[200px]">
@@ -156,19 +159,21 @@ export default function ChatPage() {
           {activeRightPanelTab === 'settings' && (
             <div className="p-4 space-y-4">
               <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-2)] p-3">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Settings Moved</p>
-                <p className="mt-1 text-xs text-[var(--text-secondary)]">
-                  Model chain, app preferences, and advanced controls now live in the dedicated Settings page.
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-3">
+                  Agent Vibe
                 </p>
+                <VibeSliders
+                  config={config}
+                  onChange={(newConfig) => setConfig(newConfig)}
+                />
+              </div>
+              <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-2)] p-3">
                 <button
                   onClick={() => (window.location.href = '/settings')}
-                  className="mt-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-3)] px-3 py-1.5 text-xs font-semibold text-[var(--text-primary)]"
+                  className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-3)] px-3 py-1.5 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition"
                 >
-                  Open Settings
+                  Advanced Settings
                 </button>
-              </div>
-              <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-2)] p-3 text-xs text-[var(--text-muted)]">
-                Quick controls remain in chat. Full routing and model profile edits are managed centrally in Settings.
               </div>
             </div>
           )}
