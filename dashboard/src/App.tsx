@@ -11,7 +11,8 @@ import type { Agent, CommunicationEvent } from './types';
 import { LifeAgentCard } from './components/LifeAgentCard';
 import { CommunicationFlow } from './components/CommunicationFlow';
 import { MobileBottomNav, DesktopSideNav } from './components/Navigation';
-import { AGENT_PORTS, fetchAgentStatus } from './utils/agents';
+import { AgentDNA } from './components/AgentDNA';
+import { AGENT_PORTS, AGENT_ICONS, fetchAgentStatus } from './utils/agents';
 
 // Modal Component for Create Agent
 interface CreateAgentModalProps {
@@ -211,7 +212,7 @@ const AgentsTab: React.FC<AgentsTabProps> = ({
   );
 };
 
-// Placeholder tabs
+// Placeholder tabs with props
 const ChatTab: React.FC = () => (
   <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
     <div className="w-20 h-20 rounded-full bg-indigo-500/20 flex items-center justify-center mb-4">
@@ -222,15 +223,51 @@ const ChatTab: React.FC = () => (
   </div>
 );
 
-const DnaTab: React.FC = () => (
-  <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-    <div className="w-20 h-20 rounded-full bg-amber-500/20 flex items-center justify-center mb-4">
-      <span className="text-4xl">🧬</span>
+interface DnaTabProps {
+  agents: Agent[];
+}
+
+const DnaTab: React.FC<DnaTabProps> = ({ agents }) => {
+  const [selectedAgentId, setSelectedAgentId] = useState<string>(agents[0]?.id || '');
+  const selectedAgent = agents.find(a => a.id === selectedAgentId) || agents[0];
+
+  if (!selectedAgent) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <div className="w-20 h-20 rounded-full bg-amber-500/20 flex items-center justify-center mb-4">
+          <span className="text-4xl">🧬</span>
+        </div>
+        <h2 className="text-xl font-semibold text-white mb-2">沒有可用的 Agent</h2>
+        <p className="text-white/50 max-w-md">請先創建一個 Agent</p>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      {/* Agent Selector */}
+      <div className="flex flex-wrap justify-center gap-2 mb-6">
+        {agents.map(agent => (
+          <button
+            key={agent.id}
+            onClick={() => setSelectedAgentId(agent.id)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm transition-all ${
+              selectedAgentId === agent.id
+                ? 'bg-white/10 text-white border border-white/20'
+                : 'text-white/50 hover:text-white/70 hover:bg-white/5'
+            }`}
+          >
+            <span>{AGENT_ICONS[agent.id] || '🤖'}</span>
+            {agent.name}
+          </button>
+        ))}
+      </div>
+
+      {/* Agent DNA */}
+      <AgentDNA agent={selectedAgent} />
     </div>
-    <h2 className="text-xl font-semibold text-white mb-2">Agent DNA 即將推出</h2>
-    <p className="text-white/50 max-w-md">探索 Agent 的 SOUL、MEMORY、SKILLS 和 CRON 排程</p>
-  </div>
-);
+  );
+};
 
 const MarketplaceTab: React.FC = () => (
   <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
@@ -418,7 +455,7 @@ const Dashboard: React.FC = () => {
       case 'chat':
         return <ChatTab />;
       case 'dna':
-        return <DnaTab />;
+        return <DnaTab agents={agents} />;
       case 'marketplace':
         return <MarketplaceTab />;
       case 'profile':
