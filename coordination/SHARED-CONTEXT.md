@@ -27,7 +27,20 @@
 
 **Status:** 🟢 Live at https://dashboard.autopus.cloud  
 **Updated:** 2026-02-24  
-**Commits:** `1c1b294`, `b9c9b2c`
+**Commits:** `1c1b294`, `b9c9b2c`, `8455256`, `b732961`
+
+### Design System v4.0 (LOCKED)
+
+| Element | Value | Usage |
+|---------|-------|-------|
+| **Navy** | #2B2D42 | Primary text, headers, backgrounds |
+| **Coral** | #F4845F | CTAs, accents, active states |
+| **Warm White** | #F5F5F0 | Page background |
+| **Surface** | #FFFFFF | Cards, modals |
+| **Border** | #E8E8E4 | Dividers, borders |
+
+**Style:** Clean, minimal, enterprise-ready (DeepMind/Notion-inspired)  
+**Language:** English-first for global market
 
 ### Core Concept: Agent Swarm Architecture
 
@@ -86,23 +99,71 @@ Transform from "MVP rush" to **sustainable multi-agent operation**. Each agent (
 
 ---
 
+## 🚀 Landing Page v4.0 (DEPLOYED)
+
+**Status:** 🟢 Live at http://108.160.137.70:3001  
+**Domain:** https://autopus.cloud (routing in progress)  
+**Updated:** 2026-02-24  
+**Commit:** `3a07394`
+
+### Features
+- **Hero Section:** Value proposition + dual CTAs
+- **Features Grid:** Memory & Growth, Agent Swarm, Data Sovereignty, Skill Marketplace
+- **AI Team Showcase:** KAITEN, FORGE, SIGHT, PULSE cards
+- **CTA Section:** Navy background with coral accent
+- **Footer:** Logo + links
+
+### Design
+- Matches Dashboard v4.0 (Navy + Coral + Warm White)
+- English-only content
+- Responsive for all devices
+- New octopus logo integration
+
+---
+
+## 🗄️ Storage Architecture (DOCUMENTED)
+
+**Location:** `docs/STORAGE-ARCHITECTURE.md`
+
+### Database Schema (PostgreSQL)
+- **User Management:** Users, subscriptions, billing
+- **Agent System:** Agents, configurations, sessions
+- **Chat & Memory:** Sessions, messages with 90-day retention
+- **Skills Marketplace:** Skills, installations
+- **Analytics:** Usage tracking with cost calculation
+
+### Storage Strategy
+| Data Type | Storage | Retention |
+|-----------|---------|-----------|
+| Agent Config | Filesystem | Persistent |
+| Chat History | PostgreSQL | 90 days |
+| Session Context | Filesystem | Active only |
+| User Files | S3 | Persistent |
+| Analytics | PostgreSQL | 1 year |
+
+### Caching (Redis)
+- Rate limiting counters
+- Session cache (24h TTL)
+- Agent status cache
+- Pub/sub for real-time events
+
+---
+
 ## Agent Status Overview
 
 | Agent | Role | Status | Level | Current Focus |
 |-------|------|--------|-------|---------------|
 | **KAITEN** | Orchestrator | growing | 2 | Strategy & Coordination |
-| **FORGE** | Builder | growing | 1 | Dashboard 2.0 Dev |
-| **SIGHT** | Researcher | growing | 1 | Security + OSINT |
-| **PULSE** | DevOps | growing | 1 | Infrastructure Optimization |
+| **FORGE** | Builder | growing | 2 | MVP Completion |
+| **SIGHT** | Researcher | growing | 1 | Content + SEO |
+| **PULSE** | DevOps | growing | 1 | Infrastructure |
 
 ---
 
 ## Security Status ✅
 
-**2026-02-23:** All 3 critical findings resolved.
-- Config permissions: `chmod 600` applied
-- Telegram groupPolicy: `allowlist` with authorized IDs
-- Elevated tools: Restricted to allowlist-only triggers
+**2026-02-23:** All 3 critical findings resolved.  
+**2026-02-24:** Dashboard v4.0 security hardened.
 
 ---
 
@@ -111,24 +172,32 @@ Transform from "MVP rush" to **sustainable multi-agent operation**. Each agent (
 ### 🎨 Dashboard 2.0 (FORGE) — ✅ COMPLETED
 - **Status:** Production deployed at dashboard.autopus.cloud
 - **Features:** LifeAgentCard, Agent DNA page, 5-tab navigation
-- **Next:** Chat integration, Marketplace backend
+- **Design:** Design System v4.0 (Navy + Coral)
 
-### 🔒 Security & Intelligence (SIGHT)
-- Daily security scans
-- OSINT briefings (Moltbook/GitHub/Twitter)
-- Threat intelligence
-- Skill security audits
+### 🚀 Landing Page (FORGE) — ✅ COMPLETED
+- **Status:** Deployed at port 3001, domain routing in progress
+- **Features:** Hero, Features, Team, CTA, Footer
+- **Next:** Domain config, auth flow
+
+### 🔒 Security & Intelligence (SIGHT) — ✅ COMPLETED
+- Security audit: 0 critical findings
+- SEO meta tags: Updated with "AI Persona Companion"
+- Content strategy: Blog, Twitter, Reddit, Newsletter
 
 ### ☁️ Infrastructure (PULSE)
-- Production endpoint monitoring
-- Automated deployment pipeline
-- CI/CD with GitHub Actions
-- Cost tracking alerts
+- VPS: 108.160.137.70 operational
+- Docker: All services containerized
+- Coolify: Deployment automation
+
+### 💳 Billing Integration (PENDING)
+- Stripe: Account setup
+- Pricing tiers: FREE, LAUNCH, PRO, ENTERPRISE
+- Webhook handling: Pending
 
 ### 💬 Chat System (PENDING)
-- WebSocket integration for real-time messaging
-- Agent-to-user direct communication
-- Message history persistence
+- WebSocket: Architecture defined
+- Real-time: Message streaming
+- History: Persistent storage
 
 ---
 
@@ -136,32 +205,40 @@ Transform from "MVP rush" to **sustainable multi-agent operation**. Each agent (
 
 | Service | URL | Status |
 |---------|-----|--------|
-| Landing Page | https://autopus.cloud | 🟢 Live |
-| Dashboard | https://dashboard.autopus.cloud | 🟢 Live |
-| API | https://api.autopus.cloud | 🟢 Live |
+| Landing Page | https://autopus.cloud | 🟡 DNS Pending |
+| Dashboard | https://dashboard.autopus.cloud | 🟢 Live v4.0 |
+| API | https://api.autopus.cloud | 🟢 Healthy |
+| LiteLLM | https://api.autopus.cloud | 🟢 Proxy Ready |
 
 **VPS:** 108.160.137.70 (Vultr)  
-**Orchestration:** Coolify + Docker
+**Orchestration:** Coolify + Docker  
+**Database:** PostgreSQL (ocaas-postgres-new)  
+**Cache:** Redis (coolify-redis)
 
 ---
 
 ## Key Documents
 
-- **Sprint Plan:** `SPRINT-GROWTH-MODE.md`
+- **MVP Task Board:** `coordination/MVP-TASK-BOARD.md`
+- **Storage Architecture:** `docs/STORAGE-ARCHITECTURE.md`
+- **Session State:** `coordination/SESSION-STATE.md`
 - **Status Board:** `status-board.json`
-- **Business Strategy:** `~/workspace/AUTOPUS-BUSINESS-STRATEGY.md`
-- **Master Plan:** `~/workspace/AUTOPUS-MASTER-PLAN.md`
 
 ---
 
-## Communication Protocol
+## MVP Progress
 
-1. **Mentions in Group:** Direct mention (@agent) for tasks requiring attention
-2. **ACTIVE-TASK.md:** Each agent maintains their own task file
-3. **Daily Checkpoints:** 09:00 and 18:00 HKT
-4. **Blocker Escalation:** Immediately to KAITEN → Alton if unresolved
+| Phase | Progress |
+|-------|----------|
+| 1. Foundation | 100% ✅ |
+| 2. Dashboard | 100% ✅ |
+| 3. Landing Page | 95% 🟠 |
+| 4. Integration | 40% ⏳ |
+| 5. Launch Prep | 25% ⏳ |
+
+**Overall: 72%**
 
 ---
 
-*Last Synced: 2026-02-24*  
-*Dashboard 2.0 Deployed: https://dashboard.autopus.cloud*
+*Last Synced: 2026-02-24 21:45 HKT*  
+*Dashboard: https://dashboard.autopus.cloud*
