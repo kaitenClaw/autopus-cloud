@@ -5,32 +5,28 @@ export const AGENT_PORTS: Record<string, number> = {
   forge: 18793,
   sight: 18795,
   pulse: 18797,
-  fion: 18799,
 };
 
 export const AGENT_COLORS: Record<string, string> = {
-  kaiten: '#6366f1', // Indigo
-  forge: '#f59e0b',  // Amber
-  sight: '#10b981',  // Emerald
-  pulse: '#ef4444',  // Red
-  fion: '#ec4899',   // Pink
+  kaiten: '#0066FF', // Electric Blue
+  forge: '#00C853',  // Success Green
+  sight: '#FFB300',  // Amber
+  pulse: '#FF3D00',  // Red
 };
 
 export const AGENT_ICONS: Record<string, string> = {
   kaiten: '🧠',
-  forge: '🔨',
-  sight: '👁️',
-  pulse: '⚡',
-  fion: '🎨',
+  forge: '⚡',
+  sight: '🔍',
+  pulse: '◉',
 };
 
-// Agent SOUL descriptions - core personality essence
+// Agent Core descriptions - capabilities
 export const AGENT_SOULS: Record<string, string> = {
-  kaiten: '你的策略大腦',
-  forge: '你的建造者',
-  sight: '你的觀察者',
-  pulse: '你的脈動',
-  fion: '你的創意夥伴',
+  kaiten: 'Core Intelligence',
+  forge: 'Build Engine',
+  sight: 'Research & Analysis',
+  pulse: 'Operations',
 };
 
 export async function fetchAgentStatus(port: number, token?: string): Promise<Partial<Agent>> {
