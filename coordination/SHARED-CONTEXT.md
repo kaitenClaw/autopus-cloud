@@ -156,7 +156,7 @@ Transform from "MVP rush" to **sustainable multi-agent operation**. Each agent (
 | Service | Container | Port | Status |
 |---------|-----------|------|--------|
 | Dashboard | `ocaas-frontend-final` | 80 | 🟢 Live |
-| Landing Page | `autopus-landing` | 3001 | 🟢 Live |
+| Landing Page | `autopus-landing` | 3001 | 🟢 Live (Blog deployed) |
 | Backend API | `ocaas-backend-final` | 3000 | 🟢 Healthy |
 | Database | `ocaas-postgres-new` | 5432 | 🟢 Running |
 | LiteLLM Proxy | `litellm-kcc0wcos4sss04sggccocs8g` | 4000 | 🟢 Proxy Ready |

@@ -2,10 +2,15 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  // Landing page is public - no auth required
   const path = request.nextUrl.pathname;
   
-  if (path === '/' || path.startsWith('/api') || path.startsWith('/_next') || path.includes('.')) {
+  // Public routes - no auth required
+  const publicPaths = ['/', '/blog', '/blog/'];
+  const isPublic = publicPaths.some(publicPath => 
+    path === publicPath || path.startsWith('/blog/')
+  );
+  
+  if (isPublic || path.startsWith('/api') || path.startsWith('/_next') || path.includes('.')) {
     return NextResponse.next();
   }
 
