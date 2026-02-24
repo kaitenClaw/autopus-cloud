@@ -29,46 +29,14 @@ export const AGENT_SOULS: Record<string, string> = {
   pulse: 'Operations',
 };
 
-export async function fetchAgentStatus(port: number, token?: string): Promise<Partial<Agent>> {
+export async function fetchAgentStatus(_port: number, _token?: string): Promise<Partial<Agent>> {
   // Skip status fetch in production - agents not exposed publicly
-  if (import.meta.env.PROD) {
-    return {
-      status: 'online',
-      lastHeartbeat: new Date(),
-      metrics: { cpuUsage: 0, memoryUsage: 0, tasksCompleted: 0, uptime: 0 },
-    };
-  }
-
-  try {
-    const url = token 
-      ? `http://localhost:${port}/status?token=${token}`
-      : `http://localhost:${port}/status`;
-    
-    const response = await fetch(url, { 
-      method: 'GET',
-      headers: { 'Accept': 'application/json' }
-    });
-    
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    
-    const data = await response.json();
-    return {
-      status: data.gateway?.reachable ? 'online' : 'offline',
-      lastHeartbeat: new Date(),
-      metrics: {
-        cpuUsage: data.system?.cpu || 0,
-        memoryUsage: data.system?.memory || 0,
-        tasksCompleted: data.sessions?.totalSessions || 0,
-        uptime: data.gatewayService?.runtimeShort || 0,
-      },
-    };
-  } catch (error) {
-    return {
-      status: 'offline',
-      lastHeartbeat: new Date(),
-      metrics: { cpuUsage: 0, memoryUsage: 0, tasksCompleted: 0, uptime: 0 },
-    };
-  }
+  // In production, agents run internally and aren't accessible from browser
+  return {
+    status: 'online',
+    lastHeartbeat: new Date(),
+    metrics: { cpuUsage: 0, memoryUsage: 0, tasksCompleted: 0, uptime: 0 },
+  };
 }
 
 export function formatUptime(seconds: number): string {
