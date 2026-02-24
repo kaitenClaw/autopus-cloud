@@ -55,6 +55,7 @@ Update Dashboard components to match new Autopus Logo design system:
 - Text: Navy #2B2D42
 - Accent: Coral #F4845F
 - English-only interface for global market
+- **Bug Fixes:** Logo 403 error fixed, CORS errors resolved
 - Production URL: https://dashboard.autopus.cloud
 
 ---
