@@ -132,6 +132,55 @@ Transform from "MVP rush" to **sustainable multi-agent operation**. Each agent (
 - **Skills Marketplace:** Skills, installations
 - **Analytics:** Usage tracking with cost calculation
 
+---
+
+## 🔧 Infrastructure Access (CRITICAL — ALL AGENTS READ)
+
+### VPS SSH Access
+| Setting | Value |
+|---------|-------|
+| **IP Address** | `108.160.137.70` |
+| **Provider** | Vultr |
+| **User** | `root` |
+| **SSH Key** | `~/.openclaw/workspace-forge/vultr_key` |
+| **Access** | ✅ FORGE confirmed working |
+| **Command** | `ssh -i ~/.openclaw/workspace-forge/vultr_key root@108.160.137.70` |
+
+### ⚠️ AGENT CAPABILITY NOTICE
+- **FORGE**: ✅ Has SSH access — can deploy, restart services, manage VPS
+- **KAITEN (Prime)**: ❌ No SSH — must request FORGE for VPS operations
+- **SIGHT**: ❌ No SSH — must request FORGE for VPS operations  
+- **PULSE**: ❌ No SSH — must request FORGE for VPS operations
+
+### VPS Services
+| Service | Container | Port | Status |
+|---------|-----------|------|--------|
+| Dashboard | `ocaas-frontend-final` | 80 | 🟢 Live |
+| Landing Page | `autopus-landing` | 3001 | 🟢 Live |
+| Backend API | `ocaas-backend-final` | 3000 | 🟢 Healthy |
+| Database | `ocaas-postgres-new` | 5432 | 🟢 Running |
+| LiteLLM Proxy | `litellm-kcc0wcos4sss04sggccocs8g` | 4000 | 🟢 Proxy Ready |
+| PULSE Cloud | `pulse-cloud` | 18797 | 🟢 Online |
+| Redis | `coolify-redis` | 6379 | 🟢 Running |
+
+### When Agents Need VPS Operations
+1. **Check if FORGE is available** (fastest)
+2. **If FORGE unavailable**: Use Coolify dashboard (https://coolify.autopus.cloud)
+3. **Emergency only**: Contact Alton
+
+---
+
+## 🗄️ Storage Architecture (DOCUMENTED)
+
+**Location:** `docs/STORAGE-ARCHITECTURE.md`
+
+### Database Schema (PostgreSQL)
+- **User Management:** Users, subscriptions, billing
+- **Agent System:** Agents, configurations, sessions
+- **Chat & Memory:** Sessions, messages with 90-day retention
+- **Skills Marketplace:** Skills, installations
+- **Analytics:** Usage tracking with cost calculation
+
 ### Storage Strategy
 | Data Type | Storage | Retention |
 |-----------|---------|-----------|

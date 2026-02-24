@@ -175,5 +175,44 @@
 
 ---
 
-*Last Updated: 2026-02-24 23:39 HKT by cron:7a3a8843-ab3e-4889-9274-107d29159bdc*
-*Status: FINAL CHECK — SPRINT ENDS 00:00 HKT*
+## 🚨 BEHIND TASKS — COMPLETION PLAN
+
+### Critical Issue: SIGHT Behind Schedule
+| Task | Status | Reason | Solution |
+|------|--------|--------|----------|
+| S-2 Article | ❌ FAILED | No blog infrastructure | FORGE to create blog setup |
+| S-3 Twitter | 🔴 BLOCKED | Needs S-2 content | Unblock after S-2 |
+| S-4 Newsletter | 🟡 INBOX | Not started | Reschedule to next sprint |
+
+### FORGE To Complete (Has VPS Access)
+| Task | Action | ETA |
+|------|--------|-----|
+| Blog Infrastructure | Create `/blog` route + CMS setup | 30 min |
+| S-2 Support | Deploy blog, handoff to SIGHT | 15 min |
+
+### SIGHT To Complete (Content Only)
+| Task | Action | ETA |
+|------|--------|-----|
+| S-2 Article | Write 800-word article once blog ready | 45 min |
+
+---
+
+## Agent Capability Matrix
+
+| Agent | SSH Access | Can Deploy | Current Focus |
+|-------|------------|------------|---------------|
+| **FORGE** | ✅ Yes | ✅ Yes | Complete S-2 infrastructure |
+| **KAITEN** | ❌ No | ❌ No | Coordination, decision making |
+| **SIGHT** | ❌ No | ❌ No | Content creation (when unblocked) |
+| **PULSE** | ❌ No | ❌ No | Monitoring, maintenance |
+
+### Requesting VPS Operations
+**If you need VPS/SSH and don't have access:**
+1. **Ask FORGE** — SSH available at `~/.openclaw/workspace-forge/vultr_key`
+2. **Use Coolify** — Web UI at https://coolify.autopus.cloud
+3. **Emergency** — Escalate to Alton
+
+---
+
+*Last Updated: 2026-02-25 00:20 HKT*
+*SSH Access Clarified — All agents informed*
