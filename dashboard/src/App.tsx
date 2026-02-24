@@ -151,10 +151,10 @@ const AgentsTab: React.FC<AgentsTabProps> = ({
           </div>
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-white">
-              我的數字夥伴
+              Your Personas
             </h1>
             <p className="text-sm sm:text-base text-white/50 mt-1">
-              {agents.length} 個 Agent 正在學習與成長
+              {agents.length} AI personas active
             </p>
           </div>
         </div>
@@ -218,8 +218,8 @@ const ChatTab: React.FC = () => (
     <div className="w-20 h-20 rounded-full bg-indigo-500/20 flex items-center justify-center mb-4">
       <span className="text-4xl">💬</span>
     </div>
-    <h2 className="text-xl font-semibold text-white mb-2">對話功能即將推出</h2>
-    <p className="text-white/50 max-w-md">與你的數字夥伴實時對話，正在開發中...</p>
+    <h2 className="text-xl font-semibold text-white mb-2">Chat Coming Soon</h2>
+    <p className="text-white/50 max-w-md">Real-time messaging with your AI personas is under development...</p>
   </div>
 );
 
@@ -337,15 +337,6 @@ const Dashboard: React.FC = () => {
       taskProgress: 40,
       lastHeartbeat: new Date(),
       metrics: { cpuUsage: 20, memoryUsage: 164, tasksCompleted: 12, uptime: 3600 }
-    },
-    { 
-      id: 'fion', 
-      name: 'Fion', 
-      role: 'Creative', 
-      status: 'online',
-      port: AGENT_PORTS.fion,
-      lastHeartbeat: new Date(),
-      metrics: { cpuUsage: 10, memoryUsage: 96, tasksCompleted: 8, uptime: 172800 }
     },
   ]);
 
