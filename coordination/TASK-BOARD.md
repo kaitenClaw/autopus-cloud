@@ -65,13 +65,37 @@ Update Dashboard components to match new Autopus Logo design system:
 | ID | SEO-001 |
 | Title | Update SEO Meta Tags for Global Market |
 | Assignee | SIGHT |
-| Status | 🟡 INBOX |
+| Status | ✅ DONE |
 | Priority | P0 |
 | Created | 2026-02-24 |
-| Deadline | 2026-02-25 12:00 HKT |
+| Completed | 2026-02-24 |
 
 **Description:**
 Update landing page meta tags for "AI Persona" positioning.
+
+**Artifacts:**
+- `~/ocaas-project/command-center/src/app/layout.tsx`
+
+**Changes Made:**
+- Title: "Autopus — Your AI Persona Companion"
+- Description: "Activate your first Intelligent Agent..."
+- Keywords: AI Agent, AI Persona, Jarvis AI, Personal AI
+- Open Graph: Updated for social sharing
+- Twitter Cards: Updated for Twitter sharing
+
+**Terminology Updated:**
+| Old | New |
+|-----|-----|
+| 數字生命體 | AI Persona |
+| 收養 | Activate |
+| 夥伴 | Companion |
+
+**Acceptance Criteria:**
+- [x] Meta tags use English-first global terminology
+- [x] "AI Persona Companion" positioning applied
+- [x] Keywords optimized for global market
+- [x] Social sharing tags (OG + Twitter) updated
+- [x] Ready for deployment
 
 ---
 
