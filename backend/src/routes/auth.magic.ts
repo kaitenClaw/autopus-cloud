@@ -1,7 +1,7 @@
 // Magic Link Authentication Routes
 // src/routes/auth.magic.ts
 
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
 import {
   sendMagicLinkEmail,
@@ -20,7 +20,7 @@ router.post(
     body('email').isEmail().normalizeEmail().withMessage('Valid email required'),
     body('type').isIn(['login', 'signup']).withMessage('Type must be login or signup'),
   ],
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     try {
       // Validate input
       const errors = validationResult(req);
@@ -63,7 +63,7 @@ router.post(
  * GET /api/auth/magic/verify
  * Verify magic link token and authenticate user
  */
-router.get('/verify', async (req, res) => {
+router.get('/verify', async (req: Request, res: Response) => {
   try {
     const { token } = req.query;
     

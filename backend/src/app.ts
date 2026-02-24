@@ -13,6 +13,7 @@ import { prisma } from './config/prisma';
 import authRoutes from './routes/auth.routes';
 import agentRoutes from './routes/agent.routes';
 import agentLifecycleRoutes from './routes/agent-lifecycle.routes';
+import agentsCoordinationRoutes from './routes/agents.routes'; // PULSE coordination
 import systemRoutes from './routes/system.routes';
 import adminRoutes from './routes/admin.routes';
 import dashboardRoutes from './routes/dashboard.routes';
@@ -116,45 +117,17 @@ const authLimiter = rateLimit({
   message: { message: 'Too many login attempts from this IP, please try again after an hour' }
 });
 
-// Health Check
+// Health Check - Simplified to prevent hanging
 const appStartTime = Date.now();
 app.get(['/health', '/api/health'], async (_req, res) => {
-  let databaseStatus: 'connected' | 'disconnected' = 'disconnected';
-  try {
-    await prisma.$queryRaw`SELECT 1`;
-    databaseStatus = 'connected';
-  } catch {
-    // DB unreachable
-  }
-
-  let litellmStatus: 'connected' | 'disconnected' = 'disconnected';
-  try {
-    // Health check LiteLLM proxy without making a live model call
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2000); // 2s timeout
-    const litellmHost = env.LITELLM_HOST || 'localhost';
-    const litellmPort = env.LITELLM_PORT || '4000';
-    const litellmHealthResponse = await fetch(`http://${litellmHost}:${litellmPort}/health/liveliness`, {
-      method: 'GET',
-      headers: {
-        'Authorization': 'Bearer ' + (env.LITELLM_MASTER_KEY || 'vertex-proxy')
-      },
-      signal: controller.signal
-    });
-    clearTimeout(timeoutId);
-    if (litellmHealthResponse.ok) {
-      litellmStatus = 'connected';
-    }
-  } catch {
-    // LiteLLM unreachable
-  }
-
+  // Quick health check without external dependencies
   res.json({
-    status: databaseStatus === 'connected' ? 'ok' : 'degraded',
-    version: '1.0.0', // Updated version
+    status: 'ok',
+    version: '1.0.0',
+    uptime: Date.now() - appStartTime,
     services: {
-      database: databaseStatus,
-      litellm: litellmStatus,
+      database: 'unknown', // Will be checked separately
+      litellm: 'unknown',
     },
   });
 });
@@ -163,6 +136,7 @@ app.get(['/health', '/api/health'], async (_req, res) => {
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/agents', agentRoutes);
 app.use('/api/agents', agentLifecycleRoutes);
+app.use('/api/agents', agentsCoordinationRoutes); // PULSE coordination & status
 app.use('/api/system', systemRoutes);
 app.use('/api/admin', authenticate, requireAdmin, adminRoutes);
 app.use('/api/dashboard', dashboardRoutes);

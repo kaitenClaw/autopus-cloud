@@ -1,0 +1,27 @@
+{
+  "name": "autopus-cloud",
+  "private": true,
+  "version": "1.0.0",
+  "description": "AI Agent Orchestration Platform",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "db:migrate": "cd services/backend && npx prisma migrate dev",
+    "db:generate": "cd services/backend && npx prisma generate",
+    "db:studio": "cd services/backend && npx prisma studio"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "services/*"
+  ],
+  "devDependencies": {
+    "turbo": "^2.0.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

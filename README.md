@@ -1,159 +1,119 @@
-# OCaaS - OpenClaw as a Service
+# Autopus Cloud
 
-**Status:** Pre-Launch (MVP in 4-6 weeks)
-**Infrastructure:** Ready ✅
-**Product:** Building 🚧
+AI Agent Orchestration Platform - Deploy, manage, and coordinate autonomous AI agents in the cloud.
 
----
+## 🌐 Live URLs
 
-## What is OCaaS?
+- **Landing Page**: https://autopus.cloud
+- **Dashboard**: https://dashboard.autopus.cloud
+- **API**: https://api.autopus.cloud
 
-Managed platform for launching and operating AI agents without handling infrastructure or model operations.
-
-**Core Promise:**
-- One-click deployment from mobile
-- Reliable hosting on managed VPS
-- Best-fit model routing across providers (Google Antigravity FREE → Google API → fallbacks)
-- No token-management burden for end users
-- Intelligent Flash→Pro switching (70% cost savings)
-
----
-
-## Quick Links
-
-- **Pre-Launch Checklist:** [PRE-LAUNCH-CHECKLIST.md](PRE-LAUNCH-CHECKLIST.md)
-- **Business Plan:** `~/.openclaw/workspace/OCAAS-BUSINESS-PLAN.md`
-- **Intelligence Routing:** `~/.openclaw/OCAAS-INTELLIGENCE-ROUTING.md`
-- **Model Registry:** `~/.openclaw/MODEL-REGISTRY.json`
-
----
-
-## Project Structure
+## 🏗️ Architecture
 
 ```
-ocaas-project/
-├── mobile-app/          → React Native app (~/Mobile-Asset-Manager)
-├── backend/             → API server (TO BUILD)
-├── web-dashboard/       → Customer dashboard (TO BUILD)
-├── infrastructure/      → Coolify configs
-├── docs/                → Planning & specs
-└── README.md            → This file
+autopus-cloud/
+├── apps/
+│   ├── dashboard/          # React + Tailwind frontend (User dashboard)
+│   ├── landing/            # Marketing website (Glassmorphism design)
+│   └── admin/              # Owner admin panel
+├── packages/
+│   ├── shared/             # Shared types & utilities
+│   └── ui/                 # shadcn/ui components
+├── services/
+│   ├── backend/            # API server (Node.js + Express + Prisma)
+│   ├── agent-runtime/      # Docker agent templates
+│   └── marketplace/        # Agent template registry
+└── docs/
+    ├── architecture/       # System design docs
+    ├── api/                # API documentation
+    └── deployment/         # Deployment guides
 ```
 
----
+## 🚀 Quick Start
 
-## Current Status
+### Prerequisites
+- Node.js 22+
+- Docker & Docker Compose
+- PostgreSQL 15
 
-### ✅ Complete
-- KAITEN multi-agent system (5 bots operational)
-- MODEL-REGISTRY with Google-optimized routing
-- Mobile app prototype (React Native/Expo)
-- Coolify server (108.160.137.70)
-- Smart Flash→Pro switching (74% cost reduction)
-- Business plan & revenue model
+### Local Development
 
-### 🚧 In Progress
-- Backend API (Week 2-3)
-- Mobile app integration (Week 2-3)
-- Customer dashboard (Week 3-4)
-
-### ⏳ Next
-- Billing system (Week 4)
-- Onboarding flow (Week 4)
-- Private beta (Week 5)
-- Launch (Week 6)
-
----
-
-## Tech Stack
-
-**Backend:** Node.js + TypeScript + Express + Prisma + PostgreSQL
-**Mobile:** React Native + Expo (already built)
-**Web:** Next.js 14 + Tailwind + Shadcn UI
-**Deployment:** Coolify + Docker + Nginx
-**AI:** OpenClaw + Google Antigravity (free) + Google AI Studio API
-
----
-
-## Pricing Tiers
-
-| Tier | Price/mo | Agents | Models | Smart Escalation |
-|------|----------|--------|--------|------------------|
-| **Launch** | $29 | 1 | Gemini Flash only | No |
-| **Scale** | $149 | 5 | Flash + Pro + Multimodal | Yes |
-| **Station** | $299+ | Unlimited | All models + Custom | Yes + Custom rules |
-
-**Target:** $8,375 MRR by Month 3 (100 Launch + 20 Scale + 5 Station customers)
-
----
-
-## Getting Started
-
-### 1. Backend Setup (This Weekend)
 ```bash
-cd ~/ocaas-project
-mkdir backend && cd backend
-npm init -y
-npm install express typescript prisma @prisma/client
-npx prisma init
+# Clone repository
+git clone https://github.com/kaitenClaw/autopus-cloud.git
+cd autopus-cloud
+
+# Install dependencies
+npm install
+
+# Setup environment
+cp .env.example .env
+# Edit .env with your credentials
+
+# Start services
+docker-compose up -d
+
+# Run migrations
+npm run db:migrate
+
+# Start development
+npm run dev
 ```
 
-### 2. Database Schema
-See [PRE-LAUNCH-CHECKLIST.md](PRE-LAUNCH-CHECKLIST.md) for Prisma schema
+## 🤖 Agent Architecture
 
-### 3. First API Endpoint
-Build `/api/agents/create` to spawn new OpenClaw profiles
+| Agent | Location | Role | Status |
+|-------|----------|------|--------|
+| **KAITEN** | Local (Mac Mini) | Orchestrator + Skill Learning | 🟢 Active |
+| **PULSE** | VPS Cloud | DevOps + Monitoring | 🟡 Deploying |
+| **FORGE** | Local (Mac Mini) | Builder/UI Developer | ⏳ Pending |
+| **SIGHT** | Local (Mac Mini) | SEO + Content | ⏳ Pending |
+| **FION** | Local (Mac Mini) | Creative/Graphics | ⏳ Standby |
 
-### 4. Mobile App Connection
-Update `~/Mobile-Asset-Manager` to call backend API
+## 🎨 Design System
 
----
+- **Style**: Glassmorphism (frosted glass, depth)
+- **Colors**: Indigo (#6366F1) + Emerald (#10B981)
+- **Typography**: Fira Code + Fira Sans
+- **Stack**: React + TypeScript + Tailwind CSS + shadcn/ui
 
-## Key Resources
+## 📊 Features
 
-**Coolify Server:**
-- IP: 108.160.137.70
-- Panel: http://108.160.137.70:8000
-- Specs: 2 vCPU, 4GB RAM, 80GB SSD (Tokyo)
+- 🤖 **Cloud Agents**: Deploy AI agents with one click
+- 💬 **Telegram Integration**: Chat with agents via Telegram
+- 📈 **Real-time Monitoring**: Track agent performance
+- 💰 **Usage Tracking**: Monitor tokens and costs
+- 🛒 **Marketplace**: Pre-built agent templates
 
-**OpenClaw:**
-- Gateways: 5 running (ports 18789-18797)
-- MODEL-REGISTRY: Google-first with smart switching
-- Estimated costs: $0-16/mo (mostly free via Antigravity)
+## 🛣️ Roadmap
 
-**Mobile App:**
-- Location: `~/Mobile-Asset-Manager`
-- Stack: React Native/Expo
-- Ready to connect
+### Phase 1: Core (This Week)
+- [x] VPS infrastructure
+- [x] Landing page + Dashboard
+- [ ] Dashboard UI redesign (Glassmorphism)
+- [ ] Mobile optimization
 
----
+### Phase 2: Growth (Next Week)
+- [ ] SEO optimization
+- [ ] Social media integration
+- [ ] Blog + Newsletter
+- [ ] Dark mode
 
-## Timeline
+### Phase 3: Scale (Following Weeks)
+- [ ] Owner admin panel
+- [ ] Marketplace feature
+- [ ] Billing integration (Stripe)
+- [ ] Usage analytics
 
-**Week 1:** ✅ Foundation complete
-**Week 2-3:** Build backend + integrate mobile app
-**Week 4:** Billing + onboarding
-**Week 5:** Private beta testing (10 design partners)
-**Week 6:** Launch MVP
+## 📝 License
 
-**Month 2-3:** Growth to 50-100 customers, $1,500-3,000 MRR
+Private - All rights reserved.
 
----
+## 👥 Team
 
-## Next Actions
-
-1. **Initialize backend** (2-3 hours this weekend)
-2. **Build API endpoints** (10 hours next week)
-3. **Connect mobile app** (8 hours Week 3)
-4. **Add billing** (5 hours Week 4)
-5. **Launch private beta** (Week 5)
-
----
-
-**Built by:** Alton Cheng
-**For:** Indie makers, solo builders, agencies needing persistent AI agents
-**Differentiator:** Google Antigravity (free) + intelligent model routing + BYOK transparency
-
----
-
-**Read [PRE-LAUNCH-CHECKLIST.md](PRE-LAUNCH-CHECKLIST.md) for detailed implementation plan.**
+Built by the Autopus Agent Squad:
+- **KAITEN**: Orchestrator
+- **FORGE**: Builder
+- **SIGHT**: Researcher
+- **PULSE**: DevOps
+- **FION**: Creative

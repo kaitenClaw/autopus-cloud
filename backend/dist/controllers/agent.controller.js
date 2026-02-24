@@ -28,9 +28,25 @@ const DEFAULT_AGENT_PRESETS = [
 class AgentController {
     constructor() {
         this.create = (0, errorHandler_1.asyncHandler)(async (req, res) => {
-            const { name, modelPreset } = req.body;
+            const { name, modelPreset, autoStart = true } = req.body;
             const userId = req.user.userId;
             const agent = await agent_service_1.agentService.createAgent(userId, name, modelPreset);
+            // Auto-start agent by default for better UX
+            if (autoStart) {
+                try {
+                    const startedAgent = await spawner_service_1.spawnerService.startAgent(agent.id);
+                    res.status(201).json({
+                        status: 'success',
+                        message: 'Agent created and started',
+                        data: { agent: startedAgent }
+                    });
+                    return;
+                }
+                catch (startError) {
+                    // If start fails, still return created agent but with warning
+                    console.warn(`Agent ${agent.id} created but failed to auto-start:`, startError);
+                }
+            }
             res.status(201).json({ status: 'success', data: { agent } });
         });
         this.bulkCreate = (0, errorHandler_1.asyncHandler)(async (req, res) => {

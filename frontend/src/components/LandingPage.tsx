@@ -99,18 +99,35 @@ export default function LandingPage() {
 
           <h1 className="mx-auto max-w-4xl text-5xl font-extrabold tracking-tighter md:text-7xl">
             <span className="bg-gradient-to-b from-white via-white to-zinc-400 bg-clip-text text-transparent">
-              Your Autonomous Partner.
+              AI Agents That Work
             </span>
             <br />
             <span className="bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] bg-clip-text text-transparent">
-              Born in the Cloud.
+              While You Sleep.
             </span>
           </h1>
 
           <p className="mx-auto mt-6 max-w-2xl text-lg text-[var(--text-secondary)] md:text-xl">
-            Tell it what you need. It shapes itself, learns your business, and never sleeps.
-            Deploy AI agents to Telegram in 30 seconds — no code, no config, just conversation.
+            Deploy your first AI agent in 60 seconds. No code. No config. Just describe what you need and your partner starts working immediately.
           </p>
+
+          {/* 3-Step Visual */}
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-4 text-sm text-[var(--text-muted)]">
+            <div className="flex items-center gap-2">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--accent)] text-xs font-bold text-black">1</span>
+              <span>Describe</span>
+            </div>
+            <ArrowRight size={14} className="text-[var(--text-muted)]" />
+            <div className="flex items-center gap-2">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--accent)] text-xs font-bold text-black">2</span>
+              <span>Deploy</span>
+            </div>
+            <ArrowRight size={14} className="text-[var(--text-muted)]" />
+            <div className="flex items-center gap-2">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--accent)] text-xs font-bold text-black">3</span>
+              <span>Works</span>
+            </div>
+          </div>
 
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <button
@@ -118,13 +135,13 @@ export default function LandingPage() {
               className="inline-flex items-center gap-2 rounded-2xl bg-[var(--accent)] px-8 py-4 text-lg font-bold text-[var(--surface-0)] shadow-[0_0_40px_-10px_rgba(0,242,255,0.4)] transition-all hover:scale-105 hover:brightness-110 active:scale-95"
             >
               <Rocket size={20} />
-              Birth Your Agent
+              Create Your First Agent
             </button>
             <button
               onClick={() => navigate('/dashboard')}
               className="inline-flex items-center gap-2 rounded-2xl border border-[var(--border-default)] bg-[var(--surface-1)] px-8 py-4 text-lg font-bold transition-all hover:bg-[var(--surface-2)]"
             >
-              Open Dashboard
+              View Dashboard
               <ArrowRight size={18} />
             </button>
           </div>
@@ -250,27 +267,27 @@ export default function LandingPage() {
             {
               name: 'Free',
               price: '$0',
-              period: 'forever',
-              desc: 'Try the platform. One agent, basic features.',
-              features: ['1 agent', '10K tokens/day', 'Telegram integration', 'Session memory', 'Community support'],
-              cta: 'Get Started',
+              period: '/month',
+              desc: 'Perfect for trying out. One agent, basic skills.',
+              features: ['1 agent', 'Basic skills', 'Telegram integration', 'Session memory', 'Community support'],
+              cta: 'Get Started Free',
               accent: false,
             },
             {
               name: 'Launch',
-              price: '$29',
+              price: '$9',
               period: '/month',
-              desc: 'For builders shipping AI-powered products.',
-              features: ['3 agents', '100K tokens/day', 'Priority models', 'Workspace memory', 'Multi-model fallback', 'Email support'],
+              desc: 'For indie hackers and small projects.',
+              features: ['3 agents', 'All premium skills', 'Workspace memory', 'Priority models', 'Email support'],
               cta: 'Start Building',
               accent: true,
             },
             {
               name: 'Pro',
-              price: '$99',
+              price: '$29',
               period: '/month',
-              desc: 'For teams running autonomous agent swarms.',
-              features: ['10 agents', 'Unlimited tokens', 'Custom skills', 'Global memory', 'KAITEN coordination', 'Admin audit log', 'Priority support'],
+              desc: 'For teams running agent swarms.',
+              features: ['10 agents', 'Unlimited usage', 'Global memory', 'Custom skills', 'Priority support'],
               cta: 'Go Pro',
               accent: false,
             },

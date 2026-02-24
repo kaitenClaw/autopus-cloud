@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autopus Station | Agent Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+      color: #e4e4e7;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .logo {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+    }
+    .title h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #fff;
+      margin: 0;
+    }
+    .title p {
+      font-size: 14px;
+      color: #9ca3af;
+      margin: 4px 0 0;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: rgba(30,30,40,0.8);
+      padding: 16px;
+      border-radius: 10px;
+      border: 1px solid #374151;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .stat-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .stat-content p {
+      margin: 0;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+    .stat-content h3 {
+      margin: 4px 0 0;
+      font-size: 20px;
+      color: #fff;
+    }
+    .agents-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .agent-card {
+      background: linear-gradient(135deg, rgba(30,30,40,0.9) 0%, rgba(20,20,30,0.95) 100%);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid #374151;
+      transition: all 0.3s ease;
+    }
+    .agent-card.online {
+      border-color: #22c55e;
+      box-shadow: 0 0 20px rgba(34,197,94,0.2);
+    }
+    .agent-card.busy {
+      border-color: #f59e0b;
+      box-shadow: 0 0 20px rgba(245,158,11,0.2);
+    }
+    .agent-card.offline {
+      border-color: #ef4444;
+      opacity: 0.7;
+    }
+    .agent-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .agent-icon {
+      font-size: 32px;
+    }
+    .agent-info h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+      margin: 0;
+    }
+    .agent-info p {
+      font-size: 14px;
+      color: #9ca3af;
+      margin: 4px 0 0;
+    }
+    .status-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-left: auto;
+      animation: pulse 2s infinite;
+    }
+    .status-dot.online {
+      background: #22c55e;
+      box-shadow: 0 0 10px #22c55e;
+    }
+    .status-dot.busy {
+      background: #f59e0b;
+      box-shadow: 0 0 10px #f59e0b;
+    }
+    .status-dot.offline {
+      background: #ef4444;
+      animation: none;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .agent-task {
+      background: rgba(0,0,0,0.3);
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+    .agent-task p {
+      margin: 0;
+      font-size: 13px;
+      color: #9ca3af;
+    }
+    .agent-task h4 {
+      margin: 4px 0 0;
+      font-size: 14px;
+      color: #fff;
+      font-weight: 500;
+    }
+    .progress-bar {
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      margin-top: 8px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #6366f1, #8b5cf6);
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+    .agent-metrics {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      font-size: 13px;
+      color: #d1d5db;
+    }
+    .agent-footer {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      font-size: 12px;
+      color: #6b7280;
+    }
+    .communication {
+      background: linear-gradient(135deg, rgba(30,30,40,0.9) 0%, rgba(20,20,30,0.95) 100%);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid #374151;
+    }
+    .communication h2 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      margin: 0 0 16px;
+    }
+    .comm-event {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      border-left: 3px solid #6366f1;
+    }
+    .comm-icon {
+      font-size: 20px;
+    }
+    .comm-content {
+      flex: 1;
+    }
+    .comm-agents {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+    .comm-agent {
+      font-weight: 600;
+    }
+    .comm-message {
+      font-size: 13px;
+      color: #d1d5db;
+    }
+    .comm-time {
+      font-size: 12px;
+      color: #6b7280;
+    }
+    .footer {
+      margin-top: 32px;
+      padding-top: 16px;
+      border-top: 1px solid #374151;
+      text-align: center;
+      color: #6b7280;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">🐙</div>
+    <div class="title">
+      <h1>Autopus Station</h1>
+      <p>Agent Network Dashboard</p>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-icon" style="background: rgba(34,197,94,0.2);">🟢</div>
+      <div class="stat-content">
+        <p>Online Agents</p>
+        <h3>5/5</h3>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background: rgba(245,158,11,0.2);">🟡</div>
+      <div class="stat-content">
+        <p>Busy Agents</p>
+        <h3>2</h3>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background: rgba(99,102,241,0.2);">✅</div>
+      <div class="stat-content">
+        <p>Total Tasks</p>
+        <h3>103</h3>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background: rgba(239,68,68,0.2);">⚠️</div>
+      <div class="stat-content">
+        <p>Security Status</p>
+        <h3>3 Critical</h3>
+      </div>
+    </div>
+  </div>
+
+  <div class="agents-grid">
+    <!-- KAITEN -->
+    <div class="agent-card online">
+      <div class="agent-header">
+        <div class="agent-icon">🧠</div>
+        <div class="agent-info">
+          <h3>KAITEN</h3>
+          <p>Orchestrator</p>
+        </div>
+        <div class="status-dot online"></div>
+      </div>
+      <div class="agent-task">
+        <p>Current Task</p>
+        <h4>sprint-acceleration-sync</h4>
+      </div>
+      <div class="agent-metrics">
+        <div>⚡ 15% CPU</div>
+        <div>💾 128 MB</div>
+        <div>✓ 42 tasks</div>
+        <div>🕐 1d 0h</div>
+      </div>
+      <div class="agent-footer">Port: 18792 | Last heartbeat: Just now</div>
+    </div>
+
+    <!-- FORGE -->
+    <div class="agent-card online">
+      <div class="agent-header">
+        <div class="agent-icon">🔨</div>
+        <div class="agent-info">
+          <h3>FORGE</h3>
+          <p>Builder</p>
+        </div>
+        <div class="status-dot online"></div>
+      </div>
+      <div class="agent-task">
+        <p>Current Task</p>
+        <h4>forge-mvp-001</h4>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 100%;"></div>
+        </div>
+      </div>
+      <div class="agent-metrics">
+        <div>⚡ 25% CPU</div>
+        <div>💾 256 MB</div>
+        <div>✓ 18 tasks</div>
+        <div>🕐 12h 0m</div>
+      </div>
+      <div class="agent-footer">Port: 18793 | Last heartbeat: Just now</div>
+    </div>
+
+    <!-- SIGHT -->
+    <div class="agent-card busy">
+      <div class="agent-header">
+        <div class="agent-icon">👁️</div>
+        <div class="agent-info">
+          <h3>SIGHT</h3>
+          <p>Researcher</p>
+        </div>
+        <div class="status-dot busy"></div>
+      </div>
+      <div class="agent-task">
+        <p>Current Task</p>
+        <h4>mvp-marathon-sight-001</h4>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 75%;"></div>
+        </div>
+      </div>
+      <div class="agent-metrics">
+        <div>⚡ 35% CPU</div>
+        <div>💾 192 MB</div>
+        <div>✓ 23 tasks</div>
+        <div>🕐 1d 0h</div>
+      </div>
+      <div class="agent-footer">Port: 18795 | Last heartbeat: Just now</div>
+    </div>
+
+    <!-- PULSE -->
+    <div class="agent-card online">
+      <div class="agent-header">
+        <div class="agent-icon">⚡</div>
+        <div class="agent-info">
+          <h3>PULSE</h3>
+          <p>DevOps</p>
+        </div>
+        <div class="status-dot online"></div>
+      </div>
+      <div class="agent-task">
+        <p>Current Task</p>
+        <h4>pulse-cloud-001</h4>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 60%;"></div>
+        </div>
+      </div>
+      <div class="agent-metrics">
+        <div>⚡ 20% CPU</div>
+        <div>💾 164 MB</div>
+        <div>✓ 12 tasks</div>
+        <div>🕐 1h 0m</div>
+      </div>
+      <div class="agent-footer">Port: 18797 | Last heartbeat: Just now</div>
+    </div>
+
+    <!-- Fion -->
+    <div class="agent-card online">
+      <div class="agent-header">
+        <div class="agent-icon">🎨</div>
+        <div class="agent-info">
+          <h3>Fion</h3>
+          <p>Creative</p>
+        </div>
+        <div class="status-dot online"></div>
+      </div>
+      <div class="agent-task">
+        <p>Current Task</p>
+        <h4>Idle</h4>
+      </div>
+      <div class="agent-metrics">
+        <div>⚡ 10% CPU</div>
+        <div>💾 96 MB</div>
+        <div>✓ 8 tasks</div>
+        <div>🕐 2d 0h</div>
+      </div>
+      <div class="agent-footer">Port: 18799 | Last heartbeat: Just now</div>
+    </div>
+  </div>
+
+  <div class="communication">
+    <h2>Communication Flow</h2>
+    
+    <div class="comm-event">
+      <div class="comm-icon">✅</div>
+      <div class="comm-content">
+        <div class="comm-agents">
+          <span class="comm-agent" style="color: #ef4444;">PULSE</span>
+          <span>→</span>
+          <span class="comm-agent" style="color: #6366f1;">KAITEN</span>
+        </div>
+        <div class="comm-message">Gateway restarted successfully (PID 99377)</div>
+      </div>
+      <div class="comm-time">12:30 PM</div>
+    </div>
+
+    <div class="comm-event">
+      <div class="comm-icon">📤</div>
+      <div class="comm-content">
+        <div class="comm-agents">
+          <span class="comm-agent" style="color: #6366f1;">KAITEN</span>
+          <span>→</span>
+          <span class="comm-agent" style="color: #ef4444;">PULSE</span>
+        </div>
+        <div class="comm-message">Restart gateway service</div>
+      </div>
+      <div class="comm-time">12:28 PM</div>
+    </div>
+
+    <div class="comm-event">
+      <div class="comm-icon">📊</div>
+      <div class="comm-content">
+        <div class="comm-agents">
+          <span class="comm-agent" style="color: #f59e0b;">FORGE</span>
+          <span>→</span>
+          <span class="comm-agent" style="color: #6366f1;">KAITEN</span>
+        </div>
+        <div class="comm-message">Progress: 50% complete</div>
+      </div>
+      <div class="comm-time">12:25 PM</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Autopus Station v2.0 | All Systems Operational | Last updated: 2026-02-23 12:30 HKT
+  </div>
+
+  <script>
+    // Auto-refresh every 5 seconds
+    setInterval(() => {
+      fetch('/api/agents/status')
+        .then(r => r.json())
+        .then(data => {
+          console.log('Agent statuses updated:', data);
+        })
+        .catch(err => console.error('Failed to fetch statuses:', err));
+    }, 5000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+PULSE GROWTH PROMPT:
+
+Today I will:
+1. Ensure all systems are running optimally
+2. Automate one manual process
+3. Monitor and optimize resource usage
+4. Learn one new infrastructure pattern
+5. Document operational improvements
+
+My growth focus: Mastering DevOps and infrastructure automation.

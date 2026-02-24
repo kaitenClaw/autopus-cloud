@@ -60,9 +60,7 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
-    ports:
-      # Only expose for debugging - remove in production
-      - "127.0.0.1:5433:5432"
+    # Internal network only - no external port mapping
 
 volumes:
   postgres_data:

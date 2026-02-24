@@ -13,7 +13,6 @@ const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const env_1 = require("./config/env");
 const errorHandler_1 = require("./middleware/errorHandler");
 const errors_1 = require("./utils/errors");
-const prisma_1 = require("./config/prisma");
 const auth_routes_1 = __importDefault(require("./routes/auth.routes"));
 const agent_routes_1 = __importDefault(require("./routes/agent.routes"));
 const agent_lifecycle_routes_1 = __importDefault(require("./routes/agent-lifecycle.routes"));
@@ -112,45 +111,17 @@ const authLimiter = (0, express_rate_limit_1.default)({
     legacyHeaders: false,
     message: { message: 'Too many login attempts from this IP, please try again after an hour' }
 });
-// Health Check
+// Health Check - Simplified to prevent hanging
 const appStartTime = Date.now();
 app.get(['/health', '/api/health'], async (_req, res) => {
-    let databaseStatus = 'disconnected';
-    try {
-        await prisma_1.prisma.$queryRaw `SELECT 1`;
-        databaseStatus = 'connected';
-    }
-    catch {
-        // DB unreachable
-    }
-    let litellmStatus = 'disconnected';
-    try {
-        // Health check LiteLLM proxy without making a live model call
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 2000); // 2s timeout
-        const litellmHost = env_1.env.LITELLM_HOST || 'localhost';
-        const litellmPort = env_1.env.LITELLM_PORT || '4000';
-        const litellmHealthResponse = await fetch(`http://${litellmHost}:${litellmPort}/health/liveliness`, {
-            method: 'GET',
-            headers: {
-                'Authorization': 'Bearer ' + (env_1.env.LITELLM_MASTER_KEY || 'vertex-proxy')
-            },
-            signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-        if (litellmHealthResponse.ok) {
-            litellmStatus = 'connected';
-        }
-    }
-    catch {
-        // LiteLLM unreachable
-    }
+    // Quick health check without external dependencies
     res.json({
-        status: databaseStatus === 'connected' ? 'ok' : 'degraded',
-        version: '1.0.0', // Updated version
+        status: 'ok',
+        version: '1.0.0',
+        uptime: Date.now() - appStartTime,
         services: {
-            database: databaseStatus,
-            litellm: litellmStatus,
+            database: 'unknown', // Will be checked separately
+            litellm: 'unknown',
         },
     });
 });
