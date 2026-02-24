@@ -37,51 +37,46 @@ const CreateAgentModal: React.FC<CreateAgentModalProps> = ({ isOpen, onClose, on
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div 
-        className="w-full max-w-md p-6 relative z-10 rounded-2xl border border-white/10 backdrop-blur-xl"
-        style={{ 
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)'
-        }}
-      >
+      <div className="absolute inset-0 bg-primary/60" onClick={onClose} />
+      <div className="persona-card w-full max-w-md p-6 relative z-10">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-white">收養新 Agent</h2>
+          <h2 className="text-xl font-semibold text-primary">Adopt New Agent</h2>
           <button 
             onClick={onClose}
-            className="p-2 hover:bg-white/10 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+            className="p-2 hover:bg-autopus rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
           >
-            <X size={20} className="text-white/60" />
+            <X size={20} className="text-secondary" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-sm text-white/60 mb-2">Agent 名稱</label>
+            <label className="block text-sm text-secondary mb-2">Agent Name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full bg-white/5 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-indigo-500 transition-colors min-h-[44px]"
-              placeholder="例如：Nova"
+              className="input-field w-full"
+              placeholder="e.g., Nova"
               required
             />
           </div>
 
           <div className="mb-6">
-            <label className="block text-sm text-white/60 mb-2">角色類型</label>
+            <label className="block text-sm text-secondary mb-2">Role Type</label>
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="w-full bg-white/5 border border-white/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors min-h-[44px] appearance-none cursor-pointer"
+              className="input-field w-full"
               required
             >
-              <option value="" className="bg-gray-900">選擇角色...</option>
-              <option value="Builder" className="bg-gray-900">建造者 (Builder)</option>
-              <option value="Researcher" className="bg-gray-900">研究者 (Researcher)</option>
-              <option value="DevOps" className="bg-gray-900">運維 (DevOps)</option>
-              <option value="Creative" className="bg-gray-900">創意 (Creative)</option>
-              <option value="Orchestrator" className="bg-gray-900">協調者 (Orchestrator)</option>
-              <option value="Analyst" className="bg-gray-900">分析師 (Analyst)</option>
+              <option value="">Select role...</option>
+              <option value="Builder">Builder</option>
+              <option value="Researcher">Researcher</option>
+              <option value="DevOps">DevOps</option>
+              <option value="Creative">Creative</option>
+              <option value="Orchestrator">Orchestrator</option>
+              <option value="Analyst">Analyst</option>
             </select>
           </div>
 
@@ -89,15 +84,15 @@ const CreateAgentModal: React.FC<CreateAgentModalProps> = ({ isOpen, onClose, on
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 px-4 bg-white/5 hover:bg-white/10 border border-white/20 rounded-lg text-white transition-colors min-h-[44px]"
+              className="btn-secondary flex-1"
             >
-              取消
+              Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 py-3 px-4 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-white font-medium transition-colors min-h-[44px]"
+              className="btn-primary flex-1"
             >
-              創建 Agent
+              Create Agent
             </button>
           </div>
         </form>
@@ -116,23 +111,23 @@ interface AgentsTabProps {
   onCreateClick: () => void;
 }
 
-const AgentsTab: React.FC<AgentsTabProps> = ({ 
-  agents, 
-  onChat, 
-  onMemory, 
-  onSettings, 
+const AgentsTab: React.FC<AgentsTabProps> = ({
+  agents,
+  onChat,
+  onMemory,
+  onSettings,
   onDelete,
-  onCreateClick 
+  onCreateClick
 }) => {
   const onlineAgents = agents.filter(a => a.status === 'online').length;
   const busyAgents = agents.filter(a => a.status === 'busy').length;
   const totalTasks = agents.reduce((sum, a) => sum + a.metrics.tasksCompleted, 0);
 
   const stats = [
-    { icon: Cloud, label: '在線 Agents', value: `${onlineAgents}/${agents.length}`, color: '#6366F1' },
-    { icon: Activity, label: '忙碌中', value: busyAgents, color: '#f59e0b' },
-    { icon: CheckCircle, label: '完成任務', value: totalTasks, color: '#10B981' },
-    { icon: Shield, label: '安全狀態', value: '健康', color: '#22c55e' },
+    { icon: Cloud, label: 'Online', value: `${onlineAgents}/${agents.length}` },
+    { icon: Activity, label: 'Busy', value: busyAgents },
+    { icon: CheckCircle, label: 'Tasks Done', value: totalTasks },
+    { icon: Shield, label: 'Security', value: 'Healthy' },
   ];
 
   return (
@@ -140,20 +135,19 @@ const AgentsTab: React.FC<AgentsTabProps> = ({
       {/* Header */}
       <header>
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-          <div 
+          <div
             className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center text-2xl sm:text-3xl flex-shrink-0"
-            style={{ 
-              background: 'linear-gradient(135deg, #6366F1, #8b5cf6)',
-              boxShadow: '0 0 30px rgba(99, 102, 241, 0.3)'
+            style={{
+              background: 'linear-gradient(135deg, #2B2D42, #3D3F5C)',
             }}
           >
             🐙
           </div>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white">
+            <h1 className="text-2xl sm:text-3xl font-bold text-primary">
               Your Personas
             </h1>
-            <p className="text-sm sm:text-base text-white/50 mt-1">
+            <p className="text-sm sm:text-base text-secondary mt-1">
               {agents.length} AI personas active
             </p>
           </div>
@@ -163,20 +157,18 @@ const AgentsTab: React.FC<AgentsTabProps> = ({
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {stats.map((stat, i) => (
-          <div 
+          <div
             key={i}
-            className="rounded-xl p-3 sm:p-4 flex items-center gap-3 border border-white/10 backdrop-blur-md"
-            style={{ background: 'rgba(255,255,255,0.05)' }}
+            className="persona-card p-3 sm:p-4 flex items-center gap-3"
           >
-            <div 
-              className="p-2 sm:p-2.5 rounded-lg flex-shrink-0"
-              style={{ background: `${stat.color}20` }}
+            <div
+              className="p-2 sm:p-2.5 rounded-lg flex-shrink-0 bg-autopus"
             >
-              <stat.icon size={18} style={{ color: stat.color }} />
+              <stat.icon size={18} className="text-accent" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs text-white/50 truncate">{stat.label}</p>
-              <p className="text-lg sm:text-xl font-semibold text-white truncate">{stat.value}</p>
+              <p className="text-xs text-tertiary truncate">{stat.label}</p>
+              <p className="text-lg sm:text-xl font-semibold text-primary truncate">{stat.value}</p>
             </div>
           </div>
         ))}
@@ -185,21 +177,21 @@ const AgentsTab: React.FC<AgentsTabProps> = ({
       {/* Agent Grid */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg sm:text-xl font-semibold text-white">Agent 展示廳</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-primary">Agent Gallery</h2>
           <button
             onClick={onCreateClick}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-white text-sm font-medium transition-colors"
+            className="btn-primary flex items-center gap-2"
           >
             <Plus size={16} />
-            收養 Agent
+            Adopt Agent
           </button>
         </div>
-        
+
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {agents.map(agent => (
-            <LifeAgentCard 
-              key={agent.id} 
-              agent={agent} 
+            <LifeAgentCard
+              key={agent.id}
+              agent={agent}
               onChat={onChat}
               onMemory={onMemory}
               onSettings={onSettings}
