@@ -6,6 +6,23 @@
 
 ---
 
+## 🎨 Brand Identity Update (2026-02-24)
+
+**New Corporate Minimalist Theme:**
+- **Primary:** Navy (#1a2332) — Deep, trustworthy, professional
+- **Secondary:** White (#f8fafc) — Clean, crisp, modern
+- **Accent:** Coral (#f4a261) — Warm, human, approachable
+- **Logo:** Geometric octopus with 8 tentacles (8 agents), coral nodes
+- **Style:** DeepMind/Notion-inspired, enterprise-ready
+
+**Files Updated:**
+- `frontend/src/index.css` — New color tokens
+- `frontend/src/components/AutopusLogo.tsx` — New SVG logo
+- `frontend/index.html` — New favicon
+- `frontend/src/components/LandingPage.tsx` — Updated to match
+
+---
+
 ## 🎨 Dashboard 2.0 — Agent Companion Platform (DEPLOYED)
 
 **Status:** 🟢 Live at https://dashboard.autopus.cloud  
