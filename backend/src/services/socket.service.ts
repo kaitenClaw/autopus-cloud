@@ -1,6 +1,13 @@
 import { Server as HttpServer } from 'http';
 import { Server as SocketServer } from 'socket.io';
+import jwt from 'jsonwebtoken';
 import { env } from '../config/env';
+import { UserRole } from '@prisma/client';
+
+interface SocketUser {
+  userId: string;
+  role?: UserRole;
+}
 
 export class SocketService {
   private static instance: SocketService;
@@ -24,11 +31,32 @@ export class SocketService {
       }
     });
 
+    // JWT Authentication Middleware
+    this.io.use((socket: any, next: any) => {
+      const token = socket.handshake.auth.token || socket.handshake.query.token;
+      
+      if (!token) {
+        return next(new Error('Authentication required'));
+      }
+
+      try {
+        const decoded = jwt.verify(token, env.JWT_ACCESS_SECRET) as SocketUser;
+        socket.user = decoded;
+        next();
+      } catch (err) {
+        next(new Error('Invalid or expired token'));
+      }
+    });
+
     this.io.on('connection', (socket: any) => {
-      console.log(`🔌 Socket connected: ${socket.id}`);
+      const user = socket.user as SocketUser;
+      console.log(`🔌 Socket connected: ${socket.id} (User: ${user.userId})`);
+
+      // Join user-specific room for targeted messages
+      socket.join(user.userId);
 
       socket.on('disconnect', () => {
-        console.log(`🔌 Socket disconnected: ${socket.id}`);
+        console.log(`🔌 Socket disconnected: ${socket.id} (User: ${user.userId})`);
       });
     });
   }

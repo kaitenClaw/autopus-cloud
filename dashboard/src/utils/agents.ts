@@ -24,6 +24,15 @@ export const AGENT_ICONS: Record<string, string> = {
   fion: '🎨',
 };
 
+// Agent SOUL descriptions - core personality essence
+export const AGENT_SOULS: Record<string, string> = {
+  kaiten: '你的策略大腦',
+  forge: '你的建造者',
+  sight: '你的觀察者',
+  pulse: '你的脈動',
+  fion: '你的創意夥伴',
+};
+
 export async function fetchAgentStatus(port: number, token?: string): Promise<Partial<Agent>> {
   try {
     const url = token 

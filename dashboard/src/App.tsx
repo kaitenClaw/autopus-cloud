@@ -8,8 +8,9 @@ import {
   X
 } from 'lucide-react';
 import type { Agent, CommunicationEvent } from './types';
-import { AgentCard } from './components/AgentCard';
+import { LifeAgentCard } from './components/LifeAgentCard';
 import { CommunicationFlow } from './components/CommunicationFlow';
+import { MobileBottomNav, DesktopSideNav } from './components/Navigation';
 import { AGENT_PORTS, fetchAgentStatus } from './utils/agents';
 
 // Modal Component for Create Agent
@@ -36,9 +37,14 @@ const CreateAgentModal: React.FC<CreateAgentModalProps> = ({ isOpen, onClose, on
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="glass-card w-full max-w-md p-6 relative z-10">
+      <div 
+        className="w-full max-w-md p-6 relative z-10 rounded-2xl border border-white/10 backdrop-blur-xl"
+        style={{ 
+          background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)'
+        }}
+      >
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-white">Create New Agent</h2>
+          <h2 className="text-xl font-semibold text-white">收養新 Agent</h2>
           <button 
             onClick={onClose}
             className="p-2 hover:bg-white/10 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
@@ -49,32 +55,32 @@ const CreateAgentModal: React.FC<CreateAgentModalProps> = ({ isOpen, onClose, on
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-sm text-white/60 mb-2">Agent Name</label>
+            <label className="block text-sm text-white/60 mb-2">Agent 名稱</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full bg-white/5 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-indigo-500 transition-colors min-h-[44px]"
-              placeholder="e.g., Nova"
+              placeholder="例如：Nova"
               required
             />
           </div>
 
           <div className="mb-6">
-            <label className="block text-sm text-white/60 mb-2">Role</label>
+            <label className="block text-sm text-white/60 mb-2">角色類型</label>
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
               className="w-full bg-white/5 border border-white/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors min-h-[44px] appearance-none cursor-pointer"
               required
             >
-              <option value="" className="bg-gray-900">Select a role...</option>
-              <option value="Builder" className="bg-gray-900">Builder</option>
-              <option value="Researcher" className="bg-gray-900">Researcher</option>
-              <option value="DevOps" className="bg-gray-900">DevOps</option>
-              <option value="Creative" className="bg-gray-900">Creative</option>
-              <option value="Orchestrator" className="bg-gray-900">Orchestrator</option>
-              <option value="Analyst" className="bg-gray-900">Analyst</option>
+              <option value="" className="bg-gray-900">選擇角色...</option>
+              <option value="Builder" className="bg-gray-900">建造者 (Builder)</option>
+              <option value="Researcher" className="bg-gray-900">研究者 (Researcher)</option>
+              <option value="DevOps" className="bg-gray-900">運維 (DevOps)</option>
+              <option value="Creative" className="bg-gray-900">創意 (Creative)</option>
+              <option value="Orchestrator" className="bg-gray-900">協調者 (Orchestrator)</option>
+              <option value="Analyst" className="bg-gray-900">分析師 (Analyst)</option>
             </select>
           </div>
 
@@ -84,13 +90,13 @@ const CreateAgentModal: React.FC<CreateAgentModalProps> = ({ isOpen, onClose, on
               onClick={onClose}
               className="flex-1 py-3 px-4 bg-white/5 hover:bg-white/10 border border-white/20 rounded-lg text-white transition-colors min-h-[44px]"
             >
-              Cancel
+              取消
             </button>
             <button
               type="submit"
               className="flex-1 py-3 px-4 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-white font-medium transition-colors min-h-[44px]"
             >
-              Create Agent
+              創建 Agent
             </button>
           </div>
         </form>
@@ -99,7 +105,158 @@ const CreateAgentModal: React.FC<CreateAgentModalProps> = ({ isOpen, onClose, on
   );
 };
 
+// Agents Tab Content
+interface AgentsTabProps {
+  agents: Agent[];
+  onChat: (agentId: string) => void;
+  onMemory: (agentId: string) => void;
+  onSettings: (agentId: string) => void;
+  onDelete: (agentId: string) => void;
+  onCreateClick: () => void;
+}
+
+const AgentsTab: React.FC<AgentsTabProps> = ({ 
+  agents, 
+  onChat, 
+  onMemory, 
+  onSettings, 
+  onDelete,
+  onCreateClick 
+}) => {
+  const onlineAgents = agents.filter(a => a.status === 'online').length;
+  const busyAgents = agents.filter(a => a.status === 'busy').length;
+  const totalTasks = agents.reduce((sum, a) => sum + a.metrics.tasksCompleted, 0);
+
+  const stats = [
+    { icon: Cloud, label: '在線 Agents', value: `${onlineAgents}/${agents.length}`, color: '#6366F1' },
+    { icon: Activity, label: '忙碌中', value: busyAgents, color: '#f59e0b' },
+    { icon: CheckCircle, label: '完成任務', value: totalTasks, color: '#10B981' },
+    { icon: Shield, label: '安全狀態', value: '健康', color: '#22c55e' },
+  ];
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <header>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <div 
+            className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center text-2xl sm:text-3xl flex-shrink-0"
+            style={{ 
+              background: 'linear-gradient(135deg, #6366F1, #8b5cf6)',
+              boxShadow: '0 0 30px rgba(99, 102, 241, 0.3)'
+            }}
+          >
+            🐙
+          </div>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">
+              我的數字夥伴
+            </h1>
+            <p className="text-sm sm:text-base text-white/50 mt-1">
+              {agents.length} 個 Agent 正在學習與成長
+            </p>
+          </div>
+        </div>
+      </header>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {stats.map((stat, i) => (
+          <div 
+            key={i}
+            className="rounded-xl p-3 sm:p-4 flex items-center gap-3 border border-white/10 backdrop-blur-md"
+            style={{ background: 'rgba(255,255,255,0.05)' }}
+          >
+            <div 
+              className="p-2 sm:p-2.5 rounded-lg flex-shrink-0"
+              style={{ background: `${stat.color}20` }}
+            >
+              <stat.icon size={18} style={{ color: stat.color }} />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs text-white/50 truncate">{stat.label}</p>
+              <p className="text-lg sm:text-xl font-semibold text-white truncate">{stat.value}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Agent Grid */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg sm:text-xl font-semibold text-white">Agent 展示廳</h2>
+          <button
+            onClick={onCreateClick}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-white text-sm font-medium transition-colors"
+          >
+            <Plus size={16} />
+            收養 Agent
+          </button>
+        </div>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          {agents.map(agent => (
+            <LifeAgentCard 
+              key={agent.id} 
+              agent={agent} 
+              onChat={onChat}
+              onMemory={onMemory}
+              onSettings={onSettings}
+              onDelete={onDelete}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Placeholder tabs
+const ChatTab: React.FC = () => (
+  <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+    <div className="w-20 h-20 rounded-full bg-indigo-500/20 flex items-center justify-center mb-4">
+      <span className="text-4xl">💬</span>
+    </div>
+    <h2 className="text-xl font-semibold text-white mb-2">對話功能即將推出</h2>
+    <p className="text-white/50 max-w-md">與你的數字夥伴實時對話，正在開發中...</p>
+  </div>
+);
+
+const DnaTab: React.FC = () => (
+  <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+    <div className="w-20 h-20 rounded-full bg-amber-500/20 flex items-center justify-center mb-4">
+      <span className="text-4xl">🧬</span>
+    </div>
+    <h2 className="text-xl font-semibold text-white mb-2">Agent DNA 即將推出</h2>
+    <p className="text-white/50 max-w-md">探索 Agent 的 SOUL、MEMORY、SKILLS 和 CRON 排程</p>
+  </div>
+);
+
+const MarketplaceTab: React.FC = () => (
+  <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+    <div className="w-20 h-20 rounded-full bg-emerald-500/20 flex items-center justify-center mb-4">
+      <span className="text-4xl">🛒</span>
+    </div>
+    <h2 className="text-xl font-semibold text-white mb-2">Skill Marketplace 即將推出</h2>
+    <p className="text-white/50 max-w-md">為你的 Agent 學習新技能，擴展能力邊界</p>
+  </div>
+);
+
+const ProfileTab: React.FC = () => (
+  <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+    <div className="w-20 h-20 rounded-full bg-purple-500/20 flex items-center justify-center mb-4">
+      <span className="text-4xl">👤</span>
+    </div>
+    <h2 className="text-xl font-semibold text-white mb-2">個人中心即將推出</h2>
+    <p className="text-white/50 max-w-md">管理你的賬戶、訂閱和偏好設置</p>
+  </div>
+);
+
 const Dashboard: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<'agents' | 'chat' | 'dna' | 'marketplace' | 'profile'>('agents');
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [unreadMessages] = useState(3);
+
   const [agents, setAgents] = useState<Agent[]>([
     { 
       id: 'kaiten', 
@@ -117,8 +274,8 @@ const Dashboard: React.FC = () => {
       role: 'Builder', 
       status: 'online',
       port: AGENT_PORTS.forge,
-      currentTask: 'forge-mvp-001',
-      taskProgress: 100,
+      currentTask: 'dashboard-2.0-ui-refactor',
+      taskProgress: 65,
       lastHeartbeat: new Date(),
       metrics: { cpuUsage: 25, memoryUsage: 256, tasksCompleted: 18, uptime: 43200 }
     },
@@ -128,8 +285,8 @@ const Dashboard: React.FC = () => {
       role: 'Researcher', 
       status: 'busy',
       port: AGENT_PORTS.sight,
-      currentTask: 'mvp-marathon-sight-001',
-      taskProgress: 75,
+      currentTask: 'security-audit-findings',
+      taskProgress: 90,
       lastHeartbeat: new Date(),
       metrics: { cpuUsage: 35, memoryUsage: 192, tasksCompleted: 23, uptime: 86400 }
     },
@@ -139,8 +296,8 @@ const Dashboard: React.FC = () => {
       role: 'DevOps', 
       status: 'online',
       port: AGENT_PORTS.pulse,
-      currentTask: 'pulse-cloud-001',
-      taskProgress: 60,
+      currentTask: 'infrastructure-optimization',
+      taskProgress: 40,
       lastHeartbeat: new Date(),
       metrics: { cpuUsage: 20, memoryUsage: 164, tasksCompleted: 12, uptime: 3600 }
     },
@@ -162,7 +319,7 @@ const Dashboard: React.FC = () => {
       from: 'kaiten',
       to: 'forge',
       type: 'task_assignment',
-      message: 'Assigned: Fix MVP Blockers',
+      message: 'Assigned: Dashboard 2.0 UI Refactor',
     },
     {
       id: '2',
@@ -170,35 +327,33 @@ const Dashboard: React.FC = () => {
       from: 'forge',
       to: 'kaiten',
       type: 'status_update',
-      message: 'Progress: 50% complete',
+      message: 'Progress: 65% complete - LifeAgentCard component done',
     },
     {
       id: '3',
       timestamp: new Date(Date.now() - 180000),
       from: 'kaiten',
-      to: 'pulse',
+      to: 'sight',
       type: 'task_assignment',
-      message: 'Restart gateway service',
+      message: 'Review security findings',
     },
     {
       id: '4',
       timestamp: new Date(Date.now() - 120000),
-      from: 'pulse',
+      from: 'sight',
       to: 'kaiten',
       type: 'completion',
-      message: 'Gateway restarted successfully (PID 99377)',
+      message: '3 critical issues resolved and deployed',
     },
     {
       id: '5',
       timestamp: new Date(Date.now() - 60000),
       from: 'kaiten',
-      to: 'sight',
+      to: 'pulse',
       type: 'task_assignment',
-      message: 'Security audit findings review',
+      message: 'Monitor deployment health',
     },
   ]);
-
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(async () => {
@@ -229,126 +384,84 @@ const Dashboard: React.FC = () => {
 
   const handleChat = (agentId: string) => {
     console.log('Chat with agent:', agentId);
-    // TODO: Implement chat functionality
+    setActiveTab('chat');
   };
 
-  const handleLogs = (agentId: string) => {
-    console.log('View logs for agent:', agentId);
-    // TODO: Implement logs viewer
+  const handleMemory = (agentId: string) => {
+    console.log('View memory for agent:', agentId);
+    setActiveTab('dna');
   };
 
   const handleSettings = (agentId: string) => {
     console.log('Settings for agent:', agentId);
-    // TODO: Implement settings modal
   };
 
   const handleDelete = (agentId: string) => {
-    if (confirm('Are you sure you want to delete this agent?')) {
+    if (confirm('確定要移除這個 Agent 嗎？')) {
       setAgents(agents.filter(a => a.id !== agentId));
     }
   };
 
-  const onlineAgents = agents.filter(a => a.status === 'online').length;
-  const busyAgents = agents.filter(a => a.status === 'busy').length;
-  const totalTasks = agents.reduce((sum, a) => sum + a.metrics.tasksCompleted, 0);
-
-  const stats = [
-    { icon: Cloud, label: 'Cloud Agents', value: `${onlineAgents}/${agents.length}`, color: '#6366F1' },
-    { icon: Activity, label: 'Busy Agents', value: busyAgents, color: '#f59e0b' },
-    { icon: CheckCircle, label: 'Total Tasks', value: totalTasks, color: '#10B981' },
-    { icon: Shield, label: 'Security Status', value: 'Healthy', color: '#22c55e' },
-  ];
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'agents':
+        return (
+          <AgentsTab
+            agents={agents}
+            onChat={handleChat}
+            onMemory={handleMemory}
+            onSettings={handleSettings}
+            onDelete={handleDelete}
+            onCreateClick={() => setIsCreateModalOpen(true)}
+          />
+        );
+      case 'chat':
+        return <ChatTab />;
+      case 'dna':
+        return <DnaTab />;
+      case 'marketplace':
+        return <MarketplaceTab />;
+      case 'profile':
+        return <ProfileTab />;
+      default:
+        return null;
+    }
+  };
 
   return (
-    <div className="min-h-screen p-4 sm:p-6 lg:p-8 pb-24">
-      {/* Header */}
-      <header className="mb-6 sm:mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-          <div 
-            className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center text-2xl sm:text-3xl flex-shrink-0"
-            style={{ 
-              background: 'linear-gradient(135deg, #6366F1, #8b5cf6)',
-              boxShadow: '0 0 30px rgba(99, 102, 241, 0.3)'
-            }}
-          >
-            🐙
-          </div>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white">
-              Autopus Station
-            </h1>
-            <p className="text-sm sm:text-base text-white/50 mt-1">
-              Cloud Agent Network Dashboard
-            </p>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen flex">
+      {/* Desktop Side Navigation */}
+      <DesktopSideNav 
+        activeTab={activeTab} 
+        onTabChange={setActiveTab}
+        unreadMessages={unreadMessages}
+      />
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
-        {stats.map((stat, i) => (
-          <div 
-            key={i}
-            className="glass-card p-3 sm:p-4 flex items-center gap-3"
-          >
-            <div 
-              className="p-2 sm:p-2.5 rounded-lg flex-shrink-0"
-              style={{ background: `${stat.color}20` }}
-            >
-              <stat.icon size={18} style={{ color: stat.color }} />
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs text-white/50 truncate">{stat.label}</p>
-              <p className="text-lg sm:text-xl font-semibold text-white truncate">{stat.value}</p>
-            </div>
+      {/* Main Content Area */}
+      <main className="flex-1 md:ml-64 p-4 sm:p-6 lg:p-8 pb-24 md:pb-8">
+        {renderTabContent()}
+
+        {/* Communication Flow - Only show on agents tab */}
+        {activeTab === 'agents' && (
+          <div className="mt-8">
+            <CommunicationFlow events={events} />
           </div>
-        ))}
-      </div>
+        )}
 
-      {/* Main Content */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
-        {/* Agent Grid */}
-        <div className="xl:col-span-2">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg sm:text-xl font-semibold text-white">Cloud Agents</h2>
-            <span className="text-sm text-white/40">{agents.length} agents</span>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-4">
-            {agents.map(agent => (
-              <AgentCard 
-                key={agent.id} 
-                agent={agent} 
-                onChat={handleChat}
-                onLogs={handleLogs}
-                onSettings={handleSettings}
-                onDelete={handleDelete}
-              />
-            ))}
-          </div>
-        </div>
+        {/* Footer */}
+        <footer className="mt-8 sm:mt-12 pt-6 border-t border-white/10">
+          <p className="text-center text-sm text-white/30">
+            Autopus Station v2.0 | 最後更新: {new Date().toLocaleString()}
+          </p>
+        </footer>
+      </main>
 
-        {/* Communication Flow */}
-        <div className="xl:col-span-1">
-          <CommunicationFlow events={events} />
-        </div>
-      </div>
-
-      {/* Footer */}
-      <footer className="mt-8 sm:mt-12 pt-6 border-t border-white/10">
-        <p className="text-center text-sm text-white/30">
-          Autopus Station v2.0 | Last updated: {new Date().toLocaleString()}
-        </p>
-      </footer>
-
-      {/* Floating Action Button */}
-      <button
-        onClick={() => setIsCreateModalOpen(true)}
-        className="fab-button"
-        title="Create New Agent"
-      >
-        <Plus size={24} />
-      </button>
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav 
+        activeTab={activeTab} 
+        onTabChange={setActiveTab}
+        unreadMessages={unreadMessages}
+      />
 
       {/* Create Agent Modal */}
       <CreateAgentModal

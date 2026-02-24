@@ -17,9 +17,9 @@ services:
   postgres:
     image: postgres:15-alpine
     environment:
-      - POSTGRES_USER=ocaas
-      - POSTGRES_PASSWORD=ocaas_password
-      - POSTGRES_DB=ocaas
+      - POSTGRES_USER=${DB_USER:-ocaas}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME:-ocaas}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: always
