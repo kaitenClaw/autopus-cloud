@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  /* Standard build for Docker */
+  images: {
+    unoptimized: true
+  }
 };
 
 export default nextConfig;

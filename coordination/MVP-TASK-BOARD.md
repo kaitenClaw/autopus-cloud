@@ -44,12 +44,12 @@
 
 | Task | Owner | Status | Deadline |
 |------|-------|--------|----------|
-| Update to Design System v4.0 | FORGE | 🟠 | 2026-02-25 |
-| Hero Section | FORGE | 🟠 | 2026-02-25 |
-| Features Section | FORGE | ⏳ | 2026-02-25 |
-| Pricing Section | FORGE | ⏳ | 2026-02-26 |
-| CTA + Footer | FORGE | ⏳ | 2026-02-26 |
-| Production Deploy | FORGE | ⏳ | 2026-02-26 |
+| Update to Design System v4.0 | FORGE | ✅ | 2026-02-25 |
+| Hero Section | FORGE | ✅ | 2026-02-25 |
+| Features Section | FORGE | ✅ | 2026-02-25 |
+| AI Team Showcase | FORGE | ✅ | 2026-02-25 |
+| CTA + Footer | FORGE | ✅ | 2026-02-25 |
+| Production Deploy | FORGE | 🟠 | 2026-02-26 |
 
 **Current Issues:**
 - [ ] Dark theme → Navy + Coral + Warm White
