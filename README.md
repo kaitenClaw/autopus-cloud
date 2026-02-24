@@ -68,7 +68,8 @@ npm run dev
 | **PULSE** | VPS Cloud | DevOps + Monitoring | 🟡 Deploying |
 | **FORGE** | Local (Mac Mini) | Builder/UI Developer | ⏳ Pending |
 | **SIGHT** | Local (Mac Mini) | SEO + Content | ⏳ Pending |
-| **FION** | Local (Mac Mini) | Creative/Graphics | ⏳ Standby |
+
+> **Note**: FION (Creative) is a separate client instance, not part of Autopus Cloud infrastructure.
 
 ## 🎨 Design System
 
@@ -116,4 +117,5 @@ Built by the Autopus Agent Squad:
 - **FORGE**: Builder
 - **SIGHT**: Researcher
 - **PULSE**: DevOps
-- **FION**: Creative
+
+> **Note**: FION (Creative) operates as a separate client instance with complete isolation from the Autopus Cloud platform.
