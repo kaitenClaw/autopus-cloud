@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  pulse-lite:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pulse-lite
+    restart: unless-stopped
+    ports:
+      - "18797:3000"
+    environment:
+      - AGENT_ID=pulse-cloud
+      - AGENT_ROLE=devops
+      - LITELLM_HOST=http://litellm:4000
+      - LITELLM_API_KEY=${LITELLM_API_KEY}
+      - TELEGRAM_TOKEN=8597634042:AAGmjoWeYve1PeOmxaQ_BlivjM7C8RKG5fw
+      - PORT=3000
+    networks:
+      - autopus-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  forge-lite:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: forge-lite
+    restart: unless-stopped
+    ports:
+      - "18793:3000"
+    environment:
+      - AGENT_ID=forge-cloud
+      - AGENT_ROLE=builder
+      - LITELLM_HOST=http://litellm:4000
+      - LITELLM_API_KEY=${LITELLM_API_KEY}
+      - PORT=3000
+    networks:
+      - autopus-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  sight-lite:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sight-lite
+    restart: unless-stopped
+    ports:
+      - "18795:3000"
+    environment:
+      - AGENT_ID=sight-cloud
+      - AGENT_ROLE=researcher
+      - LITELLM_HOST=http://litellm:4000
+      - LITELLM_API_KEY=${LITELLM_API_KEY}
+      - PORT=3000
+    networks:
+      - autopus-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+networks:
+  autopus-network:
+    external: true
