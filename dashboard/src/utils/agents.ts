@@ -30,6 +30,15 @@ export const AGENT_SOULS: Record<string, string> = {
 };
 
 export async function fetchAgentStatus(port: number, token?: string): Promise<Partial<Agent>> {
+  // Skip status fetch in production - agents not exposed publicly
+  if (import.meta.env.PROD) {
+    return {
+      status: 'online',
+      lastHeartbeat: new Date(),
+      metrics: { cpuUsage: 0, memoryUsage: 0, tasksCompleted: 0, uptime: 0 },
+    };
+  }
+
   try {
     const url = token 
       ? `http://localhost:${port}/status?token=${token}`
