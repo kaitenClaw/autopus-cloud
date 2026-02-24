@@ -3,19 +3,19 @@ import { AuthProvider } from './context/AuthContext';
 import './globals.css';
 
 export const metadata = {
-  title: 'Autopus — 你的數字生命體夥伴',
-  description: '收養你的第一個 AI Agent。它有靈魂、會記得你、持續進化。Local 或 Cloud，數據自主。像 Jarvis 咁熟悉你的 AI 夥伴。',
-  keywords: ['AI Agent', '數字生命體', 'Jarvis AI', '個人 AI', 'AI 夥伴', 'Agent 平台'],
+  title: 'Autopus — Your AI Persona Companion',
+  description: 'Activate your first Intelligent Agent. It has memory, learns from you, and grows with you. Local or Cloud, your data stays yours. An AI companion that truly knows you.',
+  keywords: ['AI Agent', 'AI Persona', 'Jarvis AI', 'Personal AI', 'AI Companion', 'Agent Platform'],
   openGraph: {
-    title: 'Autopus — 收養你的 AI 夥伴',
-    description: '有靈魂嘅 AI Agent，記得你嘅喜好，持續成長，幫你處理一切',
+    title: 'Autopus — Activate Your AI Companion',
+    description: 'An AI with memory that learns your preferences and grows with you',
     image: 'https://autopus.cloud/og-agent-companion.jpg',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Autopus — 你的數字生命體',
-    description: '收養你的 AI 夥伴。有記憶、會進化、真正懂你',
+    title: 'Autopus — Your AI Persona',
+    description: 'Activate your AI companion. With memory, evolution, and true understanding',
   },
 };
 

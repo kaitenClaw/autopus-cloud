@@ -83,14 +83,11 @@ export const DesktopSideNav: React.FC<DesktopSideNavProps> = ({
       {/* Logo */}
       <div className="p-6 border-b border-autopus-border">
         <div className="flex items-center gap-3">
-          <div 
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
-            style={{ 
-              background: 'linear-gradient(135deg, #2B2D42, #3D3F5C)',
-            }}
-          >
-            🐙
-          </div>
+          <img
+            src="/autopus-logo.jpg"
+            alt="Autopus"
+            className="w-10 h-10 rounded-xl object-cover"
+          />
           <div>
             <h1 className="font-bold text-primary">Autopus</h1>
             <p className="text-xs text-secondary">Agent Companion</p>

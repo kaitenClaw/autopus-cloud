@@ -1,0 +1,62 @@
+{
+  "task": "SEO + Content Strategy",
+  "assignedTo": "SIGHT",
+  "deadline": "2026-02-25 12:00 HKT",
+  "status": "IN_PROGRESS",
+  "lastUpdated": "2026-02-24 03:48 HKT",
+  "completed": [
+    {
+      "item": "SEO Meta Tags",
+      "path": "~/ocaas-project/command-center/src/app/layout.tsx",
+      "status": "DONE",
+      "notes": "Updated title, description, keywords, Open Graph, Twitter cards"
+    },
+    {
+      "item": "First Article",
+      "path": "~/ocaas-project/command-center/content/blog/why-ai-needs-a-soul.md",
+      "status": "DONE",
+      "notes": "~1300 words, emotional storytelling approach, no technical jargon"
+    },
+    {
+      "item": "Twitter Content Calendar",
+      "path": "~/ocaas-project/command-center/content/social/twitter-week-1.md",
+      "status": "DONE",
+      "notes": "5-day content plan + bio + posting strategy"
+    },
+    {
+      "item": "Reddit Posts",
+      "path": "~/ocaas-project/command-center/content/social/reddit-week-1.md",
+      "status": "DONE",
+      "notes": "2 posts: r/AIagents + r/selfhosted"
+    },
+    {
+      "item": "Newsletter Page Content",
+      "path": "~/ocaas-project/command-center/content/newsletter/page-content.md",
+      "status": "DONE",
+      "notes": "Hero, form, benefits, testimonials, FAQ sections"
+    }
+  ],
+  "pending": [
+    {
+      "item": "Meta Tags Deployment",
+      "status": "NEEDS_FORGE",
+      "notes": "Requires actual deployment to production"
+    },
+    {
+      "item": "Twitter Account Setup",
+      "status": "NEEDS_MANUAL",
+      "notes": "@autopus_cloud needs to be created"
+    },
+    {
+      "item": "Newsletter Page Implementation",
+      "status": "NEEDS_FORGE",
+      "notes": "Frontend code + email collection integration"
+    },
+    {
+      "item": "OG Image Creation",
+      "status": "NEEDS_FION",
+      "notes": "og-agent-companion.jpg for social sharing"
+    }
+  ],
+  "blockers": []
+}
