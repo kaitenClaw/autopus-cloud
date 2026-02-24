@@ -207,11 +207,11 @@ const AgentsTab: React.FC<AgentsTabProps> = ({
 // Placeholder tabs with props
 const ChatTab: React.FC = () => (
   <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-    <div className="w-20 h-20 rounded-full bg-indigo-500/20 flex items-center justify-center mb-4">
+    <div className="w-20 h-20 rounded-full bg-autopus flex items-center justify-center mb-4">
       <span className="text-4xl">💬</span>
     </div>
-    <h2 className="text-xl font-semibold text-white mb-2">Chat Coming Soon</h2>
-    <p className="text-white/50 max-w-md">Real-time messaging with your AI personas is under development...</p>
+    <h2 className="text-xl font-semibold text-primary mb-2">Chat Coming Soon</h2>
+    <p className="text-secondary max-w-md">Real-time messaging with your AI personas is under development</p>
   </div>
 );
 
@@ -226,11 +226,11 @@ const DnaTab: React.FC<DnaTabProps> = ({ agents }) => {
   if (!selectedAgent) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <div className="w-20 h-20 rounded-full bg-amber-500/20 flex items-center justify-center mb-4">
+        <div className="w-20 h-20 rounded-full bg-autopus flex items-center justify-center mb-4">
           <span className="text-4xl">🧬</span>
         </div>
-        <h2 className="text-xl font-semibold text-white mb-2">沒有可用的 Agent</h2>
-        <p className="text-white/50 max-w-md">請先創建一個 Agent</p>
+        <h2 className="text-xl font-semibold text-primary mb-2">No Agents Available</h2>
+        <p className="text-secondary max-w-md">Create an agent to view their DNA</p>
       </div>
     );
   }
@@ -245,8 +245,8 @@ const DnaTab: React.FC<DnaTabProps> = ({ agents }) => {
             onClick={() => setSelectedAgentId(agent.id)}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm transition-all ${
               selectedAgentId === agent.id
-                ? 'bg-white/10 text-white border border-white/20'
-                : 'text-white/50 hover:text-white/70 hover:bg-white/5'
+                ? 'bg-accent/10 text-accent border border-accent/20'
+                : 'text-secondary hover:text-primary hover:bg-autopus'
             }`}
           >
             <span>{AGENT_ICONS[agent.id] || '🤖'}</span>
@@ -263,21 +263,21 @@ const DnaTab: React.FC<DnaTabProps> = ({ agents }) => {
 
 const MarketplaceTab: React.FC = () => (
   <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-    <div className="w-20 h-20 rounded-full bg-emerald-500/20 flex items-center justify-center mb-4">
+    <div className="w-20 h-20 rounded-full bg-autopus flex items-center justify-center mb-4">
       <span className="text-4xl">🛒</span>
     </div>
-    <h2 className="text-xl font-semibold text-white mb-2">Skill Marketplace 即將推出</h2>
-    <p className="text-white/50 max-w-md">為你的 Agent 學習新技能，擴展能力邊界</p>
+    <h2 className="text-xl font-semibold text-primary mb-2">Skill Marketplace Coming Soon</h2>
+    <p className="text-secondary max-w-md">Expand your agent's abilities with new skills</p>
   </div>
 );
 
 const ProfileTab: React.FC = () => (
   <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-    <div className="w-20 h-20 rounded-full bg-purple-500/20 flex items-center justify-center mb-4">
+    <div className="w-20 h-20 rounded-full bg-autopus flex items-center justify-center mb-4">
       <span className="text-4xl">👤</span>
     </div>
-    <h2 className="text-xl font-semibold text-white mb-2">個人中心即將推出</h2>
-    <p className="text-white/50 max-w-md">管理你的賬戶、訂閱和偏好設置</p>
+    <h2 className="text-xl font-semibold text-primary mb-2">Profile Coming Soon</h2>
+    <p className="text-secondary max-w-md">Manage your account, subscriptions, and preferences</p>
   </div>
 );
 
@@ -417,7 +417,7 @@ const Dashboard: React.FC = () => {
   };
 
   const handleDelete = (agentId: string) => {
-    if (confirm('確定要移除這個 Agent 嗎？')) {
+    if (confirm('Are you sure you want to remove this agent?')) {
       setAgents(agents.filter(a => a.id !== agentId));
     }
   };
@@ -469,9 +469,9 @@ const Dashboard: React.FC = () => {
         )}
 
         {/* Footer */}
-        <footer className="mt-8 sm:mt-12 pt-6 border-t border-white/10">
-          <p className="text-center text-sm text-white/30">
-            Autopus Station v2.0 | 最後更新: {new Date().toLocaleString()}
+        <footer className="mt-8 sm:mt-12 pt-6 border-t border-autopus-border">
+          <p className="text-center text-sm text-tertiary">
+            Autopus Station v2.0 | Last updated: {new Date().toLocaleString()}
           </p>
         </footer>
       </main>
