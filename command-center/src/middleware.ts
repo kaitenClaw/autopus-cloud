@@ -2,6 +2,13 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
+  // Landing page is public - no auth required
+  const path = request.nextUrl.pathname;
+  
+  if (path === '/' || path.startsWith('/api') || path.startsWith('/_next') || path.includes('.')) {
+    return NextResponse.next();
+  }
+
   const basicAuth = request.headers.get('authorization');
 
   if (basicAuth) {
