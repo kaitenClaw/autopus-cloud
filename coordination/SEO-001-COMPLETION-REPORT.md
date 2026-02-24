@@ -75,8 +75,10 @@
 | Item | Needs | Status |
 |------|-------|--------|
 | Deploy meta tags | FORGE | Pending |
-| OG Image | FION | Pending |
+| OG Image | Design (Fion is CLIENT, not worker) | Pending |
 | Create @autopus_cloud | Manual | Pending |
+
+**Note**: Fion is our CLIENT (nail business), not an Autopus worker. OG image should be created by design resources or FORGE.
 
 ---
 

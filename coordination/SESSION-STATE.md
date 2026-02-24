@@ -16,7 +16,7 @@
 - **Style**: DeepMind/Notion minimalist (not cartoon)
 - **Terminology**: "AI Persona" / "Activate" / "Companion" (NOT "數字夥伴")
 - **Language**: English-first for global market
-- **Fion**: REMOVED from Autopus Cloud (separate client)
+- **Fion**: CLIENT (nail business), NOT an Autopus worker — separate system
 
 ## Blockers
 - Coolify deployment failed (npm ci issue, FIXED with npm install)
