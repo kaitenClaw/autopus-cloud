@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  pulse-cloud:
+    build:
+      context: ./services/agent-runtime
+      dockerfile: Dockerfile
+    container_name: pulse-cloud
+    restart: unless-stopped
+    ports:
+      - "18797:3000"
+    environment:
+      - AGENT_ID=pulse-cloud
+      - AGENT_ROLE=devops
+      - LITELLM_HOST=http://litellm:4000
+      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
+      - PORT=3000
+    volumes:
+      - ./pulse-data:/app/workspace
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - autopus-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: LiteLLM Proxy
+  litellm:
+    image: ghcr.io/berriai/litellm:main-latest
+    container_name: litellm
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      - LITELLM_MASTER_KEY=${LITELLM_API_KEY}
+    volumes:
+      - ./litellm-config.yaml:/app/config.yaml
+    networks:
+      - autopus-network
+    command: ["--config", "/app/config.yaml", "--port", "4000"]
+
+  # Optional: Watchtower for auto-updates
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_POLL_INTERVAL=300
+    command: pulse-cloud
+
+networks:
+  autopus-network:
+    driver: bridge
