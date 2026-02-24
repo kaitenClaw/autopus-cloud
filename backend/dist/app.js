@@ -16,6 +16,7 @@ const errors_1 = require("./utils/errors");
 const auth_routes_1 = __importDefault(require("./routes/auth.routes"));
 const agent_routes_1 = __importDefault(require("./routes/agent.routes"));
 const agent_lifecycle_routes_1 = __importDefault(require("./routes/agent-lifecycle.routes"));
+const agents_routes_1 = __importDefault(require("./routes/agents.routes")); // PULSE coordination
 const system_routes_1 = __importDefault(require("./routes/system.routes"));
 const admin_routes_1 = __importDefault(require("./routes/admin.routes"));
 const dashboard_routes_1 = __importDefault(require("./routes/dashboard.routes"));
@@ -129,6 +130,7 @@ app.get(['/health', '/api/health'], async (_req, res) => {
 app.use('/api/auth', authLimiter, auth_routes_1.default);
 app.use('/api/agents', agent_routes_1.default);
 app.use('/api/agents', agent_lifecycle_routes_1.default);
+app.use('/api/agents', agents_routes_1.default); // PULSE coordination & status
 app.use('/api/system', system_routes_1.default);
 app.use('/api/admin', authenticate_1.authenticate, requireAdmin_1.requireAdmin, admin_routes_1.default);
 app.use('/api/dashboard', dashboard_routes_1.default);
