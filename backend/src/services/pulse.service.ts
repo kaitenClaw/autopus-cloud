@@ -57,7 +57,7 @@ export async function getAgentStatus(agentId: string): Promise<PulseAgentStatus>
     });
 
     if (response.ok) {
-      const data = await response.json();
+      const data = (await response.json()) as any;
       return {
         id: agentId,
         name: AGENT_NAMES[agentId],

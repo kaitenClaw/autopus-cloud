@@ -119,76 +119,83 @@ const AgentsTab: React.FC<AgentsTabProps> = ({
   onDelete,
   onCreateClick
 }) => {
+  const [isListView, setIsListView] = useState(true);
   const onlineAgents = agents.filter(a => a.status === 'online').length;
   const busyAgents = agents.filter(a => a.status === 'busy').length;
   const totalTasks = agents.reduce((sum, a) => sum + a.metrics.tasksCompleted, 0);
 
   const stats = [
-    { icon: Cloud, label: 'Online', value: `${onlineAgents}/${agents.length}` },
-    { icon: Activity, label: 'Busy', value: busyAgents },
-    { icon: CheckCircle, label: 'Tasks Done', value: totalTasks },
-    { icon: Shield, label: 'Security', value: 'Healthy' },
+    { icon: Cloud, label: 'Cloud Status', value: `${onlineAgents}/${agents.length}` },
+    { icon: Activity, label: 'Agent Activity', value: busyAgents > 0 ? `${busyAgents} Busy` : 'All Idle' },
+    { icon: CheckCircle, label: 'Tasks Executed', value: totalTasks },
+    { icon: Shield, label: 'Station Guard', value: 'Active' },
   ];
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <header>
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
           <img
             src="/autopus-logo.jpg"
             alt="Autopus"
-            className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex-shrink-0 object-cover"
+            className="w-12 h-12 rounded-xl object-cover border border-[#F4845F20]"
           />
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-primary">
-              Your Personas
-            </h1>
-            <p className="text-sm sm:text-base text-secondary mt-1">
-              {agents.length} AI personas active
-            </p>
+            <h1 className="text-xl font-bold text-primary">Station Overview</h1>
+            <p className="text-[10px] text-tertiary uppercase tracking-wider">KAITEN Multiverse v4.1</p>
           </div>
+        </div>
+        
+        <div className="flex items-center bg-autopus p-1 rounded-xl border border-autopus-border">
+          <button 
+            onClick={() => setIsListView(true)}
+            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${isListView ? 'bg-white text-primary shadow-sm' : 'text-tertiary hover:text-secondary'}`}
+          >
+            Compact
+          </button>
+          <button 
+            onClick={() => setIsListView(false)}
+            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${!isListView ? 'bg-white text-primary shadow-sm' : 'text-tertiary hover:text-secondary'}`}
+          >
+            Detailed
+          </button>
         </div>
       </header>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      {/* Simplified Elements Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {stats.map((stat, i) => (
-          <div
-            key={i}
-            className="persona-card p-3 sm:p-4 flex items-center gap-3"
-          >
-            <div
-              className="p-2 sm:p-2.5 rounded-lg flex-shrink-0 bg-autopus"
-            >
-              <stat.icon size={18} className="text-accent" />
+          <div key={i} className="bg-white rounded-2xl p-3 border border-autopus-border flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-autopus flex items-center justify-center">
+              <stat.icon size={14} className="text-accent" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs text-tertiary truncate">{stat.label}</p>
-              <p className="text-lg sm:text-xl font-semibold text-primary truncate">{stat.value}</p>
+              <p className="text-[10px] text-tertiary truncate leading-none mb-1">{stat.label}</p>
+              <p className="text-sm font-bold text-primary truncate leading-none">{stat.value}</p>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Agent Grid */}
+      {/* Agent Elements */}
       <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg sm:text-xl font-semibold text-primary">Agent Gallery</h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-bold text-primary uppercase tracking-widest">Active Elements</h2>
           <button
             onClick={onCreateClick}
-            className="btn-primary flex items-center gap-2"
+            className="text-accent hover:text-accent/80 transition-colors"
           >
-            <Plus size={16} />
-            Adopt Agent
+            <Plus size={18} />
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className={isListView ? "space-y-2" : "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"}>
           {agents.map(agent => (
             <LifeAgentCard
               key={agent.id}
               agent={agent}
+              isCollapsed={isListView}
               onChat={onChat}
               onMemory={onMemory}
               onSettings={onSettings}
@@ -278,9 +285,41 @@ const ProfileTab: React.FC = () => (
   </div>
 );
 
+const DocsTab: React.FC = () => (
+  <div className="space-y-6">
+    <header>
+      <h1 className="text-2xl font-bold text-primary">Glass Brain</h1>
+      <p className="text-sm text-secondary">Transparency into the Station's shared consciousness</p>
+    </header>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="persona-card p-6">
+        <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+          <Activity size={18} className="text-accent" />
+          MEMORY.md
+        </h2>
+        <div className="bg-autopus rounded-xl p-4 h-64 overflow-y-auto text-xs font-mono text-secondary leading-relaxed">
+          {`# MEMORY.md - Long-Term Memory\n\n## 2026-02-25\n- PULSE Cloud successfully migrated to v13 with Minimax 2.5.\n- Dashboard v4.1 UI simplification completed.\n- PostgreSQL database provisioned on VPS.\n- Blog article "Why AI Needs a Soul" published.\n\n## 2026-02-24\n- Dashboard v4.0 design system finalized (Coral/Navy).`}
+        </div>
+      </div>
+
+      <div className="persona-card p-6">
+        <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+          <Shield size={18} className="text-accent" />
+          SOUL.md (Shared)
+        </h2>
+        <div className="bg-autopus rounded-xl p-4 h-64 overflow-y-auto text-xs font-mono text-secondary leading-relaxed">
+          {`# SOUL.md - KAITEN Station Core\n\n## Core Truths\n- Zero Latency. Infinite Iteration.\n- Architect of the Station\n- Strategic Partner\n- Resourceful & Independent\n\n## Vibe\n- Sharp, Technical, Entrepreneurial\n- Language: Cantonese/English/Code`}
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
 const Dashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'agents' | 'chat' | 'dna' | 'marketplace' | 'profile'>('agents');
+  const [activeTab, setActiveTab] = useState<'agents' | 'chat' | 'dna' | 'marketplace' | 'profile' | 'docs'>('agents');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isNewUser, setIsNewUser] = useState(false); // Can be toggled for testing
   const [unreadMessages] = useState(3);
 
   const [agents, setAgents] = useState<Agent[]>([
@@ -420,6 +459,32 @@ const Dashboard: React.FC = () => {
   };
 
   const renderTabContent = () => {
+    if (isNewUser && activeTab === 'agents') {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[70vh] text-center px-4">
+          <div className="w-24 h-24 bg-accent/10 rounded-3xl flex items-center justify-center mb-8 animate-bounce">
+            <Plus className="w-12 h-12 text-accent" />
+          </div>
+          <h1 className="text-3xl font-bold text-primary mb-4">Welcome to Autopus</h1>
+          <p className="text-secondary max-w-md mb-8">
+            You don't have any intelligent agents yet. Adopt your first digital lifeform to start automating your world.
+          </p>
+          <button 
+            onClick={() => setIsCreateModalOpen(true)}
+            className="btn-primary px-8 py-4 text-lg shadow-xl shadow-accent/20"
+          >
+            Adopt Your First Agent
+          </button>
+          <button 
+            onClick={() => setIsNewUser(false)}
+            className="mt-4 text-xs text-tertiary hover:text-secondary underline"
+          >
+            Switch to Dashboard View
+          </button>
+        </div>
+      );
+    }
+
     switch (activeTab) {
       case 'agents':
         return (
@@ -440,6 +505,8 @@ const Dashboard: React.FC = () => {
         return <MarketplaceTab />;
       case 'profile':
         return <ProfileTab />;
+      case 'docs':
+        return <DocsTab />;
       default:
         return null;
     }

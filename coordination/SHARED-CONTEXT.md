@@ -23,11 +23,12 @@
 
 ---
 
-## 🎨 Dashboard 2.0 — Agent Companion Platform (DEPLOYED)
+## 🎨 Dashboard 4.1 — Agent Companion Platform (DEPLOYED)
 
 **Status:** 🟢 Live at https://dashboard.autopus.cloud  
-**Updated:** 2026-02-24  
-**Commits:** `1c1b294`, `b9c9b2c`, `8455256`, `b732961`
+**Updated:** 2026-02-25  
+**Version:** v4.1 (UI Simplification)
+**Commits:** `1c1b294`, `b9c9b2c`, `8455256`, `b732961`, `cc06da4`
 
 ### Design System v4.0 (LOCKED)
 
@@ -160,7 +161,7 @@ Transform from "MVP rush" to **sustainable multi-agent operation**. Each agent (
 | Backend API | `ocaas-backend-final` | 3000 | 🟢 Healthy |
 | Database | `ocaas-postgres-new` | 5432 | 🟢 Running |
 | LiteLLM Proxy | `litellm-kcc0wcos4sss04sggccocs8g` | 4000 | 🟢 Proxy Ready |
-| PULSE Cloud | `pulse-cloud` | 18797 | 🟢 Online |
+| PULSE Cloud | `pulse-lite` | 18797 | 🟢 Online |
 | Redis | `coolify-redis` | 6379 | 🟢 Running |
 
 ### When Agents Need VPS Operations

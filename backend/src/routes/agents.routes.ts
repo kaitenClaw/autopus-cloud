@@ -5,8 +5,12 @@
 
 import { Router } from 'express';
 import pulseService from '../services/pulse.service';
+import { authenticate } from '../middleware/authenticate';
 
 const router = Router();
+
+// Apply authentication to all coordination routes
+router.use(authenticate);
 
 /**
  * GET /api/agents/status

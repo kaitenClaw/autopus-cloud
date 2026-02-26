@@ -8,7 +8,10 @@ RUN apk add --no-cache \
     python3 \
     py3-pip \
     curl \
-    bash
+    bash \
+    make \
+    g++ \
+    linux-headers
 
 # Install clawhub CLI globally
 RUN npm install -g clawhub

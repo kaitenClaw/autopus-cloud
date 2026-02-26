@@ -7,6 +7,7 @@ import {
   type KAITENAgentRuntime,
 } from '../api';
 import { runPolledTask } from '../utils/polling';
+import { useSocket } from './useSocket';
 
 const getAuthToken = () => localStorage.getItem('ocaas_token');
 
@@ -62,6 +63,40 @@ export function useChatState() {
   const [kaitenRuntimes, setKaitenRuntimes] = useState<KAITENAgentRuntime[]>([]);
   const initialConfigRef = useRef<AgentConfig | null>(null);
   const configSaveTimeoutRef = useRef<number | null>(null);
+
+  const socket = useSocket();
+
+  // Socket chat listeners
+  useEffect(() => {
+    if (!socket.isConnected) return;
+
+    const cleanupToken = socket.on('chat:token', (data: { agentId: string, token: string }) => {
+      if (selectedAgent?.id === data.agentId) {
+        setMessages(prev => {
+          const last = prev[prev.length - 1];
+          if (last && last.role === 'assistant') {
+            return [...prev.slice(0, -1), { ...last, content: last.content + data.token }];
+          }
+          return prev;
+        });
+      }
+    });
+
+    const cleanupError = socket.on('chat:error', (data: { message: string }) => {
+      setError(data.message);
+      setIsLoading(false);
+    });
+
+    const cleanupDone = socket.on('chat:done', () => {
+      setIsLoading(false);
+    });
+
+    return () => {
+      cleanupToken();
+      cleanupError();
+      cleanupDone();
+    };
+  }, [socket.isConnected, selectedAgent, socket.on]);
 
   const fetchAgents = useCallback(async () => {
     const token = getAuthToken();
@@ -378,6 +413,16 @@ export function useChatState() {
       createdAt: new Date().toISOString()
     };
     setMessages(prev => [...prev, assistantMsg]);
+
+    // Use WebSocket if connected
+    if (socket.isConnected) {
+      socket.emit('chat:message', {
+        agentId: selectedAgent.id,
+        message: input,
+        sessionId: currentSession.id
+      });
+      return;
+    }
 
     try {
       await streamMessage(selectedAgent.id, currentSession.id, input, (chunk) => {

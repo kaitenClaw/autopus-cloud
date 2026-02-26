@@ -120,13 +120,24 @@ const authLimiter = rateLimit({
 // Health Check - Simplified to prevent hanging
 const appStartTime = Date.now();
 app.get(['/health', '/api/health'], async (_req, res) => {
-  // Quick health check without external dependencies
+  let dbStatus = 'ok';
+  try {
+    // Quick probe to verify DB connection with 2s timeout
+    await Promise.race([
+      prisma.$queryRaw`SELECT 1`,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('DB Timeout')), 2000))
+    ]);
+  } catch (err) {
+    dbStatus = 'error';
+    console.error('Health Check DB Error:', err);
+  }
+
   res.json({
-    status: 'ok',
+    status: dbStatus === 'ok' ? 'ok' : 'degraded',
     version: '1.0.0',
     uptime: Date.now() - appStartTime,
     services: {
-      database: 'unknown', // Will be checked separately
+      database: dbStatus,
       litellm: 'unknown',
     },
   });

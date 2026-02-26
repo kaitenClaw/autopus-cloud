@@ -15,6 +15,7 @@ interface LifeAgentCardProps {
   memoryCount?: number;
   skillCount?: number;
   todayConversations?: number;
+  isCollapsed?: boolean;
   onChat?: (agentId: string) => void;
   onMemory?: (agentId: string) => void;
   onSettings?: (agentId: string) => void;
@@ -26,6 +27,7 @@ export const LifeAgentCard: React.FC<LifeAgentCardProps> = ({
   memoryCount = 1247,
   skillCount = 8,
   todayConversations = 23,
+  isCollapsed = false,
   onChat, 
   onMemory, 
   onSettings, 
@@ -36,6 +38,29 @@ export const LifeAgentCard: React.FC<LifeAgentCardProps> = ({
 
   const isOnline = agent.status === 'online';
   const isBusy = agent.status === 'busy';
+
+  if (isCollapsed) {
+    return (
+      <div 
+        className="bg-white rounded-2xl p-3 border border-autopus-border flex items-center gap-3 hover:border-accent/30 transition-all cursor-pointer group"
+        onClick={() => onChat?.(agent.id)}
+      >
+        <div className="w-10 h-10 rounded-xl bg-autopus flex items-center justify-center text-xl">
+          {agentIcon}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <h4 className="text-sm font-bold text-primary truncate">{agent.name}</h4>
+            {isOnline && <div className="w-1.5 h-1.5 rounded-full bg-green-500" />}
+          </div>
+          <p className="text-[10px] text-tertiary truncate">{agent.currentTask || agent.role}</p>
+        </div>
+        <div className="text-tertiary group-hover:text-accent transition-colors">
+          <Zap size={14} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="persona-card relative overflow-hidden group">

@@ -3,6 +3,7 @@ import { Server as SocketServer } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import { env } from '../config/env';
 import { UserRole } from '@prisma/client';
+import { chatService } from './chat.service';
 
 interface SocketUser {
   userId: string;
@@ -54,6 +55,23 @@ export class SocketService {
 
       // Join user-specific room for targeted messages
       socket.join(user.userId);
+
+      // Pulse Chat Implementation
+      socket.on('chat:message', async (payload: { agentId: string; message: string; sessionId?: string }) => {
+        try {
+          await chatService.processMessage({
+            userId: user.userId,
+            agentId: payload.agentId,
+            message: payload.message,
+            sessionId: payload.sessionId,
+            isWebSocket: true
+          });
+        } catch (err) {
+          socket.emit('chat:error', { 
+            message: err instanceof Error ? err.message : 'Failed to process message' 
+          });
+        }
+      });
 
       socket.on('disconnect', () => {
         console.log(`🔌 Socket disconnected: ${socket.id} (User: ${user.userId})`);

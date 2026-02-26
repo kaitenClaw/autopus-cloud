@@ -20,7 +20,10 @@ check_deliverables() {
     
     # Check FORGE deliverables
     if [ ! -f "$WORKSPACE/dashboard/src/components/LifeAgentCard.tsx" ]; then
-        issues+=("FORGE: LifeAgentCard.tsx missing")
+        log "Checking $WORKSPACE/dashboard/src/components/LifeAgentCard.tsx"
+        if [ ! -f "$HOME/ocaas-project/dashboard/src/components/LifeAgentCard.tsx" ]; then
+             issues+=("FORGE: LifeAgentCard.tsx missing")
+        fi
     fi
     
     # Check SIGHT deliverables

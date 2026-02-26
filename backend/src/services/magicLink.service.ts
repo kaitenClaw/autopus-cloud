@@ -5,12 +5,13 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { PrismaClient } from '@prisma/client';
 import { sendEmail } from './email.service';
+import { env } from '../config/env';
 
 const prisma = new PrismaClient();
 
-const MAGIC_LINK_SECRET = process.env.JWT_REFRESH_SECRET || 'fallback-secret';
+const MAGIC_LINK_SECRET = env.JWT_REFRESH_SECRET;
 const MAGIC_LINK_EXPIRY = '15m'; // 15 minutes
-const BASE_URL = process.env.FRONTEND_URL || 'https://dashboard.autopus.cloud';
+const BASE_URL = env.FRONTEND_URL;
 
 export interface MagicLinkPayload {
   email: string;
@@ -178,13 +179,13 @@ export async function processMagicLink(
     // Generate auth tokens
     const accessToken = jwt.sign(
       { userId: user.id, email: user.email },
-      process.env.JWT_ACCESS_SECRET!,
+      env.JWT_ACCESS_SECRET,
       { expiresIn: '15m' }
     );
     
     const refreshToken = jwt.sign(
       { userId: user.id },
-      process.env.JWT_REFRESH_SECRET!,
+      env.JWT_REFRESH_SECRET,
       { expiresIn: '7d' }
     );
     

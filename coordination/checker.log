@@ -374,3 +374,60 @@ Market Validation:
 
 === Check complete ===
 
+=== Coordination Check: Wed Feb 25 10:00:01 HKT 2026 ===
+
+Checking agent inboxes...
+  🔨 forge: Working on forge-mvp-001
+  ℹ️  sight: Status = ACTIVE_NOW (task: mvp-marathon-sight-001)
+  🏁 pulse: Last task pulse-cloud-001 completed
+
+System Health:
+  ⚠️  Gateways running: 4/5 (MISMATCH)
+  ⚠️  Ports listening: 4/5 (DOWN: 18797)
+  ✅ Status board: Updated 2h ago
+  📊 Overall status: unknown
+
+Market Validation:
+  ✅ 7d funnel: leads=0 demos=0 paid=0
+  💰 7d net new MRR: $0.0
+
+=== Check complete ===
+
+=== Coordination Check: Wed Feb 25 18:00:02 HKT 2026 ===
+
+Checking agent inboxes...
+  🔨 forge: Working on forge-mvp-001
+  ℹ️  sight: Status = ACTIVE_NOW (task: mvp-marathon-sight-001)
+  🏁 pulse: Last task pulse-cloud-001 completed
+
+System Health:
+  ⚠️  Gateways running: 4/5 (MISMATCH)
+  ⚠️  Ports listening: 4/5 (DOWN: 18797)
+  ✅ Status board: Updated 10h ago
+  📊 Overall status: unknown
+
+Market Validation:
+  ✅ 7d funnel: leads=0 demos=0 paid=0
+  💰 7d net new MRR: $0.0
+
+=== Check complete ===
+
+=== Coordination Check: Thu Feb 26 10:00:01 HKT 2026 ===
+
+Checking agent inboxes...
+  🔨 forge: Working on forge-mvp-001
+  ℹ️  sight: Status = ACTIVE_NOW (task: mvp-marathon-sight-001)
+  🏁 pulse: Last task pulse-cloud-001 completed
+
+System Health:
+  ⚠️  Gateways running: 4/5 (MISMATCH)
+  ⚠️  Ports listening: 4/5 (DOWN: 18797)
+  ⚠️  Status board: STALE (26h old) — needs update
+  📊 Overall status: unknown
+
+Market Validation:
+  ✅ 7d funnel: leads=0 demos=0 paid=0
+  💰 7d net new MRR: $0.0
+
+=== Check complete ===
+

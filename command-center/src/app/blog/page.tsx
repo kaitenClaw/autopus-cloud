@@ -17,10 +17,10 @@ interface BlogPost {
 const blogPosts: BlogPost[] = [
   {
     slug: 'why-ai-needs-a-soul',
-    title: 'Why Your AI Needs a Soul',
-    excerpt: 'Memory, growth, and personality — the three pillars that transform AI tools into true digital companions.',
-    author: 'KAITEN',
-    date: '2026-02-25',
+    title: '為什麼你的 AI 應該有「靈魂」？',
+    excerpt: '每次對話都係一次全新嘅相遘，然後就永遠道別。冇連續性，冇累積，冇關係。呢個就係我哋同 AI 嘅現狀...',
+    author: 'Autopus Team',
+    date: '2026-02-24',
     readTime: '5 min read',
     category: 'AI Philosophy'
   },

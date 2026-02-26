@@ -31,6 +31,15 @@ export class AgentController {
     const { name, modelPreset, autoStart = true } = req.body;
     const userId = req.user!.userId;
     
+    // Tier check: Ensure user doesn't exceed agent limit
+    const activeCount = await agentService.getAgents(userId).then((list) => list.length);
+    if (activeCount >= 1) { // Default Starter tier: 1 agent
+      return res.status(409).json({
+        status: 'error',
+        message: 'Starter tier supports one active agent. Delete the existing agent or upgrade plan.',
+      });
+    }
+
     const agent = await agentService.createAgent(userId, name, modelPreset);
     
     // Auto-start agent by default for better UX

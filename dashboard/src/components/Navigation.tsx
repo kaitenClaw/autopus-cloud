@@ -4,19 +4,21 @@ import {
   MessageCircle, 
   Dna, 
   ShoppingBag, 
-  User 
+  User,
+  FileText
 } from 'lucide-react';
 
 interface MobileBottomNavProps {
-  activeTab: 'agents' | 'chat' | 'dna' | 'marketplace' | 'profile';
-  onTabChange: (tab: 'agents' | 'chat' | 'dna' | 'marketplace' | 'profile') => void;
+  activeTab: 'agents' | 'chat' | 'dna' | 'marketplace' | 'profile' | 'docs';
+  onTabChange: (tab: 'agents' | 'chat' | 'dna' | 'marketplace' | 'profile' | 'docs') => void;
   unreadMessages?: number;
 }
 
 const tabs = [
-  { id: 'agents' as const, label: 'My Agents', icon: Home },
+  { id: 'agents' as const, label: 'Station', icon: Home },
   { id: 'chat' as const, label: 'Chat', icon: MessageCircle },
   { id: 'dna' as const, label: 'DNA', icon: Dna },
+  { id: 'docs' as const, label: 'Glass Brain', icon: FileText },
   { id: 'marketplace' as const, label: 'Store', icon: ShoppingBag },
   { id: 'profile' as const, label: 'Profile', icon: User },
 ];
@@ -67,8 +69,8 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
 
 // Desktop Side Navigation (for larger screens)
 interface DesktopSideNavProps {
-  activeTab: 'agents' | 'chat' | 'dna' | 'marketplace' | 'profile';
-  onTabChange: (tab: 'agents' | 'chat' | 'dna' | 'marketplace' | 'profile') => void;
+  activeTab: 'agents' | 'chat' | 'dna' | 'marketplace' | 'profile' | 'docs';
+  onTabChange: (tab: 'agents' | 'chat' | 'dna' | 'marketplace' | 'profile' | 'docs') => void;
   unreadMessages?: number;
 }
 

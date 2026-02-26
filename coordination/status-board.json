@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-02-24T14:13:00+08:00",
+  "lastUpdated": "2026-02-25T07:13:00+08:00",
   "sprint": "Agent Independence & Growth",
   "status": "growth_activated",
   "agents": {
@@ -139,7 +139,7 @@
     "Run 'daily-growth.sh' each morning to continue growth streaks"
   ],
   "marketValidation": {
-    "lastDigestAt": "2026-02-23T10:00:02+08:00",
+    "lastDigestAt": "2026-02-26T10:00:01+08:00",
     "windowDays": 7,
     "leadsCaptured7d": 0,
     "demos7d": 0,

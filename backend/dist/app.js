@@ -13,6 +13,7 @@ const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const env_1 = require("./config/env");
 const errorHandler_1 = require("./middleware/errorHandler");
 const errors_1 = require("./utils/errors");
+const prisma_1 = require("./config/prisma");
 const auth_routes_1 = __importDefault(require("./routes/auth.routes"));
 const agent_routes_1 = __importDefault(require("./routes/agent.routes"));
 const agent_lifecycle_routes_1 = __importDefault(require("./routes/agent-lifecycle.routes"));
@@ -115,13 +116,24 @@ const authLimiter = (0, express_rate_limit_1.default)({
 // Health Check - Simplified to prevent hanging
 const appStartTime = Date.now();
 app.get(['/health', '/api/health'], async (_req, res) => {
-    // Quick health check without external dependencies
+    let dbStatus = 'ok';
+    try {
+        // Quick probe to verify DB connection with 2s timeout
+        await Promise.race([
+            prisma_1.prisma.$queryRaw `SELECT 1`,
+            new Promise((_, reject) => setTimeout(() => reject(new Error('DB Timeout')), 2000))
+        ]);
+    }
+    catch (err) {
+        dbStatus = 'error';
+        console.error('Health Check DB Error:', err);
+    }
     res.json({
-        status: 'ok',
+        status: dbStatus === 'ok' ? 'ok' : 'degraded',
         version: '1.0.0',
         uptime: Date.now() - appStartTime,
         services: {
-            database: 'unknown', // Will be checked separately
+            database: dbStatus,
             litellm: 'unknown',
         },
     });

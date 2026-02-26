@@ -6,6 +6,7 @@ import { readdir, readFile, writeFile } from 'fs/promises';
 import { prisma } from '../config/prisma';
 import { AuthRequest } from '../middleware/authenticate';
 import { ForbiddenError, UnauthorizedError } from '../utils/errors';
+import { env } from '../config/env';
 
 const execFileAsync = promisify(execFile);
 
@@ -236,7 +237,7 @@ const isPlaceholderEmail = (email: string): boolean => {
 
 const getConfiguredAdminEmails = (): Set<string> => {
   return new Set(
-    (process.env.ADMIN_EMAILS || '')
+    (env.ADMIN_EMAILS || '')
       .split(',')
       .map((email) => email.trim().toLowerCase())
       .filter(Boolean)
@@ -291,7 +292,7 @@ const fetchAgentStatus = async (agent: {
 
     // Attempt CLI check if profilePath is set (legacy/hybrid support)
     // DISABLED for production/Docker stability: only use CLI if explicitly in local dev
-    if (agent.profilePath && process.env.NODE_ENV !== 'production') {
+    if (agent.profilePath && env.NODE_ENV !== 'production') {
       const { stdout } = await execFileAsync(
         'openclaw',
         ['--profile', agent.profilePath, 'status', '--json'],
